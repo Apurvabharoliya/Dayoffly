@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Employee Dashboard</title>
+  <link rel="icon" href="/images/rounded logo for Day.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="/CSS/EmployeeDashboard.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+ <!-- Header -->
+  <header class="header">
+    <div class="logo">Dayoffly</div>
+    <div class="header-actions">
+      <div class="dashboard-banner">
+        <h1>Employee Dashboard</h1>
+        <p>Manage your leave requests and track your attendance</p>
+      </div>
+      <input type="text" class="search-bar" placeholder="Search..." aria-label="Search">
+      <!-- <button class="icon-btn" title="Help"><i class="fas fa-question-circle"></i></button> -->
+      <!-- <button class="icon-btn" title="Settings"><i class="fas fa-cog"></i></button> -->
+      <button class="icon-btn" title="Apps"><i class="fas fa-th"></i></button>
+      <img src="/images/user.png" alt="User Avatar" class="user-avatar">
+    </div>
+  </header>
+
+  <!-- Layout -->
+  <div class="main-container">
+    <!-- Sidebar -->
+    <nav class="sidebar">
+      <button class="nav-item active"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></button>
+      <a href="/HTML/leaveapplication.html">
+        <button class="nav-item"><i class="fas fa-folder-open"></i> <span>Leave Applications</span></button>
+      </a>
+      <button class="nav-item"><i class="fas fa-chart-line"></i> <span>Reports & Analytics</span></button>
+      <button class="nav-item"><i class="fas fa-list-check"></i> <span>Leave Status</span></button>
+      <a href="/HTML/profile&settingsE.html">
+        <button class="nav-item"><i class="fas fa-id-badge"></i> <span>My Profile</span></button>
+      </a>
+      <button class="nav-item"><i class="fas fa-user-cog"></i> <span>Profile & Settings</span></button>
+      <button class="nav-item"><i class="fas fa-calendar-alt"></i> <span>Calendar</span></button>
+      <button class="nav-item"><i class="fas fa-headset"></i> <span>Help & Support</span></button>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="content">
+      <!-- Charts Section -->
+      <section class="charts-row">
+        <div class="chart-card">
+          <h3>Monthly Attendance</h3>
+          <div class="chart-container">
+            <canvas id="monthlyAttendanceChart"></canvas>
+          </div>
+        </div>
+        <div class="chart-card">
+          <h3>Attendance Split</h3>
+          <div class="chart-container">
+            <canvas id="attendancePieChart"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- Stats Section -->
+      <section class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-number" id="totalPresent">0</div>
+          <div class="stat-label">Days Present</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="totalLeaves">0</div>
+          <div class="stat-label">Leaves Taken</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="upcomingHolidays">0</div>
+          <div class="stat-label">Upcoming Holidays</div>
+        </div>
+      </section>
+
+      <!-- Upcoming Holidays Section -->
+      <section class="section">
+        <h3 class="section-title">Upcoming Holidays</h3>
+
+        <!-- Filter -->
+        <div class="holiday-filter">
+          <label for="holidayFilter">Show:</label>
+          <select id="holidayFilter">
+            <option value="upcoming">Upcoming</option>
+            <option value="3months">Next 3 Months</option>
+            <option value="6months">Next 6 Months</option>
+            <option value="all">All Holidays</option>
+          </select>
+        </div>
+
+        <!-- Holiday list -->
+        <ul class="holiday-list" id="holidayList"></ul>
+      </section>
+    </main>
+  </div>
+
+  <!-- Custom JS -->
+  <script src="/JS/EmployeeDashboard.js"></script>
+</body>
+
+</html>

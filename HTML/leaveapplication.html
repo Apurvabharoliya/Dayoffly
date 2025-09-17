@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leave Application</title>
+    <link rel="icon" href="/images/rounded logo for Day.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/CSS/leaveapplication.css">
+</head>
+<body>
+    <!-- Header with Employee Dashboard Banner -->
+    <header class="header">
+        <div class="logo">Dayoffly</div>
+        <div class="header-actions">
+            <div class="dashboard-banner">
+                <h1>Employee Dashboard</h1>
+                <p>Manage your leave requests and track your attendance</p>
+            </div>
+            <input type="text" class="search-bar" placeholder="Search..." aria-label="Search">
+            <button class="icon-btn" title="Apps"><i class="fas fa-th"></i></button>
+            <img src="/images/user.png" alt="User Avatar" class="user-avatar">
+        </div>
+    </header>
+
+    <!-- Layout -->
+    <div class="main-container">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <a href="/HTML/EmployeeDashboard.html">
+                <button class="nav-item"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></button>
+            </a>
+            <a href="/HTML/leaveapplication.html">
+                <button class="nav-item active"><i class="fas fa-folder-open"></i> <span>Leave Applications</span></button>
+            </a>
+            <button class="nav-item"><i class="fas fa-chart-line"></i> <span>Reports & Analytics</span></button>
+            <button class="nav-item"><i class="fas fa-list-check"></i> <span>Leave Status</span></button>
+            <a href="/HTML/profile&settingsE.html">
+                <button class="nav-item"><i class="fas fa-user-cog"></i> <span>Profile & Settings</span></button>
+            </a>
+            <button class="nav-item"><i class="fas fa-calendar-alt"></i> <span>Calendar</span></button>
+            <button class="nav-item"><i class="fas fa-headset"></i> <span>Help & Support</span></button>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="content">
+            <!-- Leave Application Content -->
+            <div class="container">
+                <div class="header-content">
+                    <div class="logo-section">
+                        <div class="logo">TL</div>
+                        <h1 class="title">Leave Application</h1>
+                    </div>
+                    <div class="profile-section">
+                        <div class="notifications">
+                            <i class="fas fa-bell"></i>
+                            <span class="notification-badge">3</span>
+                        </div>
+                        <div class="profile-pic">JS</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Leave Balance Dashboard -->
+            <section class="dashboard">
+                <h2 class="dashboard-title">My Leave Balance</h2>
+                <div class="cards-container">
+                    <div class="card annual-leave">
+                        <div class="card-title">Annual Leave</div>
+                        <div class="card-value">15</div>
+                        <div class="card-subtext">days available</div>
+                    </div>
+                    <div class="card sick-leave">
+                        <div class="card-title">Sick Leave</div>
+                        <div class="card-value">5</div>
+                        <div class="card-subtext">days available</div>
+                    </div>
+                    <div class="card total-taken">
+                        <div class="card-title">Total Taken (This Year)</div>
+                        <div class="card-value">6</div>
+                        <div class="card-subtext">days used so far</div>
+                    </div>
+                </div>
+                <button class="apply-btn" id="applyButton">Apply for Leave</button>
+            </section>
+
+            <!-- Leave Application Form -->
+            <section class="form-section" id="applicationForm">
+                <h2 class="section-title">Apply for Leave</h2>
+                <form id="leaveForm">
+                    <!-- Step 1: Leave Details -->
+                    <div class="form-group">
+                        <label class="form-label">Leave Type</label>
+                        <select class="form-control" id="leaveType">
+                            <option value="annual">Annual Leave</option>
+                            <option value="sick">Sick Leave</option>
+                            <option value="casual">Casual Leave</option>
+                            <option value="maternity">Maternity Leave</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Date Range</label>
+                        <div class="date-inputs">
+                            <input type="date" class="form-control" id="startDate">
+                            <input type="date" class="form-control" id="endDate">
+                        </div>
+                        <div id="totalDays">Total days: 0</div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="half-day-option">
+                            <input type="checkbox" id="halfDay" class="checkbox">
+                            <label for="halfDay">Half Day</label>
+                            <select class="half-day-select" id="halfDayOption" disabled>
+                                <option value="first">First Half</option>
+                                <option value="second">Second Half</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Reason and Attachments -->
+                    <div class="form-group">
+                        <label class="form-label">Reason for Leave</label>
+                        <textarea class="form-control" id="reason" placeholder="Please provide a reason for your leave"></textarea>
+                    </div>
+
+                    <div class="form-group" id="attachmentSection" style="display: none;">
+                        <label class="form-label">Attachments</label>
+                        <div class="file-upload">
+                            <input type="file" id="attachment" class="file-input">
+                            <label for="attachment" class="file-label">
+                                <i class="fas fa-upload"></i> Upload File
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Handover -->
+                    <div class="form-group">
+                        <label class="form-label">Handover to Colleague</label>
+                        <input type="text" class="form-control" id="handover" placeholder="Start typing colleague's name">
+                        <div id="suggestions" style="display: none;"></div>
+                    </div>
+
+                    <div class="form-buttons">
+                        <button type="button" class="cancel-btn" id="cancelButton">Cancel</button>
+                        <button type="submit" class="submit-btn">Submit Request</button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Leave History and Team Calendar -->
+            <section class="form-section">
+                <div class="tabs">
+                    <div class="tab active" data-tab="history">Leave Request History</div>
+                    <div class="tab" data-tab="calendar">Team Leave Calendar</div>
+                </div>
+
+                <div class="tab-content active" id="historyTab">
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th>Status</th>
+                                <th>Leave Type</th>
+                                <th>Duration</th>
+                                <th>Approval Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="status status-approved">Approved</span></td>
+                                <td>Annual Leave</td>
+                                <td>5 days</td>
+                                <td>2023-06-15</td>
+                            </tr>
+                            <tr>
+                                <td><span class="status status-pending">Pending</span></td>
+                                <td>Sick Leave</td>
+                                <td>2 days</td>
+                                <td>-</td>
+                            </tr>
+                            <tr>
+                                <td><span class="status status-rejected">Rejected</span></td>
+                                <td>Casual Leave</td>
+                                <td>1 day</td>
+                                <td>2023-07-01</td>
+                            </tr>
+                            <tr>
+                                <td><span class="status status-approved">Approved</span></td>
+                                <td>Annual Leave</td>
+                                <td>3 days</td>
+                                <td>2023-05-20</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="tab-content" id="calendarTab">
+                    <div class="calendar-container">
+                        <div class="calendar-header">
+                            <h3>September 2023</h3>
+                        </div>
+                        <div class="calendar-grid">
+                            <div class="calendar-cell header">Sun</div>
+                            <div class="calendar-cell header">Mon</div>
+                            <div class="calendar-cell header">Tue</div>
+                            <div class="calendar-cell header">Wed</div>
+                            <div class="calendar-cell header">Thu</div>
+                            <div class="calendar-cell header">Fri</div>
+                            <div class="calendar-cell header">Sat</div>
+
+                            <!-- Calendar days will be populated by JavaScript -->
+                            <div class="calendar-cell">
+                                <div class="day-number">27</div>
+                            </div>
+                            <div class="calendar-cell">
+                                <div class="day-number">28</div>
+                            </div>
+                            <div class="calendar-cell">
+                                <div class="day-number">29</div>
+                            </div>
+                            <div class="calendar-cell">
+                                <div class="day-number">30</div>
+                            </div>
+                            <div class="calendar-cell">
+                                <div class="day-number">31</div>
+                            </div>
+                            <div class="calendar-cell">
+                                <div class="day-number">1</div>
+                                <div class="leave-event annual-leave-event">John - Annual</div>
+                            </div>
+                            <div class="calendar-cell">
+                                <div class="day-number">2</div>
+                                <div class="leave-event annual-leave-event">John - Annual</div>
+                            </div>
+                            <!-- More days would be added in a real implementation -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="/JS/leaveapplication.js"></script>
+</body>
+</html>
