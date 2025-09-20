@@ -16,10 +16,8 @@
   <header class="header">
     <div class="logo">Dayoffly</div>
     <div class="header-actions">
-      <a href="/HTML/calendar.html">
-        <button class="icon-btn" title="Apps"><i class="fas fa-th"></i></button>
-      </a>
-      <img src="/images/user.png" alt="User Avatar" class="user-avatar">
+      <button class="icon-btn" title="Apps"><i class="fas fa-th"></i></button>
+      <img src="https://ui-avatars.com/api/?name=Employee+User&background=random" alt="User Avatar" class="user-avatar">
     </div>
   </header>
 
@@ -28,14 +26,10 @@
     <!-- Sidebar -->  
     <nav class="sidebar">
       <button class="nav-item active"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></button>
-      <a href="/HTML/leaveapplication.html">
-        <button class="nav-item"><i class="fas fa-folder-open"></i> <span>Leave Applications</span></button>
-      </a>
+      <button class="nav-item"><i class="fas fa-folder-open"></i> <span>Leave Applications</span></button>
       <button class="nav-item"><i class="fas fa-chart-line"></i> <span>Reports & Analytics</span></button>
       <button class="nav-item"><i class="fas fa-list-check"></i> <span>Leave Status</span></button>
-      <a href="/HTML/profile&settingsE.html">
-        <button class="nav-item"><i class="fas fa-user-cog"></i> <span>Profile & Settings</span></button>
-      </a>
+      <button class="nav-item"><i class="fas fa-user-cog"></i> <span>Profile & Settings</span></button>
       <button class="nav-item"><i class="fas fa-calendar-alt"></i> <span>Calendar</span></button>
       <button class="nav-item"><i class="fas fa-headset"></i> <span>Help & Support</span></button>
     </nav>
@@ -57,7 +51,7 @@
           </div>
         </div>
         <div class="chart-card">
-          <h3>Attendance Split</h3>
+          <h3>Leave Balance</h3>
           <div class="chart-container">
             <canvas id="attendancePieChart"></canvas>
           </div>
@@ -67,8 +61,8 @@
       <!-- Stats Section -->
       <section class="stats-grid">
         <div class="stat-card">
-          <div class="stat-number" id="totalPresent">0</div>
-          <div class="stat-label">Days Present</div>
+          <div class="stat-number" id="carryForward">0</div>
+          <div class="stat-label">Carry Forward</div>
         </div>
         <div class="stat-card">
           <div class="stat-number" id="totalLeaves">0</div>
@@ -77,6 +71,10 @@
         <div class="stat-card">
           <div class="stat-number" id="upcomingHolidays">0</div>
           <div class="stat-label">Upcoming Holidays</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="totalAllowed">20</div>
+          <div class="stat-label">Total Allowed Leaves</div>
         </div>
       </section>
 
@@ -102,4 +100,5 @@
   <!-- Custom JS -->
   <script src="/JS/EmployeeDashboard.js"></script>
 </body>
+
 </html>
