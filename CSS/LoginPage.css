@@ -196,7 +196,6 @@ body {
   display: none;
 }
 
-/* Fix for password input padding to accommodate the toggle button */
 .input-wrapper input[type="password"],
 .input-wrapper input[type="text"] {
   padding-right: 45px;
