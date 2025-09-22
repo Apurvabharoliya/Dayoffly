@@ -1,24 +1,17 @@
-// Store the user role globally
-    let userRole = '';
-    
-    document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function() {
       // Get DOM elements
-      const roleSelect = document.getElementById('role');
+      const loginForm = document.getElementById('loginForm');
       const togglePassword = document.getElementById('togglePassword');
       const passwordInput = document.getElementById('password');
-      const loginForm = document.getElementById('loginForm');
-      const loginSection = document.getElementById('loginSection');
-      const brandingSection = document.getElementById('brandingSection');
-      const detailsForm = document.getElementById('detailsForm');
-      const loginLoader = document.getElementById('loginLoader');
-      const employeeLoader = document.getElementById('employeeLoader');
-      const hrLoader = document.getElementById('hrLoader');
-      const cmoLoader = document.getElementById('cmoLoader');
-      const employeeDetailsForm = document.getElementById('employeeDetailsForm');
-      const hrDetailsForm = document.getElementById('hrDetailsForm');
-      const cmoDetailsForm = document.getElementById('cmoDetailsForm');
-      const detailsFormTitle = document.getElementById('detailsFormTitle');
-      const detailsFormSubtitle = document.getElementById('detailsFormSubtitle');
+      const employeeIdInput = document.getElementById('employeeId');
+      const roleSelect = document.getElementById('role');
+      const employeeFields = document.getElementById('employeeFields');
+      const hrFields = document.getElementById('hrFields');
+      const adminFields = document.getElementById('adminFields');
+      
+      const employeeIdError = document.getElementById('employeeIdError');
+      const passwordError = document.getElementById('passwordError');
+      const roleError = document.getElementById('roleError');
       
       // Toggle password visibility
       togglePassword.addEventListener('click', function() {
@@ -28,199 +21,189 @@
         this.querySelector('i').classList.toggle('fa-eye-slash');
       });
       
+      // Handle role selection change
+      roleSelect.addEventListener('change', function() {
+        const role = this.value;
+        
+        // Hide all role-specific fields first
+        employeeFields.style.display = 'none';
+        hrFields.style.display = 'none';
+        adminFields.style.display = 'none';
+        
+        // Show fields based on selected role
+        if (role === 'employee') {
+          employeeFields.style.display = 'block';
+        } else if (role === 'hr') {
+          hrFields.style.display = 'block';
+        } else if (role === 'admin') {
+          adminFields.style.display = 'block';
+        }
+      });
+      
       // Form validation
       loginForm.addEventListener('submit', function(e) {
         e.preventDefault();
         
-        const role = document.getElementById('role').value;
-        userRole = role; // Store the role globally
         let isValid = true;
+        const role = roleSelect.value;
         
-        // Basic validation
-        if (!document.getElementById('email').value) {
-          alert('Please enter your email address');
+        // Reset error messages
+        employeeIdError.style.display = 'none';
+        passwordError.style.display = 'none';
+        roleError.style.display = 'none';
+        
+        // Validate Employee ID
+        if (!employeeIdInput.value.trim()) {
+          employeeIdError.style.display = 'block';
           isValid = false;
-        } else if (!document.getElementById('password').value) {
-          alert('Please enter your password');
+        }
+        
+        // Validate Password
+        if (!passwordInput.value) {
+          passwordError.style.display = 'block';
           isValid = false;
-        } else if (!role) {
-          alert('Please select your role');
+        }
+        
+        // Validate Role
+        if (!role) {
+          roleError.style.display = 'block';
           isValid = false;
+        }
+        
+        // Role-specific validation
+        if (role === 'employee') {
+          const department = document.getElementById('department');
+          const designation = document.getElementById('designation');
+          
+          if (!department.value) {
+            document.getElementById('departmentError').style.display = 'block';
+            isValid = false;
+          }
+          
+          if (!designation.value) {
+            document.getElementById('designationError').style.display = 'block';
+            isValid = false;
+          }
+        } else if (role === 'hr') {
+          const hrRegion = document.getElementById('hrRegion');
+          const hrLevel = document.getElementById('hrLevel');
+          
+          if (!hrRegion.value) {
+            document.getElementById('hrRegionError').style.display = 'block';
+            isValid = false;
+          }
+          
+          if (!hrLevel.value) {
+            document.getElementById('hrLevelError').style.display = 'block';
+            isValid = false;
+          }
+        } else if (role === 'admin') {
+          const adminAccess = document.getElementById('adminAccess');
+          const adminDepartment = document.getElementById('adminDepartment');
+          
+          if (!adminAccess.value) {
+            document.getElementById('adminAccessError').style.display = 'block';
+            isValid = false;
+          }
+          
+          if (!adminDepartment.value) {
+            document.getElementById('adminDepartmentError').style.display = 'block';
+            isValid = false;
+          }
         }
         
         if (isValid) {
-          // Show loading animation
-          loginLoader.style.display = 'inline-block';
-          
-          // Simulate login process
-          setTimeout(function() {
-            loginLoader.style.display = 'none';
-            
-            // Hide login form and show details form
-            loginSection.style.display = 'none';
-            detailsForm.style.display = 'block';
-            brandingSection.style.display = 'none';
-            
-            // Show the appropriate form based on role
-            if (role === 'employee') {
-              employeeDetailsForm.classList.remove('hidden');
-              detailsFormTitle.textContent = 'Complete Your Employee Profile';
-              detailsFormSubtitle.textContent = 'Please provide your employee details to continue';
-            } else if (role === 'hr') {
-              hrDetailsForm.classList.remove('hidden');
-              detailsFormTitle.textContent = 'Complete Your HR Profile';
-              detailsFormSubtitle.textContent = 'Please provide your HR details to continue';
-            } else if (role === 'cmo') {
-              cmoDetailsForm.classList.remove('hidden');
-              detailsFormTitle.textContent = 'Complete Your CMO Profile';
-              detailsFormSubtitle.textContent = 'Please provide your CMO details to continue';
-            }
-          }, 1500);
+          // Simulate authentication process
+          authenticateUser(employeeIdInput.value, passwordInput.value, role);
         }
       });
       
-      // Employee details form submission
-      employeeDetailsForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        // Show loading animation
-        employeeLoader.style.display = 'inline-block';
-        
-        // Simulate form submission
-        setTimeout(function() {
-          employeeLoader.style.display = 'none';
-          document.getElementById('step2').classList.remove('active');
-          document.getElementById('step2').classList.add('completed');
-          document.getElementById('step3').classList.add('active');
-          
-          detailsFormTitle.textContent = 'Registration Complete!';
-          detailsFormSubtitle.textContent = 'Your employee account has been successfully created';
-          
-          // Hide form and show success message
-          employeeDetailsForm.style.display = 'none';
-          
-          // Create success message
-          const successMessage = document.createElement('div');
-          successMessage.innerHTML = `
-            <div style="text-align: center; padding: 30px 0;">
-              <i class="fas fa-check-circle" style="font-size: 48px; color: #3a0ca3; margin-bottom: 20px;"></i>
-              <h3 style="color: #3a0ca3; margin-bottom: 15px;">Welcome to Dayoffly!</h3>
-              <p style="margin-bottom: 30px;">Your account has been successfully created. You can now access all features.</p>
-              <button class="btn-primary" onclick="redirectToDashboard()">
-                Go to Dashboard <i class="fas fa-arrow-right"></i>
-              </button>
-            </div>
-          `;
-          detailsForm.appendChild(successMessage);
-        }, 1500);
+      // Input validation on change
+      employeeIdInput.addEventListener('input', function() {
+        if (this.value.trim()) {
+          employeeIdError.style.display = 'none';
+        }
       });
       
-      // HR details form submission
-      hrDetailsForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        // Show loading animation
-        hrLoader.style.display = 'inline-block';
-        
-        // Simulate form submission
-        setTimeout(function() {
-          hrLoader.style.display = 'none';
-          document.getElementById('step2').classList.remove('active');
-          document.getElementById('step2').classList.add('completed');
-          document.getElementById('step3').classList.add('active');
-          
-          detailsFormTitle.textContent = 'Registration Complete!';
-          detailsFormSubtitle.textContent = 'Your HR account has been successfully created';
-          
-          // Hide form and show success message
-          hrDetailsForm.style.display = 'none';
-          
-          // Create success message
-          const successMessage = document.createElement('div');
-          successMessage.innerHTML = `
-            <div style="text-align: center; padding: 30px 0;">
-              <i class="fas fa-check-circle" style="font-size: 48px; color: #3a0ca3; margin-bottom: 20px;"></i>
-              <h3 style="color: #3a0ca3; margin-bottom: 15px;">Welcome to Dayoffly!</h3>
-              <p style="margin-bottom: 30px;">Your HR account has been successfully created. You can now access all features.</p>
-              <button class="btn-primary" onclick="redirectToDashboard()">
-                Go to Dashboard <i class="fas fa-arrow-right"></i>
-              </button>
-            </div>
-          `;
-          detailsForm.appendChild(successMessage);
-        }, 1500);
+      passwordInput.addEventListener('input', function() {
+        if (this.value) {
+          passwordError.style.display = 'none';
+        }
       });
       
-      // CMO details form submission
-      cmoDetailsForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        // Show loading animation
-        cmoLoader.style.display = 'inline-block';
-        
-        // Simulate form submission
-        setTimeout(function() {
-          cmoLoader.style.display = 'none';
-          document.getElementById('step2').classList.remove('active');
-          document.getElementById('step2').classList.add('completed');
-          document.getElementById('step3').classList.add('active');
-          
-          detailsFormTitle.textContent = 'Registration Complete!';
-          detailsFormSubtitle.textContent = 'Your CMO account has been successfully created';
-          
-          // Hide form and show success message
-          cmoDetailsForm.style.display = 'none';
-          
-          // Create success message
-          const successMessage = document.createElement('div');
-          successMessage.innerHTML = `
-            <div style="text-align: center; padding: 30px 0;">
-              <i class="fas fa-check-circle" style="font-size: 48px; color: #3a0ca3; margin-bottom: 20px;"></i>
-              <h3 style="color: #3a0ca3; margin-bottom: 15px;">Welcome to Dayoffly!</h3>
-              <p style="margin-bottom: 30px;">Your CMO account has been successfully created. You can now access all features.</p>
-              <button class="btn-primary" onclick="redirectToDashboard()">
-                Go to Dashboard <i class="fas fa-arrow-right"></i>
-              </button>
-            </div>
-          `;
-          detailsForm.appendChild(successMessage);
-        }, 1500);
+      roleSelect.addEventListener('change', function() {
+        if (this.value) {
+          roleError.style.display = 'none';
+        }
       });
-    });
-    
-    function goBackToLogin() {
-      // Hide details form and show login form
-      document.getElementById('detailsForm').style.display = 'none';
-      document.getElementById('loginSection').style.display = 'block';
-      document.getElementById('brandingSection').style.display = 'flex';
       
-      // Hide all detail forms
-      document.getElementById('employeeDetailsForm').classList.add('hidden');
-      document.getElementById('hrDetailsForm').classList.add('hidden');
-      document.getElementById('cmoDetailsForm').classList.add('hidden');
+      // Role-specific field validation
+      const setupRoleFieldValidation = (fieldId, errorId) => {
+        const field = document.getElementById(fieldId);
+        const error = document.getElementById(errorId);
+        
+        if (field && error) {
+          field.addEventListener('change', function() {
+            if (this.value) {
+              error.style.display = 'none';
+            }
+          });
+        }
+      };
       
-      // Reset progress steps
-      document.getElementById('step2').classList.remove('active', 'completed');
-      document.getElementById('step3').classList.remove('active', 'completed');
-      document.getElementById('step2').classList.add('active');
+      // Set up validation for all role-specific fields
+      setupRoleFieldValidation('department', 'departmentError');
+      setupRoleFieldValidation('designation', 'designationError');
+      setupRoleFieldValidation('hrRegion', 'hrRegionError');
+      setupRoleFieldValidation('hrLevel', 'hrLevelError');
+      setupRoleFieldValidation('adminAccess', 'adminAccessError');
+      setupRoleFieldValidation('adminDepartment', 'adminDepartmentError');
       
-      // Show the forms again
-      document.getElementById('employeeDetailsForm').style.display = 'block';
-      document.getElementById('hrDetailsForm').style.display = 'block';
-      document.getElementById('cmoDetailsForm').style.display = 'block';
-    }
-    
-    function redirectToDashboard() {
-      // Redirect based on user role
-      if (userRole === 'employee') {
-        window.location.href = 'EmployeeDashboard.html';
-      } else if (userRole === 'hr') {
-        window.location.href = 'HRDashboard.html';
-      } else if (userRole === 'cmo') {
-        // For CMO, you can redirect to a specific dashboard or use a generic one
-        window.location.href = 'CMODashboard.html';
-      } else {
-        // Fallback to employee dashboard if role is not set
-        window.location.href = 'EmployeeDashboard.html';
+      // Authentication function
+      function authenticateUser(employeeId, password, role) {
+        // In a real application, this would be an API call to the server
+        console.log('Authenticating user:', { employeeId, password, role });
+        
+        // Get role-specific data
+        let roleData = {};
+        if (role === 'employee') {
+          roleData = {
+            department: document.getElementById('department').value,
+            designation: document.getElementById('designation').value
+          };
+        } else if (role === 'hr') {
+          roleData = {
+            region: document.getElementById('hrRegion').value,
+            level: document.getElementById('hrLevel').value
+          };
+        } else if (role === 'admin') {
+          roleData = {
+            access: document.getElementById('adminAccess').value,
+            adminDepartment: document.getElementById('adminDepartment').value
+          };
+        }
+        
+        console.log('Role-specific data:', roleData);
+        
+        // Simulate API call with timeout
+        setTimeout(() => {
+          // For demo purposes, assume authentication is successful
+          // In a real application, you would check credentials against the database
+          
+          // Redirect based on role
+          switch(role) {
+            case 'employee':
+              window.location.href = 'EmployeeDashboard.html';
+              break;
+            case 'hr':
+              window.location.href = 'HRDashboard.html';
+              break;
+            case 'admin':
+              window.location.href = 'AdminDashboard.html';
+              break;
+            default:
+              alert('Invalid role selected');
+          }
+        }, 1000);
       }
-    }
+    });

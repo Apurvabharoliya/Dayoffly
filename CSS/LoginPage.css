@@ -24,7 +24,6 @@
       border-radius: 12px;
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
       overflow: hidden;
-      position: relative;
     }
 
     /* Branding Section */
@@ -38,7 +37,6 @@
       justify-content: center;
       align-items: center;
       text-align: center;
-      transition: all 0.3s ease;
     }
 
     .brand-title {
@@ -64,10 +62,6 @@
     .form-section {
       flex: 1;
       padding: 40px;
-      position: relative;
-      overflow-y: auto;
-      max-height: 90vh;
-      transition: all 0.3s ease;
     }
 
     .form-section h2 {
@@ -168,24 +162,6 @@
       background: #3a0ca3;
     }
 
-    .btn-secondary {
-      width: 100%;
-      padding: 15px;
-      background: #f8f9fa;
-      color: #333;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s;
-      margin-top: 10px;
-    }
-
-    .btn-secondary:hover {
-      background: #e9ecef;
-    }
-
     .login-link {
       text-align: center;
       margin-top: 20px;
@@ -202,138 +178,33 @@
       text-decoration: underline;
     }
 
-    .hidden {
-      display: none;
-    }
-
-    .input-wrapper input[type="password"],
-    .input-wrapper input[type="text"] {
-      padding-right: 45px;
-    }
-
-    /* Details Form styles */
-    #detailsForm {
-      display: none;
-      padding: 40px;
-      width: 100%;
-    }
-
-    .form-header {
-      text-align: center;
-      margin-bottom: 30px;
-    }
-
-    .form-header h2 {
-      font-size: 1.8rem;
-      color: #3a0ca3;
-      margin-bottom: 10px;
-    }
-
-    .form-header p {
-      color: #666;
-    }
-
-    .form-progress {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 30px;
-      position: relative;
-    }
-
-    .form-progress::before {
-      content: '';
-      position: absolute;
-      top: 15px;
-      left: 0;
-      right: 0;
-      height: 2px;
-      background: #ddd;
-      z-index: 1;
-    }
-
-    .progress-step {
-      position: relative;
-      z-index: 2;
-      text-align: center;
-      width: 30%;
-    }
-
-    .progress-step .step-number {
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      background: #ddd;
-      color: #666;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 10px;
-      font-weight: bold;
-    }
-
-    .progress-step.active .step-number {
-      background: #4361ee;
-      color: white;
-    }
-
-    .progress-step.completed .step-number {
-      background: #3a0ca3;
-      color: white;
-    }
-
-    .progress-step .step-label {
+    .error-message {
+      color: #e74c3c;
       font-size: 0.9rem;
-      color: #666;
+      margin-top: 5px;
+      display: none;
     }
 
-    .progress-step.active .step-label {
-      color: #4361ee;
-      font-weight: 500;
-    }
-
-    .progress-step.completed .step-label {
-      color: #3a0ca3;
-    }
-
-    .form-navigation {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 30px;
+    .role-specific-field {
+      display: none;
     }
 
     /* Responsive styles */
-    @media (max-width: 992px) {
+    @media (max-width: 768px) {
       .container {
         flex-direction: column;
-        max-height: 90vh;
       }
       
       .branding-section {
-        padding: 25px 15px;
-        max-height: 200px;
+        padding: 30px 20px;
       }
       
-      .form-section, #detailsForm {
-        padding: 25px 15px;
-        overflow-y: auto;
+      .form-section {
+        padding: 30px 20px;
       }
-
+      
       .brand-illustration {
         display: none;
-      }
-      
-      .form-progress {
-        flex-direction: column;
-        align-items: center;
-        gap: 20px;
-      }
-      
-      .form-progress::before {
-        display: none;
-      }
-      
-      .progress-step {
-        width: 100%;
       }
     }
 
@@ -350,7 +221,7 @@
         font-size: 1rem;
       }
       
-      .form-section h2, .form-header h2 {
+      .form-section h2 {
         font-size: 1.5rem;
       }
       
@@ -359,30 +230,4 @@
         padding: 12px 12px 12px 40px;
         font-size: 14px;
       }
-      
-      .form-navigation {
-        flex-direction: column;
-        gap: 10px;
-      }
-      
-      .btn-primary, .btn-secondary {
-        width: 100%;
-      }
-    }
-
-    /* Loading animation */
-    .loader {
-      display: none;
-      border: 3px solid #f3f3f3;
-      border-radius: 50%;
-      border-top: 3px solid #4361ee;
-      width: 20px;
-      height: 20px;
-      animation: spin 1s linear infinite;
-      margin-left: 10px;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
     }
