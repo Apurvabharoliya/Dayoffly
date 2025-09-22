@@ -146,6 +146,12 @@ body {
     margin-bottom: 5px;
 }
 
+.profile-name span {
+    font-size: 16px;
+    color: var(--gray);
+    font-weight: normal;
+}
+
 .profile-title {
     color: var(--gray);
     margin-bottom: 10px;
@@ -197,6 +203,7 @@ body {
     border-radius: 4px;
     cursor: pointer;
     transition: var(--transition);
+    font-size: 14px;
 }
 
 .edit-btn:hover {
@@ -261,6 +268,12 @@ body {
     color: var(--gray);
 }
 
+.contact-phone {
+    font-size: 14px;
+    color: var(--gray);
+    margin-top: 2px;
+}
+
 /* Toggle Switch */
 .toggle-switch {
     position: relative;
@@ -307,6 +320,120 @@ input:checked + .slider:before {
     transform: translateX(24px);
 }
 
+/* Notification items */
+.notification-item {
+    display: flex;
+    align-items: flex-start;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--light-gray);
+}
+
+.notification-item:last-child {
+    border-bottom: none;
+}
+
+.notification-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 15px;
+    color: var(--primary);
+    font-size: 16px;
+}
+
+.notification-content {
+    flex: 1;
+}
+
+.notification-title {
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+
+.notification-time {
+    font-size: 12px;
+    color: var(--gray);
+    margin-bottom: 4px;
+}
+
+.notification-message {
+    font-size: 14px;
+    color: var(--gray);
+}
+
+/* Settings select dropdown */
+.settings-select {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--light-gray);
+    border-radius: 4px;
+    background-color: white;
+    font-size: 16px;
+    color: var(--dark);
+}
+
+.settings-select:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+/* Dark Mode */
+body.dark-mode {
+    background-color: #1a1a1a;
+    color: #ffffff;
+}
+
+body.dark-mode .card {
+    background-color: #2d2d2d;
+    border-color: #404040;
+}
+
+/* Compact View */
+body.compact-view .card-body {
+    padding: 1rem;
+}
+
+body.compact-view .info-group {
+    margin-bottom: 0.8rem;
+}
+
+/* Font Sizes */
+body.font-small { font-size: 14px; }
+body.font-medium { font-size: 16px; }
+body.font-large { font-size: 18px; }
+
+/* Sidebar Positions */
+body.sidebar-right .container {
+    flex-direction: row-reverse;
+}
+
+/* Clear Data Button */
+.clear-data-btn {
+    background: #ff4757;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 100%;
+    font-size: 14px;
+}
+
+.clear-data-btn:hover {
+    background: #ff3742;
+}
+
+.settings-select {
+    padding: 5px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: white;
+}
+
 /* Responsive Design */
 @media (max-width: 992px) {
     .container {
@@ -336,5 +463,24 @@ input:checked + .slider:before {
     
     .main-content {
         padding: 15px;
+    }
+    
+    .cards-container {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .card-body {
+        padding: 15px;
+    }
+    
+    .contact-item, .notification-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .contact-avatar, .notification-icon {
+        margin-bottom: 10px;
+        margin-right: 0;
     }
 }

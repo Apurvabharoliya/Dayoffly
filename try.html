@@ -4,20 +4,93 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>About Us • ShiftXpress</title>
-  <link href="/css/aboutus.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
-    /* Additional styles for sidebar integration */
+    /* Color Variables - Light theme */
+    :root {
+      --white: #FFFFFF;         /* Primary background */
+      --light-gray: #F8F9FA;    /* Secondary backgrounds */
+      --medium-gray: #E9ECEF;   /* Borders and dividers */
+      --text-dark: #212529;     /* Primary text */
+      --text-medium: #495057;   /* Secondary text */
+      --accent-blue: #0D6EFD;   /* Primary accent */
+      --accent-teal: #20C997;   /* Secondary accent */
+      --accent-purple: #6F42C1; /* Tertiary accent */
+      --shadow: rgba(0, 0, 0, 0.08); /* Light shadows */
+    }
+    
+    /* Base Styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+    
+    body {
+      background-color: var(--white);
+      color: var(--text-dark);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+    
+    /* Header */
+    .header {
+      background: var(--white);
+      color: var(--text-dark);
+      padding: 16px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 10px var(--shadow);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 1px solid var(--medium-gray);
+    }
+    
+    .logo {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: var(--accent-blue);
+    }
+    
+    .logo:hover {
+      color: var(--accent-teal);
+    }
+    
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--medium-gray);
+      box-shadow: 0 2px 8px var(--shadow);
+    }
+    
+    /* Layout */
     .main-container {
       display: flex;
       flex: 1;
       overflow: hidden;
     }
     
+    /* Sidebar */
     .sidebar {
       width: 240px;
-      background: #f9f6f1;
-      border-right: 1px solid #e5e7eb;
+      background: var(--light-gray);
+      border-right: 1px solid var(--medium-gray);
       padding: 16px 0;
       overflow-y: auto;
       transition: width 0.3s;
@@ -31,65 +104,211 @@
       display: flex;
       align-items: center;
       gap: 12px;
-      padding: 12px 20px;
-      color: #6b7280;
+      padding: 14px 20px;
+      color: var(--text-medium);
       font-size: 15px;
       border: none;
       background: none;
       width: 100%;
       text-align: left;
       cursor: pointer;
-      transition: all 0.25s;
+      transition: all 0.3s;
       border-left: 4px solid transparent;
     }
     
     .nav-item:hover {
-      background: #e8e2d6;
-      color: #111827;
-      border-left: 4px solid #a38d72;
+      background: rgba(13, 110, 253, 0.05);
+      color: var(--accent-blue);
+      border-left: 4px solid var(--accent-blue);
     }
     
     .nav-item.active {
-      background: linear-gradient(to right, #e8e2d6, #d6cbb9);
-      color: #8a755c;
+      background: rgba(13, 110, 253, 0.1);
+      color: var(--accent-blue);
       font-weight: 600;
-      border-left: 4px solid #8a755c;
+      border-left: 4px solid var(--accent-blue);
     }
     
+    .nav-item i {
+      width: 20px;
+      text-align: center;
+      color: var(--accent-blue);
+    }
+    
+    /* Content */
     .content {
       flex: 1;
-      padding: 28px;
+      padding: 32px;
       overflow-y: auto;
+      background-color: var(--white);
     }
     
-    .header {
-      background: linear-gradient(135deg, #a38d72 0%, #8a755c 100%);
-      color: white;
-      padding: 12px 24px;
-      display: flex;
-      justify-content: space-between;
+    /* About Section */
+    .about {
+      margin-bottom: 60px;
+    }
+    
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 50px;
       align-items: center;
-      box-shadow: 0 2px 15px rgba(0,0,0,0.15);
     }
     
-    .logo {
-      font-size: 20px;
+    .eyebrow {
+      color: var(--accent-blue);
+      font-size: 14px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+    }
+    
+    h1 {
+      font-size: 36px;
       font-weight: 700;
-      letter-spacing: 0.5px;
-      cursor: pointer;
-      transition: transform 0.2s;
+      color: var(--text-dark);
+      margin-bottom: 20px;
+      line-height: 1.2;
     }
     
-    .logo:hover {
-      transform: scale(1.05);
+    .lead {
+      font-size: 18px;
+      color: var(--text-medium);
+      margin-bottom: 30px;
+      font-weight: 500;
+      background: var(--light-gray);
+      padding: 20px;
+      border-radius: 10px;
+      border-left: 4px solid var(--accent-teal);
     }
     
-    .user-avatar {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 2px solid white;
+    .bullets {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    
+    .bullet {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      color: var(--text-dark);
+      background: var(--light-gray);
+      padding: 12px 15px;
+      border-radius: 8px;
+      transition: all 0.3s;
+    }
+    
+    .bullet:hover {
+      background: rgba(13, 110, 253, 0.05);
+      transform: translateX(5px);
+    }
+    
+    .tick {
+      color: var(--accent-teal);
+      font-weight: bold;
+      font-size: 18px;
+      margin-top: 2px;
+    }
+    
+    .scene {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .scene-inner {
+      width: 100%;
+      max-width: 400px;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 10px 25px var(--shadow);
+    }
+    
+    .card-image {
+      width: 100%;
+      height: auto;
+      display: block;
+      transition: transform 0.3s;
+    }
+    
+    .card-image:hover {
+      transform: scale(1.03);
+    }
+    
+    /* Features Section */
+    .features {
+      margin-bottom: 60px;
+    }
+    
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 30px;
+      margin-top: 30px;
+    }
+    
+    .card {
+      background: var(--white);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 6px 15px var(--shadow);
+      transition: transform 0.3s, box-shadow 0.3s;
+      border: 1px solid var(--medium-gray);
+    }
+    
+    .card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+    }
+    
+    .card-image-container {
+      width: 100%;
+      height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 50px;
+    }
+    
+    .card-body {
+      padding: 24px;
+    }
+    
+    .card h3 {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: var(--text-dark);
+    }
+    
+    .muted {
+      color: var(--text-medium);
+      font-size: 15px;
+    }
+    
+    /* Footer */
+    footer {
+      background: var(--light-gray);
+      color: var(--text-medium);
+      text-align: center;
+      padding: 20px 0;
+      margin-top: auto;
+      border-top: 1px solid var(--medium-gray);
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 968px) {
+      .about-grid {
+        grid-template-columns: 1fr;
+        gap: 40px;
+      }
+      
+      .scene-inner {
+        max-width: 500px;
+      }
     }
     
     @media (max-width: 768px) {
@@ -101,7 +320,19 @@
         width: 100%;
         height: auto;
         border-right: none;
-        border-bottom: 1px solid #e5e7eb;
+        border-bottom: 1px solid var(--medium-gray);
+      }
+      
+      .content {
+        padding: 24px;
+      }
+      
+      h1 {
+        font-size: 28px;
+      }
+      
+      .cards {
+        grid-template-columns: 1fr;
       }
     }
   </style>
@@ -111,7 +342,7 @@
   <header class="header">
     <div class="logo">ShiftXpress</div>
     <div class="header-actions">
-      <img src="https://ui-avatars.com/api/?name=ShiftXpress+User&background=random" alt="User Avatar" class="user-avatar">
+      <img src="https://ui-avatars.com/api/?name=ShiftXpress+User&background=0D6EFD&color=ffffff" alt="User Avatar" class="user-avatar">
     </div>
   </header>
 
@@ -133,21 +364,24 @@
         <div class="about-grid">
           <div>
             <div class="eyebrow">ABOUT US</div>
-            <h1>We connect Customers & Drivers with Transparency</h1>
-            <p class="lead">"At ShiftXpress, admins are the bridge between customers and drivers. We validate every booking, assign the right driver, and optimize routes for efficiency. From resolving disputes to ensuring security checks, our admin team makes the process safe and smooth. With real-time monitoring, transparent updates, and secure payments, we guarantee trust and reliability throughout the shifting journey."</p>
+            <h1>We Connect Customers & Drivers with Transparency</h1>
+            <p class="lead">At ShiftXpress, admins are the bridge between customers and drivers. We validate every booking, assign the right driver, and optimize routes for efficiency. From resolving disputes to ensuring security checks, our admin team makes the process safe and smooth. With real-time monitoring, transparent updates, and secure payments, we guarantee trust and reliability throughout the shifting journey.</p>
             <div class="bullets">
               <div class="bullet"><span class="tick">✓</span> We verify every booking request to make sure the right driver is assigned for the right job</div>
               <div class="bullet"><span class="tick">✓</span> Admins help in planning the most efficient routes, saving both time and fuel costs.</div>
-              <div class="bullet"><span class="tick">✓</span>Manage booking requests.</div>
-              <div class="bullet"><span class="tick">✓</span>Admins ensure drivers are background-verified, vehicles are safe, and customers' belongings remain protected.</div>
+              <div class="bullet"><span class="tick">✓</span> Manage booking requests and ensure timely service delivery.</div>
+              <div class="bullet"><span class="tick">✓</span> Admins ensure drivers are background-verified, vehicles are safe, and customers' belongings remain protected.</div>
               <div class="bullet"><span class="tick">✓</span> We track live shipments and provide instant updates, ensuring complete transparency.</div>
-              <div class="bullet"><span class="tick">✓</span>Ensure secure payments directly between customer & driver</div>
+              <div class="bullet"><span class="tick">✓</span> Ensure secure payments directly between customer & driver</div>
             </div>
           </div>
 
           <div class="scene">
             <div class="scene-inner">
-              <img src="/Photos/packinggirl.jpg" alt="Packing Girl" class="girl-in-box">
+              <!-- Illustration placeholder -->
+              <div class="card-image-container" style="background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-teal) 100%);">
+                <i class="fas fa-people-carry"></i>
+              </div>
             </div>
           </div>
         </div>
@@ -158,24 +392,30 @@
         <div class="eyebrow">WHAT WE DO</div>
         <div class="cards">
           <article class="card">
-            <img src="/Photos/packing.jpg" alt="Packing">
+            <div class="card-image-container" style="background: linear-gradient(135deg, var(--accent-blue) 0%, #0a58ca 100%);">
+              <i class="fas fa-id-card-alt"></i>
+            </div>
             <div class="card-body">
-              <h3>Driver Verification🚚</h3>
-              <p class="muted">"Our admin team ensures all drivers are background-verified and trained for safe operations."</p>
+              <h3>Driver Verification 🚚</h3>
+              <p class="muted">Our admin team ensures all drivers are background-verified and trained for safe operations.</p>
             </div>
           </article>
           <article class="card">
-            <img src="/Photos/loading.jpg" alt="Loading">
+            <div class="card-image-container" style="background: linear-gradient(135deg, var(--accent-teal) 0%, #1aa179 100%);">
+              <i class="fas fa-clipboard-list"></i>
+            </div>
             <div class="card-body">
               <h3>Booking Management 📑</h3>
-              <p class="muted">"Admins assign drivers, optimize routes, and make sure every booking runs smoothly."</p>
+              <p class="muted">Admins assign drivers, optimize routes, and make sure every booking runs smoothly.</p>
             </div>
           </article>
           <article class="card">
-            <img src="/Photos/delivery.jpg" alt="Delivery">
+            <div class="card-image-container" style="background: linear-gradient(135deg, var(--accent-purple) 0%, #5a3796 100%);">
+              <i class="fas fa-shield-alt"></i>
+            </div>
             <div class="card-body">
               <h3>Secure Payments 💳</h3>
-              <p class="muted">"Admins monitor transactions to ensure secure and transparent payments directly between customers and drivers."</p>
+              <p class="muted">Admins monitor transactions to ensure secure and transparent payments directly between customers and drivers.</p>
             </div>
           </article>
         </div>
@@ -187,5 +427,10 @@
   <footer>
     <div class="container">© <span id="y"></span> ShiftXpress • All rights reserved</div>
   </footer>
+
+  <script>
+    // Set current year in footer
+    document.getElementById('y').textContent = new Date().getFullYear();
+  </script>
 </body>
 </html>

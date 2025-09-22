@@ -3,9 +3,9 @@ document.addEventListener('DOMContentLoaded', function() {
   const loginForm = document.getElementById('loginForm');
   const togglePassword = document.getElementById('togglePassword');
   const passwordInput = document.getElementById('password');
-  const employeeIdInput = document.getElementById('employeeId');
+  const userIdInput = document.getElementById('userId');
   
-  const employeeIdError = document.getElementById('employeeIdError');
+  const userIdError = document.getElementById('userIdError');
   const passwordError = document.getElementById('passwordError');
   
   // Toggle password visibility
@@ -23,13 +23,13 @@ document.addEventListener('DOMContentLoaded', function() {
     let isValid = true;
     
     // Reset error messages
-    employeeIdError.style.display = 'none';
+    userIdError.style.display = 'none';
     passwordError.style.display = 'none';
     
-    // Validate Employee ID
-    if (!employeeIdInput.value.trim()) {
-      employeeIdError.textContent = 'Please enter your employee ID';
-      employeeIdError.style.display = 'block';
+    // Validate User ID
+    if (!userIdInput.value.trim()) {
+      userIdError.textContent = 'Please enter your user ID';
+      userIdError.style.display = 'block';
       isValid = false;
     }
     
@@ -47,20 +47,20 @@ document.addEventListener('DOMContentLoaded', function() {
       submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Authenticating...';
       submitBtn.disabled = true;
       
-      // Authenticate user
-      authenticateUser(employeeIdInput.value.trim(), passwordInput.value)
+      // Authenticate user with mock data
+      authenticateUser(userIdInput.value.trim(), passwordInput.value)
         .then(result => {
           if (result.success) {
-            // Store user data in localStorage (in a real app, you might use more secure methods)
+            // Store user data in localStorage
             localStorage.setItem('user', JSON.stringify(result.user));
             
-            // Redirect to dashboard
+            // Redirect to appropriate dashboard based on user role
             window.location.href = result.redirectUrl;
           } else {
             // Show error message
-            if (result.field === 'employeeId') {
-              employeeIdError.textContent = result.message;
-              employeeIdError.style.display = 'block';
+            if (result.field === 'userId') {
+              userIdError.textContent = result.message;
+              userIdError.style.display = 'block';
             } else if (result.field === 'password') {
               passwordError.textContent = result.message;
               passwordError.style.display = 'block';
@@ -86,9 +86,9 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   
   // Input validation on change
-  employeeIdInput.addEventListener('input', function() {
+  userIdInput.addEventListener('input', function() {
     if (this.value.trim()) {
-      employeeIdError.style.display = 'none';
+      userIdError.style.display = 'none';
     }
   });
   
@@ -98,16 +98,16 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
   
-  // Authentication function with simulated user database
-  async function authenticateUser(employeeId, password) {
+  // Mock authentication function (no backend needed)
+  async function authenticateUser(userId, password) {
     // Simulate API call delay
     await new Promise(resolve => setTimeout(resolve, 1000));
     
-    // Simulated user database (in a real application, this would be on the server)
+    // Mock user database
     const users = [
       {
         id: 'EMP001',
-        password: 'password123', // In a real app, this would be a hashed password
+        password: 'password123',
         name: 'John Doe',
         role: 'employee',
         email: 'john.doe@company.com'
@@ -120,26 +120,33 @@ document.addEventListener('DOMContentLoaded', function() {
         email: 'jane.smith@company.com'
       },
       {
-        id: 'ADM003',
-        password: 'adminpass',
-        name: 'Admin User',
-        role: 'admin',
-        email: 'admin@company.com'
+        id: 'EMP002',
+        password: 'test123',
+        name: 'Mike Johnson',
+        role: 'employee',
+        email: 'mike.johnson@company.com'
+      },
+      {
+        id: 'HR001',
+        password: 'hr123',
+        name: 'Sarah Wilson',
+        role: 'hr',
+        email: 'sarah.wilson@company.com'
       }
     ];
     
-    // Find user by employee ID
-    const user = users.find(u => u.id === employeeId);
+    // Find user by user ID
+    const user = users.find(u => u.id === userId);
     
     if (!user) {
       return {
         success: false,
-        message: 'Employee ID not found',
-        field: 'employeeId'
+        message: 'User ID not found',
+        field: 'userId'
       };
     }
     
-    // Check password (in a real app, compare hashed passwords)
+    // Check password
     if (user.password !== password) {
       return {
         success: false,
@@ -148,20 +155,12 @@ document.addEventListener('DOMContentLoaded', function() {
       };
     }
     
-    // Determine redirect URL based on role
+    // Determine redirect URL based on user role
     let redirectUrl;
-    switch(user.role) {
-      case 'employee':
-        redirectUrl = '../EmployeeDashboard/EmployeeDashboard.html';
-        break;
-      case 'hr':
-        redirectUrl = '../HRDashboard/HRDashboard.html';
-        break;
-      case 'admin':
-        redirectUrl = '../AdminDashboard/AdminDashboard.html';
-        break;
-      default:
-        console.log('Unknown role, redirecting to default dashboard');
+    if (user.role === 'hr') {
+      redirectUrl = '../HRDashboard/HRDashboard.html';
+    } else {
+      redirectUrl = '../EmployeeDashboard/EmployeeDashboard.html';
     }
     
     // Return success with user data (without password)
@@ -173,27 +172,24 @@ document.addEventListener('DOMContentLoaded', function() {
     };
   }
   
-  // Check if user is already logged in (optional)
+  // Check if user is already logged in
   function checkExistingLogin() {
     const userData = localStorage.getItem('user');
     if (userData) {
-      const user = JSON.parse(userData);
-      if (confirm('You are already logged in. Would you like to go to your dashboard?')) {
-        let redirectUrl;
-        switch(user.role) {
-          case 'employee':
-            redirectUrl = '../EmployeeDashboard/EmployeeDashboard.html';
-            break;
-          case 'hr':
+      try {
+        const user = JSON.parse(userData);
+        if (confirm('You are already logged in. Would you like to go to your dashboard?')) {
+          let redirectUrl;
+          if (user.role === 'hr') {
             redirectUrl = '../HRDashboard/HRDashboard.html';
-            break;
-          case 'admin':
-            redirectUrl = '../AdminDashboard/AdminDashboard.html';
-            break;
-          default:
-            console.log('Unknown role, redirecting to default dashboard');
+          } else {
+            redirectUrl = '../EmployeeDashboard/EmployeeDashboard.html';
+          }
+          window.location.href = redirectUrl;
         }
-        window.location.href = redirectUrl;
+      } catch (error) {
+        console.error('Error parsing user data:', error);
+        localStorage.removeItem('user');
       }
     }
   }
