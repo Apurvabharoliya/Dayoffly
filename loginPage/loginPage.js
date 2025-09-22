@@ -152,16 +152,16 @@ document.addEventListener('DOMContentLoaded', function() {
     let redirectUrl;
     switch(user.role) {
       case 'employee':
-        redirectUrl = 'EmployeeDashboard/EmployeeDashboard.html';
+        redirectUrl = '../EmployeeDashboard/EmployeeDashboard.html';
         break;
       case 'hr':
-        redirectUrl = 'HRDashboard.html';
+        redirectUrl = '../HRDashboard/HRDashboard.html';
         break;
       case 'admin':
-        redirectUrl = 'AdminDashboard.html';
+        redirectUrl = '../AdminDashboard/AdminDashboard.html';
         break;
       default:
-        redirectUrl = 'Dashboard.html';
+        console.log('Unknown role, redirecting to default dashboard');
     }
     
     // Return success with user data (without password)
@@ -182,16 +182,16 @@ document.addEventListener('DOMContentLoaded', function() {
         let redirectUrl;
         switch(user.role) {
           case 'employee':
-            redirectUrl = 'EmployeeDashboard.html';
+            redirectUrl = '../EmployeeDashboard/EmployeeDashboard.html';
             break;
           case 'hr':
-            redirectUrl = 'HRDashboard.html';
+            redirectUrl = '../HRDashboard/HRDashboard.html';
             break;
           case 'admin':
-            redirectUrl = 'AdminDashboard.html';
+            redirectUrl = '../AdminDashboard/AdminDashboard.html';
             break;
           default:
-            redirectUrl = 'Dashboard.html';
+            console.log('Unknown role, redirecting to default dashboard');
         }
         window.location.href = redirectUrl;
       }
