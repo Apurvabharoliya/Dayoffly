@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dayoffly - HR Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="HRDashboard.css">
+  <link rel="icon" href="/images/rounded logo for Day.png">
+</head>
+<body>
+  <div class="container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="logo">
+        <h2><i class="fas fa-calendar-alt"></i> Dayoffly</h2>
+      </div>
+      <div class="nav-item active">
+        <i class="fas fa-home"></i> Dashboard
+      </div>
+      <div class="nav-item">
+        <i class="fas fa-users"></i> Employees
+      </div>
+      <div class="nav-item">
+        <i class="fas fa-calendar-check"></i> Leave Requests
+      </div>
+      <div class="nav-item">
+        <i class="fas fa-chart-bar"></i> Analytics
+      </div>
+      <div class="nav-item">
+        <i class="fas fa-cog"></i> Settings
+      </div>
+      <div class="nav-item">
+        <i class="fas fa-sign-out-alt"></i> Logout
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <header>
+        <div>
+          <h1>HR Dashboard</h1>
+          <p>Manage leave requests and monitor team activity</p>
+        </div>
+        <div class="user-info">
+          <div class="user-avatar">HR</div>
+          <div>
+            <div>Sarah Johnson</div>
+            <div style="font-size: 0.8rem; color: var(--gray);">HR Manager</div>
+          </div>
+        </div>
+      </header>
+
+      <section class="summary">
+        <div class="card total">
+          <div class="card-icon">
+            <i class="fas fa-clipboard-list"></i>
+          </div>
+          <h3 id="total-count">12</h3>
+          <p>Total Requests</p>
+        </div>
+        <div class="card pending">
+          <div class="card-icon">
+            <i class="fas fa-clock"></i>
+          </div>
+          <h3 id="pending-count">4</h3>
+          <p>Pending Requests</p>
+        </div>
+        <div class="card approved">
+          <div class="card-icon">
+            <i class="fas fa-check-circle"></i>
+          </div>
+          <h3 id="approved-count">6</h3>
+          <p>Approved Requests</p>
+        </div>
+        <div class="card rejected">
+          <div class="card-icon">
+            <i class="fas fa-times-circle"></i>
+          </div>
+          <h3 id="rejected-count">2</h3>
+          <p>Rejected Requests</p>
+        </div>
+      </section>
+
+      <section class="requests">
+        <div class="section-header">
+          <h2>Leave Requests</h2>
+          <div class="filter-options">
+            <button class="filter-btn active">All</button>
+            <button class="filter-btn">Pending</button>
+            <button class="filter-btn">Approved</button>
+            <button class="filter-btn">Rejected</button>
+          </div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Employee</th>
+              <th>Type</th>
+              <th>Dates</th>
+              <th>Duration</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="request-table">
+            <!-- JS will populate this -->
+          </tbody>
+        </table>
+      </section>
+
+      <section class="analytics">
+        <h2>Leave Analytics</h2>
+        <div class="charts">
+          <div class="chart-container">
+            <h3>Leave Types Distribution</h3>
+            <canvas id="leaveTypeChart"></canvas>
+          </div>
+          <div class="chart-container">
+            <h3>Monthly Trends</h3>
+            <canvas id="monthlyTrendChart"></canvas>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script src="HRDashboard.js"></script>
+</body>
+</html>
