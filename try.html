@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About Us • ShiftXpress</title>
+  <link href="/css/aboutus.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    /* Additional styles for sidebar integration */
+    .main-container {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+    
+    .sidebar {
+      width: 240px;
+      background: #f9f6f1;
+      border-right: 1px solid #e5e7eb;
+      padding: 16px 0;
+      overflow-y: auto;
+      transition: width 0.3s;
+    }
+    
+    .sidebar a {
+      text-decoration: none;
+    }
+    
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 20px;
+      color: #6b7280;
+      font-size: 15px;
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.25s;
+      border-left: 4px solid transparent;
+    }
+    
+    .nav-item:hover {
+      background: #e8e2d6;
+      color: #111827;
+      border-left: 4px solid #a38d72;
+    }
+    
+    .nav-item.active {
+      background: linear-gradient(to right, #e8e2d6, #d6cbb9);
+      color: #8a755c;
+      font-weight: 600;
+      border-left: 4px solid #8a755c;
+    }
+    
+    .content {
+      flex: 1;
+      padding: 28px;
+      overflow-y: auto;
+    }
+    
+    .header {
+      background: linear-gradient(135deg, #a38d72 0%, #8a755c 100%);
+      color: white;
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 15px rgba(0,0,0,0.15);
+    }
+    
+    .logo {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    
+    .logo:hover {
+      transform: scale(1.05);
+    }
+    
+    .user-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid white;
+    }
+    
+    @media (max-width: 768px) {
+      .main-container {
+        flex-direction: column;
+      }
+      
+      .sidebar {
+        width: 100%;
+        height: auto;
+        border-right: none;
+        border-bottom: 1px solid #e5e7eb;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="logo">ShiftXpress</div>
+    <div class="header-actions">
+      <img src="https://ui-avatars.com/api/?name=ShiftXpress+User&background=random" alt="User Avatar" class="user-avatar">
+    </div>
+  </header>
+
+  <!-- Layout -->
+  <div class="main-container">
+    <!-- Sidebar -->
+    <nav class="sidebar">
+      <a href="/HTML/home.html"><button class="nav-item"><i class="fas fa-home"></i> <span>Home</span></button></a>
+      <button class="nav-item active"><i class="fas fa-info-circle"></i> <span>About Us</span></button>
+      <a href="/HTML/servicepage.html"><button class="nav-item"><i class="fas fa-concierge-bell"></i> <span>Services</span></button></a>
+      <a href="/HTML/bookpickup.html"><button class="nav-item"><i class="fas fa-calendar-check"></i> <span>Book Now</span></button></a>
+      <a href="/HTML/contactus.html"><button class="nav-item"><i class="fas fa-headset"></i> <span>Contact Us</span></button></a>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="content">
+      <!-- About Section -->
+      <section id="about" class="about container">
+        <div class="about-grid">
+          <div>
+            <div class="eyebrow">ABOUT US</div>
+            <h1>We connect Customers & Drivers with Transparency</h1>
+            <p class="lead">"At ShiftXpress, admins are the bridge between customers and drivers. We validate every booking, assign the right driver, and optimize routes for efficiency. From resolving disputes to ensuring security checks, our admin team makes the process safe and smooth. With real-time monitoring, transparent updates, and secure payments, we guarantee trust and reliability throughout the shifting journey."</p>
+            <div class="bullets">
+              <div class="bullet"><span class="tick">✓</span> We verify every booking request to make sure the right driver is assigned for the right job</div>
+              <div class="bullet"><span class="tick">✓</span> Admins help in planning the most efficient routes, saving both time and fuel costs.</div>
+              <div class="bullet"><span class="tick">✓</span>Manage booking requests.</div>
+              <div class="bullet"><span class="tick">✓</span>Admins ensure drivers are background-verified, vehicles are safe, and customers' belongings remain protected.</div>
+              <div class="bullet"><span class="tick">✓</span> We track live shipments and provide instant updates, ensuring complete transparency.</div>
+              <div class="bullet"><span class="tick">✓</span>Ensure secure payments directly between customer & driver</div>
+            </div>
+          </div>
+
+          <div class="scene">
+            <div class="scene-inner">
+              <img src="/Photos/packinggirl.jpg" alt="Packing Girl" class="girl-in-box">
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- What We Do Section -->
+      <section id="gallery" class="features container">
+        <div class="eyebrow">WHAT WE DO</div>
+        <div class="cards">
+          <article class="card">
+            <img src="/Photos/packing.jpg" alt="Packing">
+            <div class="card-body">
+              <h3>Driver Verification🚚</h3>
+              <p class="muted">"Our admin team ensures all drivers are background-verified and trained for safe operations."</p>
+            </div>
+          </article>
+          <article class="card">
+            <img src="/Photos/loading.jpg" alt="Loading">
+            <div class="card-body">
+              <h3>Booking Management 📑</h3>
+              <p class="muted">"Admins assign drivers, optimize routes, and make sure every booking runs smoothly."</p>
+            </div>
+          </article>
+          <article class="card">
+            <img src="/Photos/delivery.jpg" alt="Delivery">
+            <div class="card-body">
+              <h3>Secure Payments 💳</h3>
+              <p class="muted">"Admins monitor transactions to ensure secure and transparent payments directly between customers and drivers."</p>
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">© <span id="y"></span> ShiftXpress • All rights reserved</div>
+  </footer>
+</body>
+</html>
