@@ -517,3 +517,65 @@
         .btn-secondary:hover {
             background-color: #d1d5db;
         }
+        /* Add to calendar.css */
+
+/* Status indicators for leaves */
+.status-indicator {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.status-indicator.approved {
+    background-color: #10b981;
+}
+
+.status-indicator.pending {
+    background-color: #f59e0b;
+}
+
+/* Modal status badges */
+.status-badge {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+.status-approved {
+    background-color: #d1fae5;
+    color: #065f46;
+}
+
+.status-pending {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+.leave-details, .no-leave-details {
+    padding: 10px 0;
+}
+
+.leave-type {
+    text-transform: capitalize;
+    font-weight: 500;
+}
+
+.leave-type.vacation { color: #3b82f6; }
+.leave-type.sick { color: #10b981; }
+.leave-type.personal { color: #f59e0b; }
+.leave-type.parental { color: #ec4899; }
+
+/* Leave markers with status */
+.leave-marker.approved-status {
+    opacity: 1;
+}
+
+.leave-marker.pending-status {
+    opacity: 0.8;
+    border: 1px dashed currentColor;
+}
