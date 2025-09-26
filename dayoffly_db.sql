@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 21, 2025 at 05:36 PM
+-- Generation Time: Sep 25, 2025 at 04:51 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `dayoffly`
+-- Database: `dayoffly_db`
 --
 
 -- --------------------------------------------------------
@@ -29,7 +29,7 @@ SET time_zone = "+00:00";
 
 CREATE TABLE `department` (
   `department_id` int(5) NOT NULL,
-  `department_name` enum('Human Resources','Finance','IT','Sales','Marketing','Engineering','Operations') NOT NULL
+  `department_name` enum('Human Resources','Finance','IT','Sales','Marketing','Research & Development') NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -47,7 +47,7 @@ CREATE TABLE `leave_application` (
   `end_date` date NOT NULL,
   `reason` text NOT NULL,
   `attachment` varchar(255) DEFAULT NULL,
-  `status` varchar(20) DEFAULT 'pending'
+  `leave_status` varchar(10) DEFAULT 'pending'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -84,7 +84,7 @@ CREATE TABLE `leave_types` (
 
 CREATE TABLE `role` (
   `role_id` int(5) NOT NULL,
-  `role_name` enum('Manager','HR','Admin','Senior','Junior','Intern') NOT NULL
+  `role_name` enum('Manager','HR','Senior','Junior','Intern') NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -100,10 +100,10 @@ CREATE TABLE `users_master` (
   `password` varchar(20) NOT NULL,
   `department_id` int(5) DEFAULT NULL,
   `role_id` int(5) DEFAULT NULL,
-  `contact_number` varchar(16) DEFAULT NULL,
+  `designation` varchar(20) NOT NULL,
+  `contact_number` varchar(16) NOT NULL,
   `is_active` tinyint(1) DEFAULT 1,
-  `approver_id` int(5) NOT NULL,
-  `designation` varchar(20) NOT NULL
+  `approver_id` int(5) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
