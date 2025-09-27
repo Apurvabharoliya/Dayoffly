@@ -29,6 +29,11 @@
         </a>
       </div>
       <div class="nav-item">
+        <a href="../AnalyticsHR/analyticsHR.html" style="color: inherit; text-decoration: none;">
+          <i class="fas fa-chart-bar"></i> Analytics
+        </a>
+      </div>
+      <div class="nav-item">
         <a href="../SettingsHR/settingsHR.html" style="color: inherit; text-decoration: none;">
           <i class="fas fa-cog"></i> Settings
         </a>
@@ -55,6 +60,43 @@
           </div>
         </div>
       </header>
+
+      <!-- Analytics Section -->
+      <section class="analytics">
+        <h2>Employee Analytics</h2>
+        
+        <!-- Summary Cards -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-number" id="total-employees">5</div>
+            <div class="stat-label">Total Employees</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" id="active-employees">4</div>
+            <div class="stat-label">Active Employees</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" id="on-leave-count">1</div>
+            <div class="stat-label">On Leave</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" id="avg-leaves">3.2</div>
+            <div class="stat-label">Avg. Leaves per Employee</div>
+          </div>
+        </div>
+        
+        <!-- Charts -->
+        <div class="charts">
+          <div class="chart-container">
+            <h3>Leave Types Distribution</h3>
+            <canvas id="leaveTypeChart"></canvas>
+          </div>
+          <div class="chart-container">
+            <h3>Department Distribution</h3>
+            <canvas id="departmentChart"></canvas>
+          </div>
+        </div>
+      </section>
 
       <section class="employee-management">
         <div class="section-header">
