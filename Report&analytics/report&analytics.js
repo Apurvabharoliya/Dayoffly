@@ -11,11 +11,11 @@
       // Set up event listeners
       document.getElementById('apply-date-range').addEventListener('click', function() {
         // In a real application, this would filter the data based on the selected date range
-        alert('Date range filter applied. In a real application, this would update the charts and data.');
+        alert('Date range filter applied. Displaying your leave data for the selected period.');
       });
       
       document.getElementById('export-report').addEventListener('click', function() {
-        alert('Report exported successfully!');
+        alert('Your personal leave report exported successfully!');
       });
     });
     
@@ -27,7 +27,7 @@
         data: {
           labels: ['Casual Leave', 'Sick Leave', 'Earned Leave', 'Work From Home', 'Other'],
           datasets: [{
-            data: [42, 28, 15, 10, 5],
+            data: [45, 25, 15, 10, 5],
             backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444'],
             borderWidth: 1
           }]
@@ -38,6 +38,10 @@
           plugins: {
             legend: {
               position: 'right'
+            },
+            title: {
+              display: true,
+              text: 'My Leave Types'
             }
           }
         }
@@ -50,8 +54,8 @@
         data: {
           labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
           datasets: [{
-            label: 'Leave Requests',
-            data: [8, 10, 12, 9, 11, 15, 22, 18, 14, 10, 9, 6],
+            label: 'My Leave Requests',
+            data: [1, 0, 2, 1, 1, 0, 3, 2, 1, 2, 1, 5],
             borderColor: '#3b82f6',
             backgroundColor: 'rgba(59, 130, 246, 0.1)',
             fill: true,
@@ -63,30 +67,17 @@
           maintainAspectRatio: false,
           scales: {
             y: {
-              beginAtZero: true
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'Number of Leaves'
+              }
             }
-          }
-        }
-      });
-      
-      // Department-wise Analysis Chart
-      const departmentCtx = document.getElementById('departmentChart').getContext('2d');
-      new Chart(departmentCtx, {
-        type: 'bar',
-        data: {
-          labels: ['Engineering', 'Sales', 'HR', 'Finance', 'IT'],
-          datasets: [{
-            label: 'Total Requests',
-            data: [42, 28, 19, 15, 20],
-            backgroundColor: '#8b5cf6'
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            y: {
-              beginAtZero: true
+          },
+          plugins: {
+            title: {
+              display: true,
+              text: 'My Monthly Leave Pattern'
             }
           }
         }
@@ -97,10 +88,10 @@
       new Chart(statusCtx, {
         type: 'pie',
         data: {
-          labels: ['Approved', 'Pending', 'Rejected', 'Cancelled'],
+          labels: ['Approved', 'Pending', 'Rejected'],
           datasets: [{
-            data: [78, 12, 7, 3],
-            backgroundColor: ['#10b981', '#f59e0b', '#ef4444', '#6b7280'],
+            data: [83, 8, 9],
+            backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
             borderWidth: 1
           }]
         },
@@ -110,6 +101,43 @@
           plugins: {
             legend: {
               position: 'right'
+            },
+            title: {
+              display: true,
+              text: 'My Leave Status'
+            }
+          }
+        }
+      });
+      
+      // Duration Pattern Chart
+      const durationCtx = document.getElementById('durationChart').getContext('2d');
+      new Chart(durationCtx, {
+        type: 'bar',
+        data: {
+          labels: ['1 day', '2 days', '3 days', '4-5 days', '5+ days'],
+          datasets: [{
+            label: 'My Leave Durations',
+            data: [6, 8, 5, 3, 2],
+            backgroundColor: '#8b5cf6'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'Number of Leaves'
+              }
+            }
+          },
+          plugins: {
+            title: {
+              display: true,
+              text: 'My Leave Duration Pattern'
             }
           }
         }
