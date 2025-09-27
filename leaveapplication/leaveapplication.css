@@ -209,18 +209,6 @@
             justify-content: center;
         }
 
-        /* .profile-pic {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-        } */
-
         /* Dashboard */
         .dashboard {
             background: white;
@@ -668,6 +656,13 @@
 
         .popup-close-btn:hover {
             background: #1d4ed8;
+        }
+
+        /* Manual Leave Type Input Styles */
+        .manual-leave-type {
+            display: block;
+            margin-top: 8px;
+            animation: fadeIn 0.3s ease;
         }
 
         /* Animations */

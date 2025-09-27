@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="leaveapplication.css">
 </head>
 <body>
-    <!-- Toast Container -->
+   <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>
 
     <!-- Header with Employee Dashboard Banner -->
@@ -61,7 +61,6 @@
                             <i class="fas fa-bell"></i>
                             <span class="notification-badge">3</span>
                         </div>
-                        <!-- <div class="profile-pic">JS</div> -->
                     </div>
                 </div>
             </div>
@@ -96,19 +95,17 @@
                     <!-- Step 1: Leave Details -->
                     <div class="form-group">
                         <label class="form-label">Leave Type</label>
-                        <select class="form-control" id="leaveType">
-                            <option value="annual">Annual Leave</option>
-                            <option value="sick">Sick Leave</option>
-                            <option value="casual">Casual Leave</option>
-                            <option value="maternity">Maternity Leave</option>
-                        </select>
+                        <div class="manual-leave-type" id="manualLeaveType">
+                            <input type="text" class="form-control" id="customLeaveType" placeholder="Enter your leave type" required>
+                        </div>
+                        <input type="hidden" id="leaveType" name="leaveType">
                     </div>
 
                     <div class="form-group">
                         <label class="form-label">Date Range</label>
                         <div class="date-inputs">
-                            <input type="date" class="form-control" id="startDate">
-                            <input type="date" class="form-control" id="endDate">
+                            <input type="date" class="form-control" id="startDate" required>
+                            <input type="date" class="form-control" id="endDate" required>
                         </div>
                     </div>
 
@@ -126,7 +123,7 @@
                     <!-- Step 2: Reason and Attachments -->
                     <div class="form-group">
                         <label class="form-label">Reason for Leave</label>
-                        <textarea class="form-control" id="reason" placeholder="Please provide a reason for your leave"></textarea>
+                        <textarea class="form-control" id="reason" placeholder="Please provide a reason for your leave" required></textarea>
                     </div>
 
                     <div class="form-group" id="attachmentSection" style="display: none;">

@@ -44,6 +44,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 halfDaySelect.disabled = !this.checked;
             });
             
+            // Leave type input
+            const leaveTypeInput = document.getElementById('leaveType');
+            const customLeaveType = document.getElementById('customLeaveType');
+            
+            // Update leave type when custom input changes
+            customLeaveType.addEventListener('input', function() {
+                if (this.value.trim() !== '') {
+                    leaveTypeInput.value = this.value.trim();
+                }
+            });
+            
             // Toast notification function
             function showToast(title, message, type = 'success') {
                 const toastContainer = document.getElementById('toastContainer');
@@ -91,6 +102,22 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('leaveForm').addEventListener('submit', function(e) {
                 e.preventDefault();
                 
+                // Validate form
+                const leaveType = customLeaveType.value.trim();
+                const startDate = startDateInput.value;
+                const endDate = endDateInput.value;
+                const reason = document.getElementById('reason').value;
+                
+                if (!leaveType || !startDate || !endDate || !reason) {
+                    showToast('Error', 'Please fill in all required fields', 'error');
+                    return;
+                }
+                
+                if (new Date(startDate) > new Date(endDate)) {
+                    showToast('Error', 'End date must be after start date', 'error');
+                    return;
+                }
+                
                 // Create and show custom popup
                 const popup = document.createElement('div');
                 popup.className = 'custom-popup';
@@ -100,7 +127,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             <i class="fas fa-check-circle"></i>
                         </div>
                         <h3>Application Submitted</h3>
-                        <p>Your leave application has been submitted successfully!</p>
+                        <p>Your leave application for <strong>${leaveType}</strong> has been submitted successfully!</p>
                         <button class="popup-close-btn">OK</button>
                     </div>
                 `;
@@ -123,6 +150,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Hide form and show apply button
                     applicationForm.style.display = 'none';
                     applyButton.style.display = 'block';
+                    
+                    // Reset form
+                    document.getElementById('leaveForm').reset();
+                    // Reset dates to defaults
+                    startDateInput.value = formatDate(today);
+                    endDateInput.value = formatDate(tomorrow);
                 });
                 
                 // Also close when clicking outside the popup content
