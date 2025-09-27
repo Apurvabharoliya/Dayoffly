@@ -18,7 +18,7 @@
         <button class="icon-btn" title="Apps"><i class="fas fa-th"></i></button>
       </a>
       <a href="../profile/profile.html">
-        <img src="https://ui-avatars.com/api/?name=Employee+User&background=random" alt="User Avatar" class="user-avatar">
+        <img src="https://ui-avatars.com/api/?name=Milli+Jethwani&background=0D8ABC&color=fff" alt="User Avatar" class="user-avatar">
       </a>
     </div>
   </header>
@@ -40,7 +40,7 @@
         <button class="nav-item"><i class="fas fa-chart-line"></i> <span>Reports & Analytics</span></button>
       </a>
       <a href="../LeaveStatus/leaveStatus.html">
-        <button class="nav-item active"><i class="fas fa-list-check"></i> <span>Leave Status</span></button>
+        <button class="nav-item active"><i class="fas fa-list-check"></i> <span>My Leave Status</span></button>
       </a>
       <a href="../profile/profile.html">
         <button class="nav-item"><i class="fas fa-user-cog"></i> <span>Profile</span></button>
@@ -50,10 +50,24 @@
     <!-- Main Content -->
     <main class="content">
       <!-- Last Updated -->
-      <div class="last-updated">
+      <!-- <div class="last-updated">
         <i class="fas fa-sync-alt"></i>
         Last updated: <span id="last-updated-time">Loading...</span>
-      </div>
+      </div> -->
+
+      <!-- Employee Info Section -->
+      <section class="employee-info-section">
+        <img src="https://ui-avatars.com/api/?name=Milli+Jethwani&background=0D8ABC&color=fff&size=80" alt="Employee Avatar" class="employee-avatar">
+        <div class="employee-details">
+          <h2>Milli Jethwani</h2>
+          <p>EMP2001 • Sales Department</p>
+          <p>Sales Executive</p>
+        </div>
+        <div class="leave-balance">
+          <div class="number" id="total-leave-balance">6</div>
+          <div class="label">Leave Balance</div>
+        </div>
+      </section>
 
       <!-- Statistics Section -->
       <section class="stats-grid">
@@ -77,11 +91,11 @@
 
       <!-- Filters Section -->
       <section class="section">
-        <h3 class="section-title">Filter Requests</h3>
+        <h3 class="section-title">Filter My Requests</h3>
         <div class="filters-row">
           <div class="filter-group">
             <label for="search-input">Search</label>
-            <input type="text" id="search-input" placeholder="Search requests...">
+            <input type="text" id="search-input" placeholder="Search my requests...">
           </div>
           
           <div class="filter-group">
@@ -112,11 +126,11 @@
 
       <!-- Leave Requests Table -->
       <section class="section">
-        <h3 class="section-title">Leave Requests</h3>
+        <h3 class="section-title">My Leave Requests</h3>
         <div class="table-container">
           <div id="loading-indicator" class="loading-indicator">
             <div class="spinner"></div>
-            <p>Loading leave requests...</p>
+            <p>Loading my leave requests...</p>
           </div>
           
           <div id="empty-state" class="empty-state" style="display: none;">
@@ -129,7 +143,6 @@
             <thead>
               <tr>
                 <th>Request ID</th>
-                <th>Employee</th>
                 <th>Leave Type</th>
                 <th>Duration</th>
                 <th>Applied Date</th>

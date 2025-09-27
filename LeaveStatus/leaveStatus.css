@@ -1,4 +1,4 @@
-    * {
+* {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
@@ -146,6 +146,57 @@
       overflow-y: auto;
     }
 
+    /* Employee Info Section */
+    .employee-info-section {
+      background: white;
+      padding: 20px;
+      border-radius: 14px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      margin-bottom: 28px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .employee-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid #e5e7eb;
+    }
+
+    .employee-details h2 {
+      font-size: 1.5rem;
+      margin-bottom: 5px;
+      color: #1f2937;
+    }
+
+    .employee-details p {
+      color: #6b7280;
+      margin-bottom: 3px;
+    }
+
+    .leave-balance {
+      margin-left: auto;
+      text-align: center;
+      padding: 15px;
+      background: #f0f9ff;
+      border-radius: 10px;
+      min-width: 150px;
+    }
+
+    .leave-balance .number {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #2563eb;
+    }
+
+    .leave-balance .label {
+      font-size: 0.9rem;
+      color: #6b7280;
+    }
+
     /* Stats Grid */
     .stats-grid {
       display: flex;
@@ -199,14 +250,14 @@
     }
 
     /* Leave Status Specific Styles */
-    .last-updated {
+    /* .last-updated {
       font-size: 14px;
       color: #6b7280;
       display: flex;
       align-items: center;
       gap: 5px;
       margin-bottom: 20px;
-    }
+    } */
 
     .filters-row {
       display: flex;
@@ -440,6 +491,16 @@
 
     /* Responsive adjustments */
     @media (max-width: 768px) {
+      .employee-info-section {
+        flex-direction: column;
+        text-align: center;
+      }
+      
+      .leave-balance {
+        margin-left: 0;
+        margin-top: 15px;
+      }
+      
       .stats-grid {
         flex-direction: column;
       }

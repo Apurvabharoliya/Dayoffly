@@ -1,11 +1,19 @@
-// Sample data for leave requests with only 3 statuses
+// Sample data for leave requests for a single employee
+    const employeeData = {
+      empName: 'Milli Jethwani',
+      empId: 'EMP2001',
+      department: 'Sales',
+      designation: 'Sales Executive',
+      totalLeaveBalance: 6
+    };
+
     const leaveRequests = [
       {
         requestId: 'RID1',
         empName: 'Milli Jethwani',
         empId: 'EMP2001',
         department: 'Sales',
-        designation: 'Executive',
+        designation: 'Sales Executive',
         leaveType: 'Casual Leave',
         startDate: '2025-09-20',
         endDate: '2025-09-22',
@@ -25,92 +33,92 @@
       },
       {
         requestId: 'RID2',
-        empName: 'Apurva Bharoliya',
-        empId: 'EMP2002',
-        department: 'Engineering',
-        designation: 'Sr. Engineer',
+        empName: 'Milli Jethwani',
+        empId: 'EMP2001',
+        department: 'Sales',
+        designation: 'Sales Executive',
         leaveType: 'Sick Leave',
         startDate: '2025-09-05',
         endDate: '2025-09-07',
         totalDays: 3,
         appliedDate: '2025-09-04',
         status: 'approved',
-        balanceBefore: '10',
-        balanceAfter: '7',
-        approverName: 'Meera Kapoor',
-        approverDesignation: 'Team Lead',
+        balanceBefore: '6',
+        balanceAfter: '3',
+        approverName: 'Rohit Mehra',
+        approverDesignation: 'Sales Manager',
         decisionDate: '2025-09-04',
         remarks: 'Medical certificate accepted.',
-        documents: ['Medical_Certificate_Apurva_Bharoliya.pdf'],
+        documents: ['Medical_Certificate_Milli_Jethwani.pdf'],
         logs: [
           {time: '2025-09-04 08:23', entry: 'Applied by employee'},
-          {time: '2025-09-04 14:02', entry: 'Approved by Team Lead'}
+          {time: '2025-09-04 14:02', entry: 'Approved by Sales Manager'}
         ]
       },
       {
         requestId: 'RID3',
-        empName: 'Dhruvi Patel',
-        empId: 'EMP2003',
-        department: 'HR',
-        designation: 'HR Executive',
+        empName: 'Milli Jethwani',
+        empId: 'EMP2001',
+        department: 'Sales',
+        designation: 'Sales Executive',
         leaveType: 'Work From Home',
         startDate: '2025-09-15',
         endDate: '2025-09-15',
         totalDays: 1,
         appliedDate: '2025-09-14',
         status: 'declined',
-        balanceBefore: '4',
-        balanceAfter: '4',
-        approverName: 'Anil Verma',
-        approverDesignation: 'HR Manager',
+        balanceBefore: '6',
+        balanceAfter: '6',
+        approverName: 'Rohit Mehra',
+        approverDesignation: 'Sales Manager',
         decisionDate: '2025-09-14',
         remarks: 'Team needs on-site presence that day.',
         documents: [],
         logs: [
           {time: '2025-09-14 11:20', entry: 'Applied by employee'},
-          {time: '2025-09-14 13:30', entry: 'Declined by HR Manager'}
+          {time: '2025-09-14 13:30', entry: 'Declined by Sales Manager'}
         ]
       },
       {
         requestId: 'RID4',
-        empName: 'Het Patel',
-        empId: 'EMP2004',
-        department: 'Finance',
-        designation: 'Analyst',
+        empName: 'Milli Jethwani',
+        empId: 'EMP2001',
+        department: 'Sales',
+        designation: 'Sales Executive',
         leaveType: 'Earned Leave',
         startDate: '2025-09-25',
         endDate: '2025-09-28',
         totalDays: 4,
         appliedDate: '2025-09-18',
         status: 'approved',
-        balanceBefore: '12',
-        balanceAfter: '8',
-        approverName: 'Kavita Rao',
-        approverDesignation: 'Finance Manager',
+        balanceBefore: '6',
+        balanceAfter: '2',
+        approverName: 'Rohit Mehra',
+        approverDesignation: 'Sales Manager',
         decisionDate: '2025-09-19',
         remarks: 'Approved as per policy.',
         documents: [],
         logs: [
           {time: '2025-09-18 09:00', entry: 'Applied by employee'},
-          {time: '2025-09-19 10:30', entry: 'Approved by Finance Manager'}
+          {time: '2025-09-19 10:30', entry: 'Approved by Sales Manager'}
         ]
       },
       {
         requestId: 'RID5',
-        empName: 'Jeal Rajpal',
-        empId: 'EMP2005',
-        department: 'IT',
-        designation: 'Software Engineer',
+        empName: 'Milli Jethwani',
+        empId: 'EMP2001',
+        department: 'Sales',
+        designation: 'Sales Executive',
         leaveType: 'Casual Leave',
         startDate: '2025-09-30',
         endDate: '2025-10-02',
         totalDays: 3,
         appliedDate: '2025-09-20',
         status: 'pending',
-        balanceBefore: '8',
-        balanceAfter: '5',
-        approverName: 'Rajesh Sharma',
-        approverDesignation: 'Project Manager',
+        balanceBefore: '6',
+        balanceAfter: '3',
+        approverName: 'Rohit Mehra',
+        approverDesignation: 'Sales Manager',
         decisionDate: '--',
         remarks: 'Under review',
         documents: [],
@@ -178,6 +186,9 @@
       animateCount(document.getElementById('pending-requests'), pendingRequests);
       animateCount(document.getElementById('approved-requests'), approvedRequests);
       animateCount(document.getElementById('declined-requests'), declinedRequests);
+      
+      // Update leave balance
+      document.getElementById('total-leave-balance').textContent = employeeData.totalLeaveBalance;
     }
 
     // Animation function (same as in EmployeeDashboard.js)
@@ -209,9 +220,7 @@
         const searchTerm = currentSearch.toLowerCase();
         filtered = filtered.filter(req => 
           req.requestId.toLowerCase().includes(searchTerm) ||
-          req.empName.toLowerCase().includes(searchTerm) ||
-          req.leaveType.toLowerCase().includes(searchTerm) ||
-          req.department.toLowerCase().includes(searchTerm)
+          req.leaveType.toLowerCase().includes(searchTerm)
         );
       }
       
@@ -336,11 +345,6 @@
             <td>
               <div class="font-semibold">${req.requestId}</div>
             </td>
-            <td>
-              <div class="font-semibold">${req.empName}</div>
-              <div class="employee-info">${req.empId} • ${req.department}</div>
-              <div class="employee-info">${req.designation}</div>
-            </td>
             <td>${req.leaveType}</td>
             <td>
               <div>${formatDate(req.startDate)} — ${formatDate(req.endDate)}</div>
@@ -393,30 +397,56 @@
               nextRow.remove();
               btn.innerHTML = '<i class="fas fa-chevron-down"></i> Details';
             } else {
+              // Remove any existing details row
+              document.querySelectorAll('.details-row').forEach(r => r.remove());
+              
+              // Reset all buttons
+              document.querySelectorAll('.details-btn').forEach(b => {
+                b.innerHTML = '<i class="fas fa-chevron-down"></i> Details';
+              });
+              
               // Create details row
               const detailsRow = document.createElement('tr');
-              detailsRow.className = 'details-row';
+              detailsRow.classList.add('details-row');
               detailsRow.innerHTML = `
-                <td colspan="8">
+                <td colspan="7">
                   <div class="details-panel">
                     <div class="details-grid">
                       <div class="detail-section">
-                        <h4><i class="fas fa-user-check"></i> Approver Details</h4>
-                        <div class="text-sm font-medium mb-1">${request.approverName}</div>
-                        <div class="employee-info mb-2">${request.approverDesignation}</div>
-                        <div class="employee-info">Decision Date: ${request.decisionDate || '--'}</div>
-                        <div class="mt-3">
-                          <div class="employee-info mb-1">Remarks:</div>
-                          <div class="text-sm bg-gray-50 p-2 rounded">${request.remarks || 'No remarks provided'}</div>
+                        <h4><i class="fas fa-info-circle"></i> Request Details</h4>
+                        <div class="grid grid-cols-2 gap-2 text-sm">
+                          <div>Request ID:</div><div class="font-semibold">${request.requestId}</div>
+                          <div>Leave Type:</div><div class="font-semibold">${request.leaveType}</div>
+                          <div>Duration:</div><div class="font-semibold">${request.totalDays} day${request.totalDays !== 1 ? 's' : ''}</div>
+                          <div>Applied Date:</div><div class="font-semibold">${formatDate(request.appliedDate)}</div>
                         </div>
                       </div>
+                      
                       <div class="detail-section">
-                        <h4><i class="fas fa-file-alt"></i> Supporting Documents</h4>
+                        <h4><i class="fas fa-user-check"></i> Approval Details</h4>
+                        <div class="grid grid-cols-2 gap-2 text-sm">
+                          <div>Approver:</div><div class="font-semibold">${request.approverName}</div>
+                          <div>Designation:</div><div class="font-semibold">${request.approverDesignation}</div>
+                          <div>Decision Date:</div><div class="font-semibold">${formatDate(request.decisionDate)}</div>
+                          <div>Status:</div><div><span class="status-badge ${statusMap[request.status].class}">${statusMap[request.status].text}</span></div>
+                        </div>
+                      </div>
+                      
+                      <div class="detail-section">
+                        <h4><i class="fas fa-sticky-note"></i> Remarks</h4>
+                        <p class="text-sm">${request.remarks}</p>
+                      </div>
+                      
+                      <div class="detail-section">
+                        <h4><i class="fas fa-paperclip"></i> Documents</h4>
                         ${formatDocs(request.documents)}
                       </div>
+                      
                       <div class="detail-section">
-                        <h4><i class="fas fa-history"></i> Request History</h4>
-                        <ul class="text-sm text-gray-600">${formatLogs(request.logs)}</ul>
+                        <h4><i class="fas fa-history"></i> Activity Log</h4>
+                        <ul class="text-sm max-h-40 overflow-y-auto">
+                          ${formatLogs(request.logs)}
+                        </ul>
                       </div>
                     </div>
                   </div>
@@ -425,8 +455,6 @@
               
               // Insert after the current row
               row.parentNode.insertBefore(detailsRow, row.nextSibling);
-              
-              // Change button text
               btn.innerHTML = '<i class="fas fa-chevron-up"></i> Hide';
             }
           });
@@ -434,57 +462,21 @@
         
         // Render pagination
         renderPagination(totalItems);
-      }, 500); // Simulate network delay
+      }, 500); // Simulated loading delay
     }
 
-    // Export data as CSV
-    function exportToCSV() {
-      const filteredRequests = getFilteredAndSortedRequests();
+    // Initialize the page
+    function init() {
+      // Update last updated time
+      // document.getElementById('last-updated-time').textContent = new Date().toLocaleString();
       
-      if (filteredRequests.length === 0) {
-        alert('No data to export!');
-        return;
-      }
-      
-      // Create CSV content
-      const headers = ['Request ID', 'Employee', 'Leave Type', 'Start Date', 'End Date', 'Total Days', 'Applied Date', 'Status'];
-      let csvContent = headers.join(',') + '\n';
-      
-      filteredRequests.forEach(req => {
-        const row = [
-          req.requestId,
-          req.empName,
-          req.leaveType,
-          req.startDate,
-          req.endDate,
-          req.totalDays,
-          req.appliedDate,
-          statusMap[req.status].text
-        ];
-        csvContent += row.join(',') + '\n';
-      });
-      
-      // Create download link
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.setAttribute('href', url);
-      link.setAttribute('download', `leave_requests_${new Date().toISOString().slice(0, 10)}.csv`);
-      link.style.visibility = 'hidden';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
-
-    // Initialize the dashboard
-    function initDashboard() {
+      // Update statistics
       updateStats();
+      
+      // Render table
       renderTable();
       
-      // Update last updated time
-      document.getElementById('last-updated-time').textContent = new Date().toLocaleString();
-      
-      // Add event listeners
+      // Add event listeners to filters
       document.getElementById('filter-status').addEventListener('change', (e) => {
         currentFilter = e.target.value;
         currentPage = 1;
@@ -502,8 +494,11 @@
         renderTable();
       });
       
-      document.getElementById('export-btn').addEventListener('click', exportToCSV);
+      // Export button
+      document.getElementById('export-btn').addEventListener('click', () => {
+        alert('Export functionality would be implemented here');
+      });
     }
 
     // Initialize when DOM is loaded
-    document.addEventListener('DOMContentLoaded', initDashboard);
+    document.addEventListener('DOMContentLoaded', init);
