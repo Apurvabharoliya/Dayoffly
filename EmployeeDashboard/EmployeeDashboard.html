@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Employee Dashboard</title>
+  <link rel="icon" href="/images/rounded logo for Day.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="EmployeeDashboard.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="logo">Dayoffly</div>
+    <div class="header-actions">
+      <a href="../Calendar/calendar.html">
+        <button class="icon-btn" title="Apps"><i class="fas fa-th"></i></button>
+      </a>
+      <a href="../profile/profile.html">
+        <img src="https://ui-avatars.com/api/?name=Employee+User&background=random" alt="User Avatar" class="user-avatar">
+      </a>
+    </div>
+  </header>
+
+  <!-- Layout -->
+  <div class="main-container">
+    <!-- Sidebar -->  
+    <nav class="sidebar">
+      <button class="nav-item active"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></button>
+      <a href="../leaveapplication/leaveapplication.html">
+        <button class="nav-item"><i class="fas fa-folder-open"></i> <span>Leave Applications</span></button>
+      </a>
+      <a href="../Calendar/calendar.html">
+        <button class="nav-item"><i class="fas fa-calendar-alt"></i> <span>Calendar</span></button>
+      </a>
+      <a href="../Report&analytics/report&analytics.html">
+        <button class="nav-item"><i class="fas fa-chart-line"></i> <span>Reports & Analytics</span></button>
+      </a>
+      <a href="../LeaveStatus/leaveStatus.html">
+        <button class="nav-item"><i class="fas fa-list-check"></i> <span>Leave Status</span></button>
+      </a>
+      <a href="../profile/profile.html">
+        <button class="nav-item"><i class="fas fa-user-cog"></i> <span>Profile</span></button>
+      </a>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="content">
+      <!-- Charts Section -->
+      <section class="charts-row">
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3>Monthly Overview</h3>
+            <select id="attendanceType" class="chart-dropdown">
+              <option value="present">Attendance</option>
+              <option value="leaves">Leaves</option>
+            </select>
+          </div>
+          <div class="chart-container">
+            <canvas id="monthlyAttendanceChart"></canvas>
+          </div>
+        </div>
+        <div class="chart-card">
+          <h3>Leave Balance</h3>
+          <div class="chart-container">
+            <canvas id="attendancePieChart"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- Stats Section -->
+      <section class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-number" id="carryForward">0</div>
+          <div class="stat-label">Carry Forward</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="totalLeaves">0</div>
+          <div class="stat-label">Leaves Taken</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="upcomingHolidays">0</div>
+          <div class="stat-label">Upcoming Holidays</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="totalAllowed">20</div>
+          <div class="stat-label">Total Allowed Leaves</div>
+        </div>
+      </section>
+
+      <!-- Upcoming Holidays Section -->
+      <section class="section">
+        <h3 class="section-title">Upcoming Holidays</h3>
+        <!-- Filter -->
+        <div class="holiday-filter">
+          <label for="holidayFilter">Show:</label>
+          <select id="holidayFilter">
+            <option value="upcoming">Upcoming</option>
+            <option value="3months">Next 3 Months</option>
+            <option value="6months">Next 6 Months</option>
+            <option value="all">All Holidays</option>
+          </select>
+        </div>
+        <!-- Holiday list -->
+        <ul class="holiday-list" id="holidayList"></ul>
+      </section>
+    </main>
+  </div>
+
+  <!-- Custom JS -->
+  <script src="EmployeeDashboard.js"></script>
+</body>
+
+</html>

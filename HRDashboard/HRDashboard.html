@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dayoffly - HR Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="HRDashboard.css">
+  <link rel="icon" href="/images/rounded logo for Day.png">
+</head>
+
+<body>
+  <div class="container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="logo">
+        <h2><i class="fas fa-calendar-alt"></i> Dayoffly</h2>
+      </div>
+      <div class="nav-item active">
+        <i class="fas fa-home"></i> Dashboard
+      </div>
+      <div class="nav-item">
+        <a href="../EmployeesHR/employeeHR.html" style="color: inherit; text-decoration: none;">
+          <i class="fas fa-users"></i> Employees
+        </a>
+      </div>
+      <div class="nav-item">
+        <a href="../LeaveRequestHR/leaveRequestHR.html" style="color: inherit; text-decoration: none;">
+          <i class="fas fa-calendar-check"></i> Leave Requests
+        </a>
+      </div>
+      <div class="nav-item">
+        <a href="../AnalyticsHR/analyticsHR.html" style="color: inherit; text-decoration: none;">
+          <i class="fas fa-chart-bar"></i> Analytics
+        </a>
+      </div>
+      <div class="nav-item">
+        <a href="../SettingsHR/settingsHR.html" style="color: inherit; text-decoration: none;">
+          <i class="fas fa-cog"></i> Settings
+        </a>
+      </div>
+      <div class="nav-item">
+        <a href="../LogoutHR/logoutHR.html" style="color: inherit; text-decoration: none;">
+          <i class="fas fa-sign-out-alt"></i> Logout
+        </a>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <header>
+        <div>
+          <h1>HR Dashboard</h1>
+          <p>Manage leave requests and monitor team activity</p>
+        </div>
+        <div class="user-info">
+          <div class="user-avatar">HR</div>
+          <div>
+            <div>Sarah Johnson</div>
+            <div style="font-size: 0.8rem; color: var(--gray);">HR Manager</div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Analytics Section Moved to Top -->
+      <section class="analytics">
+        <h2>Leave Analytics</h2>
+        <div class="charts">
+          <div class="chart-container">
+            <h3>Leave Types Distribution</h3>
+            <canvas id="leaveTypeChart"></canvas>
+          </div>
+          <div class="chart-container">
+            <h3>Monthly Trends</h3>
+            <canvas id="monthlyTrendChart"></canvas>
+          </div>
+        </div>
+      </section>
+      <br />
+      <br />
+      <section class="summary">
+        <div class="card total">
+          <div class="card-icon">
+            <i class="fas fa-clipboard-list"></i>
+          </div>
+          <h3 id="total-count"></h3>
+          <p>Total Requests</p>
+        </div>
+        <div class="card pending">
+          <div class="card-icon">
+            <i class="fas fa-clock"></i>
+          </div>
+          <h3 id="pending-count"></h3>
+          <p>Pending Requests</p>
+        </div>
+        <div class="card approved">
+          <div class="card-icon">
+            <i class="fas fa-check-circle"></i>
+          </div>
+          <h3 id="approved-count"></h3>
+          <p>Approved Requests</p>
+        </div>
+        <div class="card rejected">
+          <div class="card-icon">
+            <i class="fas fa-times-circle"></i>
+          </div>
+          <h3 id="rejected-count"></h3>
+          <p>Rejected Requests</p>
+        </div>
+      </section>
+      <br />
+
+      <section class="requests">
+        <div class="section-header">
+          <h2>Recent Leave Requests</h2>
+          <div class="quick-actions">
+            <a href="../LeaveRequestHR/leaveRequestHR.html" class="view-all-btn">
+              <i class="fas fa-external-link-alt"></i> Manage All Requests
+            </a>
+          </div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Employee</th>
+              <th>Type</th>
+              <th>Dates</th>
+              <th>Duration</th>
+              <th>Status</th>
+              <th>Details</th>
+            </tr>
+          </thead>
+          <tbody id="request-table">
+            <!-- JS will populate this -->
+          </tbody>
+        </table>
+        <div class="table-footer">
+          <p>Displaying recent requests. <a href="../LeaveRequestHR/leaveRequestHR.html">Access full management
+              panel</a> for comprehensive oversight.</p>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- Modern Confirmation Modal -->
+  <div id="confirmationModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modalTitle">Confirm Action</h3>
+        <span class="close-modal">&times;</span>
+      </div>
+      <div class="modal-body">
+        <p id="modalMessage">Are you sure you want to proceed?</p>
+      </div>
+      <div class="modal-footer">
+        <button id="modalCancelBtn" class="btn-secondary">Cancel</button>
+        <button id="modalConfirmBtn" class="btn-primary">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="HRDashboard.js"></script>
+</body>
+
+</html>

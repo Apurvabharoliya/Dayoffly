@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendar - Leave Management System</title>
+    <link rel="icon" href="/images/rounded logo for Day.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/CSS/calendar.css">
+</head>
+<body>
+    <!-- Header from EmployeeDashboard -->
+    <header class="header">
+        <div class="logo">Dayoffly</div>
+        <div class="header-actions">
+            <button class="icon-btn" title="Apps"><i class="fas fa-th"></i></button>
+            <img src="/images/user.png" alt="User Avatar" class="user-avatar">
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Sidebar Navigation from EmployeeDashboard -->
+        <nav class="sidebar">
+            <a href="/HTML/EmployeeDashboard.html">
+                <button class="nav-item"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></button>
+            </a>
+            <a href="/HTML/leaveapplication.html">
+                <button class="nav-item"><i class="fas fa-folder-open"></i> <span>Leave Applications</span></button>
+            </a>
+            <button class="nav-item"><i class="fas fa-chart-line"></i> <span>Reports & Analytics</span></button>
+            <button class="nav-item"><i class="fas fa-list-check"></i> <span>Leave Status</span></button>
+            <a href="/HTML/profile&settingsE.html">
+                <button class="nav-item"><i class="fas fa-user-cog"></i> <span>Profile & Settings</span></button>
+            </a>
+            <button class="nav-item active"><i class="fas fa-calendar-alt"></i> <span>Calendar</span></button>
+            <button class="nav-item"><i class="fas fa-headset"></i> <span>Help & Support</span></button>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="content">
+            <div class="container">
+                <div class="app-content">
+                    <div class="sidebar-cal">
+                        <div class="leave-balance">
+                            <h2 class="balance-title"><i class="fas fa-chart-pie"></i> Leave Balance</h2>
+                            <div class="balance-item">
+                                <div class="balance-type">
+                                    <div class="color-indicator vacation"></div>
+                                    <span>Vacation</span>
+                                </div>
+                                <div class="balance-days">12.5 days</div>
+                            </div>
+                            <div class="balance-item">
+                                <div class="balance-type">
+                                    <div class="color-indicator sick"></div>
+                                    <span>Sick Leave</span>
+                                </div>
+                                <div class="balance-days">8 days</div>
+                            </div>
+                            <div class="balance-item">
+                                <div class="balance-type">
+                                    <div class="color-indicator personal"></div>
+                                    <span>Personal</span>
+                                </div>
+                                <div class="balance-days">3 days</div>
+                            </div>
+                            <div class="balance-item">
+                                <div class="balance-type">
+                                    <div class="color-indicator parental"></div>
+                                    <span>Parental</span>
+                                </div>
+                                <div class="balance-days">15 days</div>
+                            </div>
+                        </div>
+
+                        <div class="quick-actions">
+                            <h2 class="balance-title"><i class="fas fa-bolt"></i> Quick Actions</h2>
+                            <a href="/HTML/leaveapplication.html">
+                                <button class="action-btn"><i class="fas fa-plus"></i> Request Leave</button>
+                            </a>
+                            <button class="action-btn"><i class="fas fa-sync"></i> Sync Calendar</button>
+                        </div>
+
+                        <div class="upcoming-leaves">
+                            <h2 class="balance-title"><i class="fas fa-calendar-check"></i> Upcoming Leaves</h2>
+                            <div class="upcoming-item">
+                                <div class="color-indicator vacation"></div>
+                                <div>
+                                    <div class="upcoming-date">Jul 15 - Jul 19</div>
+                                    <div>Vacation (Approved)</div>
+                                </div>
+                            </div>
+                            <div class="upcoming-item">
+                                <div class="color-indicator public-holiday"></div>
+                                <div>
+                                    <div class="upcoming-date">Jul 4</div>
+                                    <div>Public Holiday</div>
+                                </div>
+                            </div>
+                            <div class="upcoming-item">
+                                <div class="color-indicator personal"></div>
+                                <div>
+                                    <div class="upcoming-date">Aug 5</div>
+                                    <div>Personal Day (Pending)</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="main-content">
+                        <div class="calendar-header">
+                            <div class="month-nav">
+                                <button class="nav-btn" id="prev-month"><i class="fas fa-chevron-left"></i></button>
+                                <h2 class="current-month">June 2025</h2>
+                                <button class="nav-btn" id="next-month"><i class="fas fa-chevron-right"></i></button>
+                            </div>
+                        </div>
+
+                        <!-- Month View -->
+                        <div class="calendar" id="month-calendar">
+                            <div class="weekday">Sun</div>
+                            <div class="weekday">Mon</div>
+                            <div class="weekday">Tue</div>
+                            <div class="weekday">Wed</div>
+                            <div class="weekday">Thu</div>
+                            <div class="weekday">Fri</div>
+                            <div class="weekday">Sat</div>
+
+                            <!-- Calendar days will be generated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="/JS/calendar.js"></script>
+</body>
+</html>

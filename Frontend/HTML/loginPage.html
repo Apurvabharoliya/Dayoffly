@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login | Dayoffly</title>
+  <link rel="icon" href="/images/rounded logo for Day.png">
+
+  <!-- Font Awesome for icons -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+  />
+  <link rel="stylesheet" href="/CSS/loginPage.css" />
+</head>
+<body>
+  <div class="container">
+    <!-- Branding Section -->
+    <div class="branding-section">
+      <h1 class="brand-title">Dayoffly</h1>
+      <p class="brand-tagline">
+        Mark Your Presence,<br />
+        Simplify Your Absence
+      </p>
+      <img
+        src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1000&q=80"
+        alt="Attendance illustration"
+        class="brand-illustration"
+      />
+    </div>
+
+    <!-- Form Section -->
+    <div class="form-section">
+      <form id="loginForm" novalidate>
+        <h2>Create an Account</h2>
+
+        <!-- Email Input -->
+        <div class="input-group">
+          <label for="email">Email</label>
+          <div class="input-wrapper">
+            <i class="fas fa-envelope"></i>
+            <input
+              type="email"
+              id="email"
+              placeholder="Enter your email"
+              required
+            />
+          </div>
+        </div>
+
+        <!-- Password Input -->
+        <div class="input-group">
+          <div class="password-row">
+            <label for="password">Password</label>
+            <a href="#" class="forgot">Forgot?</a>
+          </div>
+          <div class="input-wrapper">
+            <i class="fas fa-lock"></i>
+            <input
+              type="password"
+              id="password"
+              placeholder="Enter your password"
+              required
+            />
+            <button
+              type="button"
+              id="togglePassword"
+              class="toggle-password"
+              aria-label="Show password"
+            >
+              <i class="fas fa-eye"></i>
+            </button>
+          </div>
+        </div>
+        
+        <!-- Role Selection Dropdown -->
+        <div class="input-group">
+          <label for="role">I am a/an</label>
+          <div class="input-wrapper">
+            <i class="fas fa-user-tag"></i>
+            <select id="role" required>
+              <option value="">Select your role</option>
+              <option value="employee">Employee</option>
+              <option value="hr">HR Manager</option>
+              <option value="cmo">CMO</option>
+            </select>
+          </div>
+        </div>
+        
+        <!-- Employee Details (initially hidden) -->
+        <div id="employeeDetails" class="role-section hidden">
+          <h3>Employee Information</h3>
+          
+          <div class="input-group">
+            <label for="department">Department</label>
+            <div class="input-wrapper">
+              <i class="fas fa-building"></i>
+              <select id="department" required>
+                <option value="">Select department</option>
+                <option value="it">IT</option>
+                <option value="engineering">Engineering</option>
+                <option value="marketing">Marketing</option>
+                <option value="sales">Sales</option>
+                <option value="finance">Finance</option>
+                <option value="operations">Operations</option>
+                <option value="cmo">CMO Office</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="input-group">
+            <label for="jobLevel">Job Level</label>
+            <div class="input-wrapper">
+              <i class="fas fa-chart-line"></i>
+              <select id="jobLevel" required>
+                <option value="">Select job level</option>
+                <option value="intern">Intern</option>
+                <option value="junior">Junior</option>
+                <option value="mid">Mid-Level</option>
+                <option value="senior">Senior</option>
+                <option value="lead">Team Lead</option>
+                <option value="manager">Manager</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="input-group">
+            <label for="jobRole">Job Role</label>
+            <div class="input-wrapper">
+              <i class="fas fa-briefcase"></i>
+              <input
+                type="text"
+                id="jobRole"
+                placeholder="Enter your job role (e.g., Software Engineer)"
+                required
+              />
+            </div>
+          </div>
+        </div>
+        
+        <!-- HR Details (initially hidden) -->
+        <div id="hrDetails" class="role-section hidden">
+          <h3>HR Manager Information</h3>
+          
+          <div class="input-group">
+            <label for="hrDepartment">Department</label>
+            <div class="input-wrapper">
+              <i class="fas fa-building"></i>
+              <select id="hrDepartment" required>
+                <option value="">Select department</option>
+                <option value="engineering">Engineering</option>
+                <option value="marketing">Marketing</option>
+                <option value="sales">Sales</option>
+                <option value="finance">Finance</option>
+                <option value="it">IT</option>
+                <option value="hr">Human Resources</option>
+                <option value="operations">Operations</option>
+                <option value="cmo">CMO Office</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="input-group">
+            <label for="hrLevel">Job Level</label>
+            <div class="input-wrapper">
+              <i class="fas fa-chart-line"></i>
+              <select id="hrLevel" required>
+                <option value="">Select job level</option>
+                <option value="specialist">HR Specialist</option>
+                <option value="generalist">HR Generalist</option>
+                <option value="manager">HR Manager</option>
+                <option value="director">HR Director</option>
+                <option value="vp">VP of HR</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        
+        <!-- CMO Details (initially hidden) -->
+        <div id="cmoDetails" class="role-section hidden">
+          <h3>CMO Information</h3>
+          
+          <div class="input-group">
+            <label for="cmoDepartment">Department</label>
+            <div class="input-wrapper">
+              <i class="fas fa-building"></i>
+              <select id="cmoDepartment" required>
+                <option value="">Select department</option>
+                <option value="marketing">Marketing</option>
+                <option value="brand">Brand Management</option>
+                <option value="digital">Digital Marketing</option>
+                <option value="product">Product Marketing</option>
+                <option value="growth">Growth</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="input-group">
+            <label for="cmoLevel">Job Level</label>
+            <div class="input-wrapper">
+              <i class="fas fa-chart-line"></i>
+              <select id="cmoLevel" required>
+                <option value="">Select job level</option>
+                <option value="manager">Marketing Manager</option>
+                <option value="director">Marketing Director</option>
+                <option value="senior_director">Senior Director</option>
+                <option value="vp">VP of Marketing</option>
+                <option value="cmo">Chief Marketing Officer</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Submit -->
+        <button id="createAccountBtn" type="submit" class="btn-primary">
+          SignIn
+        </button>
+
+        <p class="login-link">
+          Already have an account?
+          <a class="Loginlink" href="#">Login</a>
+        </p>
+      </form>
+    </div>
+  </div>
+
+  <script src="/JS/loginPage.js"></script>
+</body>
+</html>

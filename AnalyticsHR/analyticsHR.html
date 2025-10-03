@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dayoffly - HR Analytics</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="/HRDashboard/HRDashboard.css">
+  <link rel="stylesheet" href="analytics.css">
+</head>
+
+<body>
+  <div class="container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="logo">
+        <h2><i class="fas fa-calendar-alt"></i> Dayoffly</h2>
+      </div>
+      <a href="../HRDashboard/HRDashboard.html" style="color: inherit; text-decoration: none;">
+        <div class="nav-item">
+          <i class="fas fa-home"></i> Dashboard
+        </div>
+      </a>
+      <a href="../EmployeesHR/employeeHR.html" style="color: inherit; text-decoration: none;">
+        <div class="nav-item">
+          <i class="fas fa-users"></i> Employees
+        </div>
+      </a>
+      <a href="../LeaveRequestHR/leaveRequestHR.html" style="color: inherit; text-decoration: none;">
+        <div class="nav-item">
+          <i class="fas fa-calendar-check"></i> Leave Requests
+        </div>
+      </a>
+      <a href="/hr/analytics" style="color: inherit; text-decoration: none;">
+        <div class="nav-item active">
+          <i class="fas fa-chart-bar"></i> Analytics
+        </div>
+      </a>
+      <a href="../SettingsHR/settingsHR.html" style="color: inherit; text-decoration: none;">
+        <div class="nav-item">
+          <i class="fas fa-cog"></i> Settings
+        </div>
+      </a>
+      <a href="../LogoutHR/logoutHR.html" style="color: inherit; text-decoration: none;">
+        <div class="nav-item">
+          <i class="fas fa-sign-out-alt"></i> Logout
+        </div>
+      </a>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <header>
+        <div>
+          <h1>HR Analytics</h1>
+          <p>Insights and trends for HR department leave management</p>
+        </div>
+        <div class="user-info">
+          <div class="user-avatar">HR</div>
+          <div>
+            <div>Sarah Johnson</div>
+            <div style="font-size: 0.8rem; color: var(--gray);">HR Manager</div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Summary Cards -->
+      <section class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-number" id="total-leaves">
+            <i class="fas fa-spinner fa-spin loading-state"></i>
+            <span class="value">--</span>
+          </div>
+          <div class="stat-label">Total Leaves This Year</div>
+          <p style="font-size: 0.8rem; color: var(--gray); margin-top: 5px;" id="total-leaves-trend">
+            <i class="fas fa-spinner fa-spin loading-state"></i>
+            <!-- <span class="value">Loading...</span> -->
+          </p>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-number" id="avg-duration">--</div>
+          <div class="stat-label">Avg. Duration (Days)</div>
+          <!-- <p style="font-size: 0.8rem; color: var(--gray); margin-top: 5px;" id="avg-duration-trend">Loading...</p> -->
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-number" id="approval-rate">--</div>
+          <div class="stat-label">Approval Rate</div>
+          <!-- <p style="font-size: 0.8rem; color: var(--gray); margin-top: 5px;" id="approval-rate-trend">Loading...</p> -->
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-number" id="on-leave">--</div>
+          <div class="stat-label">On Leave Now</div>
+          <p style="font-size: 0.8rem; color: var(--gray); margin-top: 5px;">Current week</p>
+        </div>
+      </section>
+
+      <!-- Filters Section -->
+      <section class="requests">
+        <div class="section-header">
+          <h2>Leave Analytics Dashboard</h2>
+        </div>
+        <div class="filter-section">
+          <div class="filter-group">
+            <span class="filter-label">Period:</span>
+            <select id="periodFilter">
+              <option value="6months">Last 6 Months</option>
+              <option value="4quarters">Last 4 Quarters</option>
+              <option value="3years">Last 3 Years</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <span class="filter-label">Department:</span>
+            <select id="departmentFilter">
+              <option value="all">All Departments</option>
+              <!-- Department options will be populated dynamically -->
+            </select>
+          </div>
+          <div class="filter-group">
+            <span class="filter-label">Employee:</span>
+            <select id="employeeFilter">
+              <option value="all">All Employees</option>
+              <!-- Employee options will be populated dynamically -->
+            </select>
+          </div>
+          <div class="filter-group">
+            <span class="filter-label">View:</span>
+            <select id="viewFilter">
+              <option value="leaves">Leaves Taken</option>
+              <option value="duration">Leave Duration</option>
+              <option value="approvals">Approval Trends</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <!-- Charts Section -->
+      <section class="analytics">
+        <h2>Analytics Overview</h2>
+        <div class="charts-row">
+          <div class="chart-card">
+            <h3>Leave Types Distribution</h3>
+            <div class="chart-container">
+              <canvas id="leaveTypeChart"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-card">
+            <h3>Monthly Trends</h3>
+            <div class="chart-container">
+              <canvas id="monthlyTrendChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="charts-row">
+          <div class="chart-card">
+            <h3>Department-wise Distribution</h3>
+            <div class="chart-container">
+              <canvas id="departmentChart"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-card">
+            <h3>Approval Rate Over Time</h3>
+            <div class="chart-container">
+              <canvas id="approvalChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Employee Leave Table -->
+      <section class="requests">
+        <div class="section-header">
+          <h2>Employee Leave Summary</h2>
+        </div>
+        <div id="employee-table-container">
+          <table id="employee-leave-table">
+            <thead>
+              <tr>
+                <th>Employee</th>
+                <th>Department</th>
+                <th>Leaves Taken</th>
+                <th>Remaining Balance</th>
+                <th>Utilization Rate</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td colspan="5" class="empty-state">
+                  <i class="fas fa-spinner fa-spin"></i>
+                  <div>Loading employee data...</div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script src="analytics.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dayoffly - Leave Requests</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="leaveRequest.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="logo">
+        <h2><i class="fas fa-calendar-alt"></i> Dayoffly</h2>
+      </div>
+      <div class="nav-item">
+        <a href="../HRDashboard/HRDashboard.html" style="color: inherit; text-decoration: none;">
+        <i class="fas fa-home"></i> Dashboard
+        </a>
+      </div>
+      <div class="nav-item">
+        <a href="../EmployeesHR/employeeHR.html" style="color: inherit; text-decoration: none;">
+        <i class="fas fa-users"></i> Employees
+        </a>
+      </div>
+      <div class="nav-item active">
+        <a href="../LeaveRequestHR/leaveRequestHR.html" style="color: inherit; text-decoration: none;">
+        <i class="fas fa-calendar-check"></i> Leave Requests
+        </a>
+      </div>
+      <div class="nav-item">
+        <a href="../AnalyticsHR/analyticsHR.html" style="color: inherit; text-decoration: none;">
+          <i class="fas fa-chart-bar"></i> Analytics
+        </a>
+      </div>
+      <div class="nav-item">
+        <a href="../SettingsHR/settingsHR.html" style="color: inherit; text-decoration: none;">
+        <i class="fas fa-cog"></i> Settings
+        </a>
+      </div>
+      <div class="nav-item">
+        <a href="../LogoutHR/logoutHR.html" style="color: inherit; text-decoration: none;">
+        <i class="fas fa-sign-out-alt"></i> Logout
+        </a>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <header>
+        <div>
+          <h1>Leave Requests</h1>
+          <p>Manage and review employee leave requests</p>
+        </div>
+        <div class="user-info">
+          <div class="user-avatar">HR</div>
+          <div>
+            <div>Sarah Johnson</div>
+            <div style="font-size: 0.8rem; color: var(--gray);">HR Manager</div>
+          </div>
+        </div>
+      </header>
+
+      <section class="summary">
+        <div class="card total">
+          <div class="card-icon">
+            <i class="fas fa-clipboard-list"></i>
+          </div>
+          <h3 id="total-count">0</h3>
+          <p>Total Requests</p>
+        </div>
+        <div class="card pending">
+          <div class="card-icon">
+            <i class="fas fa-clock"></i>
+          </div>
+          <h3 id="pending-count">0</h3>
+          <p>Pending Requests</p>
+        </div>
+        <div class="card approved">
+          <div class="card-icon">
+            <i class="fas fa-check-circle"></i>
+          </div>
+          <h3 id="approved-count">0</h3>
+          <p>Approved Requests</p>
+        </div>
+        <div class="card rejected">
+          <div class="card-icon">
+            <i class="fas fa-times-circle"></i>
+          </div>
+          <h3 id="rejected-count">0</h3>
+          <p>Rejected Requests</p>
+        </div>
+      </section>
+
+      <section class="requests">
+        <div class="section-header">
+          <h2>All Leave Requests</h2>
+          <div class="filter-section">
+            <div class="filter-options">
+              <button class="filter-btn active" data-filter="all">All</button>
+              <button class="filter-btn" data-filter="pending">Pending</button>
+              <button class="filter-btn" data-filter="approved">Approved</button>
+              <button class="filter-btn" data-filter="rejected">Rejected</button>
+            </div>
+            <div class="search-box">
+              <input type="text" id="search-input" placeholder="Search employees...">
+              <i class="fas fa-search"></i>
+            </div>
+          </div>
+        </div>
+        
+        <table>
+          <thead>
+            <tr>
+              <th>Employee</th>
+              <th>Type</th>
+              <th>Dates</th>
+              <th>Duration</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="request-table">
+            <!-- JS will populate this -->
+          </tbody>
+        </table>
+
+        <!-- Pagination -->
+        <div class="pagination-container">
+          <div class="pagination-info">
+            Showing <span id="showing-start">0</span>-<span id="showing-end">0</span> of <span id="total-items">0</span> requests
+          </div>
+          <div class="pagination-controls">
+            <button id="prev-page" class="pagination-btn" disabled>
+              <i class="fas fa-chevron-left"></i> Previous
+            </button>
+            <div class="page-numbers" id="page-numbers">
+              <!-- Page numbers will be generated here -->
+            </div>
+            <button id="next-page" class="pagination-btn">
+              Next <i class="fas fa-chevron-right"></i>
+            </button>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- Enhanced View Request Modal -->
+  <div class="modal" id="viewModal">
+    <div class="modal-content view-modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title">Leave Request Details</h2>
+        <button class="close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="detail-section">
+          <h3>Employee Information</h3>
+          <div class="detail-grid">
+            <div class="detail-item">
+              <span class="detail-label">Employee Name:</span>
+              <span class="detail-value" id="modal-employee">-</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Department:</span>
+              <span class="detail-value" id="modal-department">-</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Designation:</span>
+              <span class="detail-value" id="modal-designation">-</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Email:</span>
+              <span class="detail-value" id="modal-email">-</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="detail-section">
+          <h3>Leave Information</h3>
+          <div class="detail-grid">
+            <div class="detail-item">
+              <span class="detail-label">Leave Type:</span>
+              <span class="detail-value" id="modal-type">-</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Duration:</span>
+              <span class="detail-value" id="modal-duration">-</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Start Date:</span>
+              <span class="detail-value" id="modal-start-date">-</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">End Date:</span>
+              <span class="detail-value" id="modal-end-date">-</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="detail-section">
+          <h3>Additional Details</h3>
+          <div class="detail-item">
+            <span class="detail-label">Reason:</span>
+            <span class="detail-value" id="modal-reason">-</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Contact During Leave:</span>
+            <span class="detail-value" id="modal-contact">-</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Applied On:</span>
+            <span class="detail-value" id="modal-applied-on">-</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Approver:</span>
+            <span class="detail-value" id="modal-approver">-</span>
+          </div>
+        </div>
+        
+        <div class="detail-section">
+          <h3>Status</h3>
+          <div class="detail-item">
+            <span class="detail-label">Current Status:</span>
+            <span class="detail-value">
+              <span id="modal-status-badge" class="status-badge">-</span>
+            </span>
+          </div>
+        </div>
+        
+        <div id="change-action-section" class="change-action-section" style="display: none;">
+          <h3>Change Action</h3>
+          <p>Current action: <strong id="current-status">-</strong></p>
+          <p>If you want to change the action taken on this request, click the button below:</p>
+          <div class="change-action-buttons">
+            <button class="btn btn-warning" id="change-action-btn">
+              <i class="fas fa-exchange-alt"></i> Change Action
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="closeViewModal">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Enhanced Confirmation Modal -->
+  <div class="modal" id="confirmationModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title" id="modalTitle">Confirm Action</h2>
+        <button class="close-modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p id="modalMessage">Are you sure you want to proceed with this action?</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="modalCancelBtn">Cancel</button>
+        <button class="btn" id="modalConfirmBtn">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="leaveRequest.js"></script>
+</body>
+</html>

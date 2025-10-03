@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login | Dayoffly</title>
+  <link rel="icon" href="/images/rounded logo for Day.png">
+
+  <!-- Font Awesome for icons -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+  />
+  <link rel="stylesheet" href="LoginPage.css" />
+</head>
+<body>
+  <div class="container">
+    <!-- Branding Section -->
+    <div class="branding-section">
+      <h1 class="brand-title">Dayoffly</h1>
+      <p class="brand-tagline">
+        Mark Your Presence,<br />
+        Simplify Your Absence
+      </p>
+      <img
+        src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1000&q=80"
+        alt="Attendance illustration"
+        class="brand-illustration"
+      />
+    </div>
+
+    <!-- Form Section -->
+    <div class="form-section">
+      <form id="loginForm" novalidate>
+        <h2>Login to Dayoffly</h2>
+
+        <!-- User ID Input -->
+        <div class="input-group">
+          <label for="userId">User ID</label>
+          <div class="input-wrapper">
+            <i class="fas fa-id-card"></i>
+            <input
+              type="text"
+              id="userId"
+              name="userId"
+              placeholder="Enter your user ID"
+              required
+            />
+          </div>
+          <div class="error-message" id="userIdError">Please enter a valid user ID</div>
+        </div>
+
+        <!-- Password Input -->
+        <div class="input-group">
+          <div class="password-row">
+            <label for="password">Password</label>
+            <a href="#" class="forgot">Forgot Password?</a>
+          </div>
+          <div class="input-wrapper">
+            <i class="fas fa-lock"></i>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              placeholder="Enter your password"
+              required
+            />
+            <button
+              type="button"
+              id="togglePassword"
+              class="toggle-password"
+              aria-label="Show password"
+            >
+              <i class="fas fa-eye"></i>
+            </button>
+          </div>
+          <div class="error-message" id="passwordError">Please enter your password</div>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="btn-primary">
+          Sign In
+        </button>
+
+        <p class="login-link">
+          New to Dayoffly? 
+          <a class="Loginlink" href="#">Contact HR for account setup</a>
+        </p>
+      </form>
+    </div>
+  </div>
+  <script src="loginPage.js"></script>
+</body>
+</html>

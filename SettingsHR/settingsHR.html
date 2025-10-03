@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dayoffly - User Management</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="settingsHR.css">
+</head>
+
+<body>
+  <div class="container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="logo">
+        <h2><i class="fas fa-calendar-alt"></i> Dayoffly</h2>
+      </div>
+      <div class="nav-item">
+        <a href="../HRDashboard/HRDashboard.html" style="color: inherit; text-decoration: none;">
+          <i class="fas fa-home"></i> Dashboard
+        </a>
+      </div>
+      <div class="nav-item">
+        <a href="../HREmployeeManagement/Employees.html" style="color: inherit; text-decoration: none;">
+          <i class="fas fa-users"></i> Employees
+        </a>
+      </div>
+      <div class="nav-item">
+        <a href="../LeaveRequestHR/leaveRequestHR.html" style="color: inherit; text-decoration: none;">
+          <i class="fas fa-calendar-check"></i> Leave Requests
+        </a>
+      </div>
+      <div class="nav-item">
+        <a href="../AnalyticsHR/analyticsHR.html" style="color: inherit; text-decoration: none;">
+          <i class="fas fa-chart-bar"></i> Analytics
+        </a>
+      </div>
+      <div class="nav-item active">
+        <a href="/hr/settings" style="color: inherit; text-decoration: none;">
+          <i class="fas fa-cog"></i> Settings
+        </a>
+      </div>
+      <div class="nav-item">
+        <a href="../LogoutHR/logoutHR.html" style="color: inherit; text-decoration: none;">
+          <i class="fas fa-sign-out-alt"></i> Logout
+        </a>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <header>
+        <div>
+          <h1>User Management</h1>
+          <p>Manage employee accounts and permissions</p>
+        </div>
+        <div class="user-info">
+          <div class="user-avatar">HR</div>
+          <div>
+            <div>Sarah Johnson</div>
+            <div style="font-size: 0.8rem; color: var(--gray);">HR Manager</div>
+          </div>
+        </div>
+      </header>
+
+      <section class="user-management">
+        <div class="section-header">
+          <h2 class="section-title">Employee Accounts</h2>
+          <button class="btn btn-primary" id="addUserBtn">
+            <i class="fas fa-plus"></i> Add New User
+          </button>
+        </div>
+
+        <!-- Filter Section -->
+        <div class="filter-section">
+          <div class="filter-group">
+            <span class="filter-label">Search:</span>
+            <input type="text" id="searchUser" placeholder="Search by name or email">
+          </div>
+          <div class="filter-group">
+            <span class="filter-label">Department:</span>
+            <select id="departmentFilter">
+              <option value="all">All Departments</option>
+              <option value="hr">Human Resources</option>
+              <option value="engineering">Engineering</option>
+              <option value="marketing">Marketing</option>
+              <option value="sales">Sales</option>
+              <option value="finance">Finance</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <span class="filter-label">Role:</span>
+            <select id="roleFilter">
+              <option value="all">All Roles</option>
+              <option value="employee">Employee</option>
+              <option value="manager">Manager</option>
+              <option value="hr">HR</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <span class="filter-label">Status:</span>
+            <select id="statusFilter">
+              <option value="all">All Status</option>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- User Table -->
+        <table class="user-table">
+          <thead>
+            <tr>
+              <th>User ID</th>
+              <th>Username</th>
+              <th>Email</th>
+              <th>Password</th>
+              <th>Role</th>
+              <th>Department</th>
+              <th>Created Date</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="user-table-body">
+            <tr>
+              <td>1001</td>
+              <td>john.smith</td>
+              <td>john.smith@company.com</td>
+              <td>Employee</td>
+              <td>Engineering</td>
+              <td>2023-01-15</td>
+              <td><span class="status status-active">Active</span></td>
+              <td class="action-buttons">
+                <button class="action-btn btn-view"><i class="fas fa-eye"></i></button>
+                <button class="action-btn btn-edit"><i class="fas fa-edit"></i></button>
+                <button class="action-btn btn-delete"><i class="fas fa-trash"></i></button>
+              </td>
+            </tr>
+            <tr>
+              <td>1002</td>
+              <td>sarah.johnson</td>
+              <td>sarah.johnson@company.com</td>
+              <td>HR</td>
+              <td>Human Resources</td>
+              <td>2023-02-10</td>
+              <td><span class="status status-active">Active</span></td>
+              <td class="action-buttons">
+                <button class="action-btn btn-view"><i class="fas fa-eye"></i></button>
+                <button class="action-btn btn-edit"><i class="fas fa-edit"></i></button>
+                <button class="action-btn btn-delete"><i class="fas fa-trash"></i></button>
+              </td>
+            </tr>
+            <tr>
+              <td>1003</td>
+              <td>michael.davis</td>
+              <td>michael.davis@company.com</td>
+              <td>Manager</td>
+              <td>Engineering</td>
+              <td>2023-03-05</td>
+              <td><span class="status status-active">Active</span></td>
+              <td class="action-buttons">
+                <button class="action-btn btn-view"><i class="fas fa-eye"></i></button>
+                <button class="action-btn btn-edit"><i class="fas fa-edit"></i></button>
+                <button class="action-btn btn-delete"><i class="fas fa-trash"></i></button>
+              </td>
+            </tr>
+            <tr>
+              <td>1004</td>
+              <td>emily.wilson</td>
+              <td>emily.wilson@company.com</td>
+              <td>Employee</td>
+              <td>Marketing</td>
+              <td>2023-04-20</td>
+              <td><span class="status status-inactive">Inactive</span></td>
+              <td class="action-buttons">
+                <button class="action-btn btn-view"><i class="fas fa-eye"></i></button>
+                <button class="action-btn btn-edit"><i class="fas fa-edit"></i></button>
+                <button class="action-btn btn-delete"><i class="fas fa-trash"></i></button>
+              </td>
+            </tr>
+            <tr>
+              <td>1005</td>
+              <td>robert.brown</td>
+              <td>robert.brown@company.com</td>
+              <td>Admin</td>
+              <td>IT</td>
+              <td>2023-05-12</td>
+              <td><span class="status status-active">Active</span></td>
+              <td class="action-buttons">
+                <button class="action-btn btn-view"><i class="fas fa-eye"></i></button>
+                <button class="action-btn btn-edit"><i class="fas fa-edit"></i></button>
+                <button class="action-btn btn-delete"><i class="fas fa-trash"></i></button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </div>
+  </div>
+
+  <!-- Add/Edit User Modal -->
+  <div class="modal" id="userModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title" id="modalTitle">Add New User</h2>
+        <button class="close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="userForm">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="userID">User ID</label>
+              <input type="text" class="form-control" id="userID" placeholder="Auto-generated" disabled>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="username">Username *</label>
+              <input type="text" class="form-control" id="username" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="email">Email Address *</label>
+              <input type="email" class="form-control" id="email" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="password">Password *</label>
+              <input type="password" class="form-control" id="password" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="role">Role *</label>
+              <select class="form-control" id="role" required>
+                <option value="">Select Role</option>
+                <option value="employee">Employee</option>
+                <option value="manager">Manager</option>
+                <option value="hr">HR</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="department">Department *</label>
+              <select class="form-control" id="department" required>
+                <option value="">Select Department</option>
+                <option value="hr">Human Resources</option>
+                <option value="engineering">Engineering</option>
+                <option value="marketing">Marketing</option>
+                <option value="sales">Sales</option>
+                <option value="finance">Finance</option>
+                <option value="it">IT</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="createdDate">Created Date</label>
+              <input type="date" class="form-control" id="createdDate" disabled>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Status</label>
+              <div class="checkbox-group">
+                <input type="checkbox" id="isActive" checked>
+                <label for="isActive">Active</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="footer-buttons">
+            <button type="button" class="btn btn-outline" id="cancelBtn">Cancel</button>
+            <button type="submit" class="btn btn-primary">Save User</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="settingsHR.js"></script>
+</body>
+
+</html>

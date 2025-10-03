@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Leave Status - Employee Dashboard</title>
+  <link rel="icon" href="/images/rounded logo for Day.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="leaveStatus.css">
+</head>
+
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="logo">Dayoffly</div>
+    <div class="header-actions">
+      <a href="../Calendar/calendar.html">
+        <button class="icon-btn" title="Apps"><i class="fas fa-th"></i></button>
+      </a>
+      <a href="../profile/profile.html">
+        <img src="https://ui-avatars.com/api/?name=Milli+Jethwani&background=0D8ABC&color=fff" alt="User Avatar" class="user-avatar">
+      </a>
+    </div>
+  </header>
+
+  <!-- Layout -->
+  <div class="main-container">
+    <!-- Sidebar -->  
+    <nav class="sidebar">
+      <a href="../EmployeeDashboard/EmployeeDashboard.html">
+        <button class="nav-item"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></button>
+      </a>
+      <a href="../leaveapplication/leaveapplication.html">
+        <button class="nav-item"><i class="fas fa-folder-open"></i> <span>Leave Applications</span></button>
+      </a>
+      <a href="../Calendar/calendar.html">
+        <button class="nav-item"><i class="fas fa-calendar-alt"></i> <span>Calendar</span></button>
+      </a>
+      <a href="../Report&analytics/report&analytics.html">
+        <button class="nav-item"><i class="fas fa-chart-line"></i> <span>Reports & Analytics</span></button>
+      </a>
+      <a href="../LeaveStatus/leaveStatus.html">
+        <button class="nav-item active"><i class="fas fa-list-check"></i> <span>My Leave Status</span></button>
+      </a>
+      <a href="../profile/profile.html">
+        <button class="nav-item"><i class="fas fa-user-cog"></i> <span>Profile</span></button>
+      </a>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="content">
+      <!-- Last Updated -->
+      <!-- <div class="last-updated">
+        <i class="fas fa-sync-alt"></i>
+        Last updated: <span id="last-updated-time">Loading...</span>
+      </div> -->
+
+      <!-- Employee Info Section -->
+      <section class="employee-info-section">
+        <img src="https://ui-avatars.com/api/?name=Milli+Jethwani&background=0D8ABC&color=fff&size=80" alt="Employee Avatar" class="employee-avatar">
+        <div class="employee-details">
+          <h2>Milli Jethwani</h2>
+          <p>EMP2001 • Sales Department</p>
+          <p>Sales Executive</p>
+        </div>
+        <div class="leave-balance">
+          <div class="number" id="total-leave-balance">6</div>
+          <div class="label">Leave Balance</div>
+        </div>
+      </section>
+
+      <!-- Statistics Section -->
+      <section class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-number" id="total-requests">0</div>
+          <div class="stat-label">Total Requests</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="pending-requests">0</div>
+          <div class="stat-label">Pending</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="approved-requests">0</div>
+          <div class="stat-label">Approved</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="declined-requests">0</div>
+          <div class="stat-label">Declined</div>
+        </div>
+      </section>
+
+      <!-- Filters Section -->
+      <section class="section">
+        <h3 class="section-title">Filter My Requests</h3>
+        <div class="filters-row">
+          <div class="filter-group">
+            <label for="search-input">Search</label>
+            <input type="text" id="search-input" placeholder="Search my requests...">
+          </div>
+          
+          <div class="filter-group">
+            <label for="filter-status">Status</label>
+            <select id="filter-status">
+              <option value="all">All Status</option>
+              <option value="pending">Pending</option>
+              <option value="approved">Approved</option>
+              <option value="declined">Declined</option>
+            </select>
+          </div>
+          
+          <div class="filter-group">
+            <label for="sort-by">Sort By</label>
+            <select id="sort-by">
+              <option value="appliedDate">Applied Date (Newest)</option>
+              <option value="appliedDateOldest">Applied Date (Oldest)</option>
+              <option value="startDate">Start Date</option>
+              <option value="status">Status</option>
+            </select>
+          </div>
+          
+          <button class="export-btn" id="export-btn">
+            <i class="fas fa-download"></i> Export CSV
+          </button>
+        </div>
+      </section>
+
+      <!-- Leave Requests Table -->
+      <section class="section">
+        <h3 class="section-title">My Leave Requests</h3>
+        <div class="table-container">
+          <div id="loading-indicator" class="loading-indicator">
+            <div class="spinner"></div>
+            <p>Loading my leave requests...</p>
+          </div>
+          
+          <div id="empty-state" class="empty-state" style="display: none;">
+            <i class="fas fa-inbox"></i>
+            <p>No leave requests found</p>
+            <p>Try changing your filters or search term</p>
+          </div>
+          
+          <table class="requests-table" id="requests-table" style="display: none;">
+            <thead>
+              <tr>
+                <th>Request ID</th>
+                <th>Leave Type</th>
+                <th>Duration</th>
+                <th>Applied Date</th>
+                <th>Status</th>
+                <th>Leave Balance</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="requests-tbody">
+              <!-- Requests will be populated by JavaScript -->
+            </tbody>
+          </table>
+          
+          <!-- Pagination -->
+          <div class="pagination">
+            <div class="pagination-info" id="pagination-info"></div>
+            <div class="pagination-controls" id="pagination-buttons"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="leaveStatus.js"></script>
+</body>
+</html>

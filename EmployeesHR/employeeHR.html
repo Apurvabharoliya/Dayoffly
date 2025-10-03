@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dayoffly - Employee Management</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="icon" href="/images/rounded logo for Day.png">
+  <link rel="stylesheet" href="employeeHR.css">
+  <!-- Remove Chart.js for now since we're having connection issues -->
+</head>
+
+<body>
+  <div class="container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="logo">
+        <h2><i class="fas fa-calendar-alt"></i> Dayoffly</h2>
+      </div>
+      <div class="nav-item">
+        <a href="../HRDashboard/HRDashboard.html" style="color: inherit; text-decoration: none;">
+          <i class="fas fa-home"></i> Dashboard
+        </a>
+      </div>
+      <div class="nav-item active">
+        <i class="fas fa-users"></i> Employees
+      </div>
+      <div class="nav-item">
+        <a href="../LeaveRequestHR/leaveRequestHR.html" style="color: inherit; text-decoration: none;">
+          <i class="fas fa-calendar-check"></i> Leave Requests
+        </a>
+      </div>
+      <div class="nav-item">
+        <a href="../AnalyticsHR/analyticsHR.html" style="color: inherit; text-decoration: none;">
+          <i class="fas fa-chart-bar"></i> Analytics
+        </a>
+      </div>
+      <div class="nav-item">
+        <a href="../SettingsHR/settingsHR.html" style="color: inherit; text-decoration: none;">
+          <i class="fas fa-cog"></i> Settings
+        </a>
+      </div>
+      <div class="nav-item">
+        <a href="../LogoutHR/logoutHR.html" style="color: inherit; text-decoration: none;">
+          <i class="fas fa-sign-out-alt"></i> Logout
+        </a>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <header>
+        <div>
+          <h1><i class="fas fa-users"></i> Employee Management</h1>
+          <p>View and manage employee leave records and information</p>
+        </div>
+        <div class="user-info">
+          <div class="user-avatar" id="user-avatar">HR</div>
+          <div>
+            <div id="user-name">Sarah Johnson</div>
+            <div style="font-size: 0.8rem; color: var(--gray);" id="user-role">HR Manager</div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Analytics Section -->
+      <section class="analytics">
+        <h2><i class="fas fa-chart-line"></i> Employee Analytics</h2>
+
+        <!-- Summary Cards -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-number" id="total-employees">0</div>
+            <div class="stat-label">Total Employees</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" id="active-employees">0</div>
+            <div class="stat-label">Active Employees</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" id="on-leave-count">0</div>
+            <div class="stat-label">Currently On Leave</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" id="avg-leaves">0.0</div>
+            <div class="stat-label">Avg. Leaves per Employee</div>
+          </div>
+        </div>
+
+        <!-- Charts Section Removed for now -->
+      </section>
+
+      <!-- Employee Management Section -->
+      <section class="employee-management">
+        <div class="section-header">
+          <h2><i class="fas fa-id-card"></i> Department Employees</h2>
+          <div class="filter-section">
+            <div class="filter-group">
+              <button class="filter-btn active" onclick="filterEmployees('all')">All Employees</button>
+              <button class="filter-btn" onclick="filterEmployees('Active')">Active</button>
+              <button class="filter-btn" onclick="filterEmployees('On-Leave')">On Leave</button>
+              <button class="filter-btn" onclick="filterEmployees('Inactive')">Inactive</button>
+            </div>
+            <div class="filter-group">
+              <select class="filter-select" id="department-filter">
+                <option value="all">All Departments</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <input type="text" class="search-input" placeholder="Search employees..." id="employee-search">
+            </div>
+            <div class="filter-group">
+              <button class="add-employee-btn" onclick="showAddEmployeeForm()">
+                <i class="fas fa-user-plus"></i> Add Employee
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <button class="back-btn" id="back-btn" onclick="showEmployeeList()">
+          <i class="fas fa-arrow-left"></i> Back to Employee List
+        </button>
+
+        <div id="employee-list" class="employee-grid">
+          <div class="empty-state">
+            <i class="fas fa-users"></i>
+            <h3>Loading Employees...</h3>
+            <p>Please wait while we load the employee data</p>
+            <div class="loading-spinner" style="margin: 0 auto;"></div>
+          </div>
+        </div>
+
+        <div id="employee-details" class="employee-details">
+          <!-- Employee details will be populated by JavaScript -->
+        </div>
+
+        <div class="pagination" id="pagination-container">
+          <!-- Pagination will be populated by JavaScript -->
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script src="employeeHR.js"></script>
+</body>
+
+</html>

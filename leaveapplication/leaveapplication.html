@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leave Application</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="icon" href="/images/rounded logo for Day.png">
+    <link rel="stylesheet" href="leaveapplication.css">
+</head>
+<body>
+   <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Header with Employee Dashboard Banner -->
+    <header class="header">
+        <div class="logo">Dayoffly</div>
+        <div class="header-actions">
+            <a href="/HTML/calendar.html">
+                <button class="icon-btn" title="Apps"><i class="fas fa-th"></i></button>
+            </a>
+            <img src="/images/user.png" alt="User Avatar" class="user-avatar">
+        </div>
+    </header>
+
+    <!-- Layout -->
+    <div class="main-container">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <a href="../EmployeeDashboard/EmployeeDashboard.html">
+                <button class="nav-item"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></button>
+            </a>
+            <a href="../leaveapplication/leaveapplication.html">
+                <button class="nav-item active"><i class="fas fa-folder-open"></i> <span>Leave Applications</span></button>
+            </a>
+            <a href="../Calendar/calendar.html">
+                <button class="nav-item"><i class="fas fa-calendar-alt"></i> <span>Calendar</span></button>
+            </a>
+            <a href="../Report&analytics/report&analytics.html">
+            <button class="nav-item"><i class="fas fa-chart-line"></i> <span>Reports & Analytics</span></button>
+            </a>
+            <a href="../LeaveStatus/leaveStatus.html">
+            <button class="nav-item"><i class="fas fa-list-check"></i> <span>Leave Status</span></button>
+            </a>
+            <a href="../profile/profile.html">
+                <button class="nav-item"><i class="fas fa-user-cog"></i> <span>Profile</span></button>
+            </a>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="content">
+            <!-- Leave Application Content -->
+            <div class="container">
+                <div class="header-content">
+                    <div class="logo-section">
+                        <div class="logo">TL</div>
+                        <h1 class="title">Leave Application</h1>
+                    </div>
+                    <div class="profile-section">
+                        <div class="notifications">
+                            <i class="fas fa-bell"></i>
+                            <span class="notification-badge">3</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Leave Balance Dashboard -->
+            <section class="dashboard">
+                <h2 class="dashboard-title">My Leave Balance</h2>
+                <div class="cards-container">
+                    <div class="card annual-leave">
+                        <div class="card-title">Annual Leave</div>
+                        <div class="card-value">15</div>
+                        <div class="card-subtext">days available</div>
+                    </div>
+                    <div class="card sick-leave">
+                        <div class="card-title">Sick Leave</div>
+                        <div class="card-value">5</div>
+                        <div class="card-subtext">days available</div>
+                    </div>
+                    <div class="card total-taken">
+                        <div class="card-title">Total Taken (This Year)</div>
+                        <div class="card-value">6</div>
+                        <div class="card-subtext">days used so far</div>
+                    </div>
+                </div>
+                <button class="apply-btn" id="applyButton">Apply for Leave</button>
+            </section>
+
+            <!-- Leave Application Form -->
+            <section class="form-section" id="applicationForm">
+                <h2 class="section-title">Apply for Leave</h2>
+                <form id="leaveForm">
+                    <!-- Step 1: Leave Details -->
+                    <div class="form-group">
+                        <label class="form-label">Leave Type</label>
+                        <div class="manual-leave-type" id="manualLeaveType">
+                            <input type="text" class="form-control" id="customLeaveType" placeholder="Enter your leave type" required>
+                        </div>
+                        <input type="hidden" id="leaveType" name="leaveType">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Date Range</label>
+                        <div class="date-inputs">
+                            <input type="date" class="form-control" id="startDate" required>
+                            <input type="date" class="form-control" id="endDate" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="half-day-option">
+                            <input type="checkbox" id="halfDay" class="checkbox">
+                            <label for="halfDay">Half Day</label>
+                            <select class="half-day-select" id="halfDayOption" disabled>
+                                <option value="first">First Half</option>
+                                <option value="second">Second Half</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Reason and Attachments -->
+                    <div class="form-group">
+                        <label class="form-label">Reason for Leave</label>
+                        <textarea class="form-control" id="reason" placeholder="Please provide a reason for your leave" required></textarea>
+                    </div>
+
+                    <div class="form-group" id="attachmentSection" style="display: none;">
+                        <label class="form-label">Attachments</label>
+                        <div class="file-upload">
+                            <input type="file" id="attachment" class="file-input">
+                            <label for="attachment" class="file-label">
+                                <i class="fas fa-upload"></i> Upload File
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Handover -->
+                    <div class="form-group">
+                        <label class="form-label">Handover to Colleague</label>
+                        <input type="text" class="form-control" id="handover" placeholder="Start typing colleague's name">
+                        <div id="suggestions" style="display: none;"></div>
+                    </div>
+
+                    <div class="form-buttons">
+                        <button type="button" class="cancel-btn" id="cancelButton">Cancel</button>
+                        <button type="submit" class="submit-btn">Submit Request</button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Leave History -->
+            <section class="form-section">
+                <div class="tabs">
+                    <div class="tab active" data-tab="history">Leave Request History</div>
+                </div>
+
+                <div class="tab-content active" id="historyTab">
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th>Status</th>
+                                <th>Leave Type</th>
+                                <th>Duration</th>
+                                <th>Approval Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="status status-approved">Approved</span></td>
+                                <td>Annual Leave</td>
+                                <td>5 days</td>
+                                <td>2023-06-15</td>
+                            </tr>
+                            <tr>
+                                <td><span class="status status-pending">Pending</span></td>
+                                <td>Sick Leave</td>
+                                <td>2 days</td>
+                                <td>-</td>
+                            </tr>
+                            <tr>
+                                <td><span class="status status-rejected">Rejected</span></td>
+                                <td>Casual Leave</td>
+                                <td>1 day</td>
+                                <td>2023-07-01</td>
+                            </tr>
+                            <tr>
+                                <td><span class="status status-approved">Approved</span></td>
+                                <td>Annual Leave</td>
+                                <td>3 days</td>
+                                <td>2023-05-20</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="leaveapplication.js"></script>
+</body>
+</html>

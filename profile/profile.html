@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Profile</title>
+    <link rel="icon" href="/images/rounded logo for Day.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="profile.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="logo">
+                <h2>WorkSpace</h2>
+            </div>
+            <a href="../EmployeeDashboard/EmployeeDashboard.html" class="nav-item">
+                <i class="fas fa-home"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="profile.html" class="nav-item active">
+                <i class="fas fa-user-circle"></i>
+                <span>Profile</span>
+            </a>
+            <a href="settings.html" class="nav-item">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </a>
+            <a href="notification.html" class="nav-item">
+                <i class="fas fa-bell"></i>
+                <span>Notifications</span>
+            </a>
+            <a href="contact-details.html" class="nav-item">
+                <i class="fas fa-address-book"></i>
+                <span>Contact Details</span>
+            </a>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="header">
+                <h1>Profile</h1>
+                <div class="user-menu">
+                    <div class="notification-btn">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <div class="user-btn">
+                        <i class="fas fa-user"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Header -->
+            <div class="profile-header">
+                <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1887&q=80" alt="Profile Photo" class="profile-avatar">
+                <div class="profile-info">
+                    <h2 class="profile-name">Emily Chen <span>(She/Her)</span></h2>
+                    <p class="profile-title">Software Engineer II • Product & Engineering</p>
+                    <span class="profile-status">Active</span>
+                </div>
+            </div>
+
+            <!-- Cards Container -->
+            <div class="cards-container">
+                <!-- Personal Information Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Personal Information</h3>
+                        <button class="edit-btn">Edit</button>
+                    </div>
+                    <div class="card-body">
+                        <div class="info-group">
+                            <div class="info-label">Legal First Name</div>
+                            <div class="info-value">Emily</div>
+                        </div>
+                        <div class="info-group">
+                            <div class="info-label">Legal Last Name</div>
+                            <div class="info-value">Chen</div>
+                        </div>
+                        <div class="info-group">
+                            <div class="info-label">Preferred Name</div>
+                            <div class="info-value">Em</div>
+                        </div>
+                        <div class="info-group">
+                            <div class="info-label">Date of Birth</div>
+                            <div class="info-value">January 15, 1990</div>
+                        </div>
+                        <div class="info-group">
+                            <div class="info-label">Gender</div>
+                            <div class="info-value">Female</div>
+                        </div>
+                        <div class="info-group">
+                            <div class="info-label">Nationality</div>
+                            <div class="info-value">Canadian</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="profile.js"></script>
+</body>
+</html>
