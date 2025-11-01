@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Leave Status - Employee Dashboard</title>
   <link rel="icon" href="/images/rounded logo for Day.png">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link rel="stylesheet" href="leaveStatus.css">
+  <link rel="stylesheet" href="/LeaveStatus/leaveStatus.css">
 </head>
 
 <body>
@@ -18,31 +19,32 @@
         <button class="icon-btn" title="Apps"><i class="fas fa-th"></i></button>
       </a>
       <a href="../profile/profile.html">
-        <img src="https://ui-avatars.com/api/?name=Milli+Jethwani&background=0D8ABC&color=fff" alt="User Avatar" class="user-avatar">
+        <img src="https://ui-avatars.com/api/?name=Milli+Jethwani&background=0D8ABC&color=fff" alt="User Avatar"
+          class="user-avatar">
       </a>
     </div>
   </header>
 
   <!-- Layout -->
   <div class="main-container">
-    <!-- Sidebar -->  
+    <!-- Sidebar -->
     <nav class="sidebar">
-      <a href="../EmployeeDashboard/EmployeeDashboard.html">
+      <a href="/employee-dashboard">
         <button class="nav-item"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></button>
       </a>
-      <a href="../leaveapplication/leaveapplication.html">
+      <a href="/leave-application">
         <button class="nav-item"><i class="fas fa-folder-open"></i> <span>Leave Applications</span></button>
       </a>
-      <a href="../Calendar/calendar.html">
+      <a href="/calendar">
         <button class="nav-item"><i class="fas fa-calendar-alt"></i> <span>Calendar</span></button>
       </a>
-      <a href="../Report&analytics/report&analytics.html">
+      <a href="/reports-analytics">
         <button class="nav-item"><i class="fas fa-chart-line"></i> <span>Reports & Analytics</span></button>
       </a>
-      <a href="../LeaveStatus/leaveStatus.html">
+      <a href="/leave-status">
         <button class="nav-item active"><i class="fas fa-list-check"></i> <span>My Leave Status</span></button>
       </a>
-      <a href="../profile/profile.html">
+      <a href="/profile">
         <button class="nav-item"><i class="fas fa-user-cog"></i> <span>Profile</span></button>
       </a>
     </nav>
@@ -57,7 +59,8 @@
 
       <!-- Employee Info Section -->
       <section class="employee-info-section">
-        <img src="https://ui-avatars.com/api/?name=Milli+Jethwani&background=0D8ABC&color=fff&size=80" alt="Employee Avatar" class="employee-avatar">
+        <img src="https://ui-avatars.com/api/?name=Milli+Jethwani&background=0D8ABC&color=fff&size=80"
+          alt="Employee Avatar" class="employee-avatar">
         <div class="employee-details">
           <h2>Milli Jethwani</h2>
           <p>EMP2001 • Sales Department</p>
@@ -97,7 +100,7 @@
             <label for="search-input">Search</label>
             <input type="text" id="search-input" placeholder="Search my requests...">
           </div>
-          
+
           <div class="filter-group">
             <label for="filter-status">Status</label>
             <select id="filter-status">
@@ -107,7 +110,7 @@
               <option value="declined">Declined</option>
             </select>
           </div>
-          
+
           <div class="filter-group">
             <label for="sort-by">Sort By</label>
             <select id="sort-by">
@@ -117,7 +120,7 @@
               <option value="status">Status</option>
             </select>
           </div>
-          
+
           <button class="export-btn" id="export-btn">
             <i class="fas fa-download"></i> Export CSV
           </button>
@@ -132,13 +135,13 @@
             <div class="spinner"></div>
             <p>Loading my leave requests...</p>
           </div>
-          
+
           <div id="empty-state" class="empty-state" style="display: none;">
             <i class="fas fa-inbox"></i>
             <p>No leave requests found</p>
             <p>Try changing your filters or search term</p>
           </div>
-          
+
           <table class="requests-table" id="requests-table" style="display: none;">
             <thead>
               <tr>
@@ -155,7 +158,7 @@
               <!-- Requests will be populated by JavaScript -->
             </tbody>
           </table>
-          
+
           <!-- Pagination -->
           <div class="pagination">
             <div class="pagination-info" id="pagination-info"></div>
@@ -166,6 +169,7 @@
     </main>
   </div>
 
-  <script src="leaveStatus.js"></script>
+  <script src="/LeaveStatus/leaveStatus.js"></script>
 </body>
+
 </html>

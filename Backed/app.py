@@ -428,6 +428,42 @@ def employee_dashboard_static(filename):
     """Serve static files from EmployeeDashboard directory"""
     return send_from_directory('../EmployeeDashboard', filename)
 
+# Static file routes for leaveapplication
+@app.route('/leaveapplication/<path:filename>')
+def leaveapplication_static(filename):
+    """Serve static files from leaveapplication directory"""
+    return send_from_directory('../leaveapplication', filename)
+
+# Static file routes for Calendar
+@app.route('/Calendar/<path:filename>')
+def calendar_static(filename):
+    """Serve static files from Calendar directory"""
+    return send_from_directory('../Calendar', filename)
+
+# Static file routes for Report&analytics
+@app.route('/Report&analytics/<path:filename>')
+def report_analytics_static(filename):
+    """Serve static files from Report&analytics directory"""
+    return send_from_directory('../Report&analytics', filename)
+
+# Static file routes for LeaveStatus
+@app.route('/LeaveStatus/<path:filename>')
+def leave_status_static(filename):
+    """Serve static files from LeaveStatus directory"""
+    return send_from_directory('../LeaveStatus', filename)
+
+# Static file routes for profile
+@app.route('/profile/<path:filename>')
+def profile_static(filename):
+    """Serve static files from profile directory"""
+    return send_from_directory('../profile', filename)
+
+# Static file routes for images
+@app.route('/images/<path:filename>')
+def images_static(filename):
+    """Serve static files from images directory"""
+    return send_from_directory('../images', filename)
+
 # Routes - REMOVED DUPLICATE /profile ROUTE
 
 @app.route('/')
@@ -461,56 +497,56 @@ def employee_dashboard():
 def leave_application():
     if 'logged_in' not in session or not session['logged_in']:
         return redirect('/login-page')
-    
+
     dashboard_data = get_dashboard_data()
-    return render_template('leaveapplication.html',
+    return render_template('leaveapplication/leaveapplication.html',
                          user_info=dashboard_data['user_info'])
 
 @app.route('/calendar')
 def calendar():
     if 'logged_in' not in session or not session['logged_in']:
         return redirect('/login-page')
-    
+
     dashboard_data = get_dashboard_data()
-    return render_template('calendar.html',
+    return render_template('Calendar/calendar.html',
                          user_info=dashboard_data['user_info'])
 
 @app.route('/reports-analytics')
 def reports_analytics():
     if 'logged_in' not in session or not session['logged_in']:
         return redirect('/login-page')
-    
+
     dashboard_data = get_dashboard_data()
-    return render_template('report&analytics.html',
+    return render_template('Report&analytics/report&analytics.html',
                          user_info=dashboard_data['user_info'])
-    
+
 @app.route('/hr/employees')
 def hr_employees():
     """Serve HR Employee Management page"""
     if 'logged_in' not in session or not session['logged_in']:
         return redirect('/login-page')
-    
+
     # Check if user is HR
     user = session.get('user', {})
     if user.get('role_name') != 'HR':
         return redirect('/employee-dashboard')
-    
-    return render_template('HR/employeeHR.html')
-    
+
+    return render_template('EmployeesHR/employeeHR.html')
+
 
 @app.route('/leave-status')
 def leave_status():
     """Leave Status Page"""
     if 'logged_in' not in session or not session['logged_in']:
         return redirect('/login-page')
-    
+
     dashboard_data = get_dashboard_data()
     leave_status_data = get_leave_status_data()
-    
+
     # Convert data to JSON for JavaScript
     leave_status_json = json.dumps(leave_status_data)
-    
-    return render_template('leaveStatus.html',
+
+    return render_template('LeaveStatus/leaveStatus.html',
                          user_info=dashboard_data['user_info'],
                          leave_status_data=leave_status_data,
                          leave_status_json=leave_status_json)
@@ -623,17 +659,27 @@ def debug_leave_data():
         conn.close()
         
 # In app.py - Add this route to serve the settingsHR.html page
+@app.route('/profile')
+def profile():
+    """Profile Page"""
+    if 'logged_in' not in session or not session['logged_in']:
+        return redirect('/login-page')
+
+    dashboard_data = get_dashboard_data()
+    return render_template('profile/profile.html',
+                         user_info=dashboard_data['user_info'])
+
 @app.route('/hr/settings')
 def hr_settings():
     """Serve HR Settings/User Management page"""
     if 'logged_in' not in session or not session['logged_in']:
-        return redirect('/login-page') 
-    
+        return redirect('/login-page')
+
     # Check if user is HR
     user = session.get('user', {})
     if user.get('role_name') != 'HR':
         return redirect('/employee-dashboard')
-    
+
     return render_template('HR/settingsHR.html')
 
 # Update the API route to use the correct blueprint method

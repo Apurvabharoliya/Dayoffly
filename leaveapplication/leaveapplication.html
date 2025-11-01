@@ -1,22 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Leave Application</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="icon" href="/images/rounded logo for Day.png">
-    <link rel="stylesheet" href="leaveapplication.css">
+    <link rel="stylesheet" href="/leaveapplication/leaveapplication.css">
 </head>
+
 <body>
-   <!-- Toast Container -->
+    <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>
 
     <!-- Header with Employee Dashboard Banner -->
     <header class="header">
         <div class="logo">Dayoffly</div>
         <div class="header-actions">
-            <a href="/HTML/calendar.html">
+            <a href="/calendar">
                 <button class="icon-btn" title="Apps"><i class="fas fa-th"></i></button>
             </a>
             <img src="/images/user.png" alt="User Avatar" class="user-avatar">
@@ -27,22 +29,23 @@
     <div class="main-container">
         <!-- Sidebar -->
         <nav class="sidebar">
-            <a href="../EmployeeDashboard/EmployeeDashboard.html">
+            <a href="/employee-dashboard">
                 <button class="nav-item"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></button>
             </a>
-            <a href="../leaveapplication/leaveapplication.html">
-                <button class="nav-item active"><i class="fas fa-folder-open"></i> <span>Leave Applications</span></button>
+            <a href="/leave-application">
+                <button class="nav-item active"><i class="fas fa-folder-open"></i> <span>Leave
+                        Applications</span></button>
             </a>
-            <a href="../Calendar/calendar.html">
+            <a href="/calendar">
                 <button class="nav-item"><i class="fas fa-calendar-alt"></i> <span>Calendar</span></button>
             </a>
-            <a href="../Report&analytics/report&analytics.html">
-            <button class="nav-item"><i class="fas fa-chart-line"></i> <span>Reports & Analytics</span></button>
+            <a href="/reports-analytics">
+                <button class="nav-item"><i class="fas fa-chart-line"></i> <span>Reports & Analytics</span></button>
             </a>
-            <a href="../LeaveStatus/leaveStatus.html">
-            <button class="nav-item"><i class="fas fa-list-check"></i> <span>Leave Status</span></button>
+            <a href="/leave-status">
+                <button class="nav-item"><i class="fas fa-list-check"></i> <span>Leave Status</span></button>
             </a>
-            <a href="../profile/profile.html">
+            <a href="/profile">
                 <button class="nav-item"><i class="fas fa-user-cog"></i> <span>Profile</span></button>
             </a>
         </nav>
@@ -96,7 +99,8 @@
                     <div class="form-group">
                         <label class="form-label">Leave Type</label>
                         <div class="manual-leave-type" id="manualLeaveType">
-                            <input type="text" class="form-control" id="customLeaveType" placeholder="Enter your leave type" required>
+                            <input type="text" class="form-control" id="customLeaveType"
+                                placeholder="Enter your leave type" required>
                         </div>
                         <input type="hidden" id="leaveType" name="leaveType">
                     </div>
@@ -123,7 +127,8 @@
                     <!-- Step 2: Reason and Attachments -->
                     <div class="form-group">
                         <label class="form-label">Reason for Leave</label>
-                        <textarea class="form-control" id="reason" placeholder="Please provide a reason for your leave" required></textarea>
+                        <textarea class="form-control" id="reason" placeholder="Please provide a reason for your leave"
+                            required></textarea>
                     </div>
 
                     <div class="form-group" id="attachmentSection" style="display: none;">
@@ -139,7 +144,8 @@
                     <!-- Step 3: Handover -->
                     <div class="form-group">
                         <label class="form-label">Handover to Colleague</label>
-                        <input type="text" class="form-control" id="handover" placeholder="Start typing colleague's name">
+                        <input type="text" class="form-control" id="handover"
+                            placeholder="Start typing colleague's name">
                         <div id="suggestions" style="display: none;"></div>
                     </div>
 
@@ -198,6 +204,7 @@
         </main>
     </div>
 
-    <script src="leaveapplication.js"></script>
+    <script src="/leaveapplication/leaveapplication.js"></script>
 </body>
+
 </html>

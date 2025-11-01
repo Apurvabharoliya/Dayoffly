@@ -154,8 +154,10 @@ def update_personal_info():
             "success": False,
             "message": "Authentication required"
         }), 401
-    
+
     user_id = session.get('user', {}).get('user_id')
+    print(f"DEBUG: Session user: {session.get('user')}")
+    print(f"DEBUG: User ID from session: {user_id}")
     if not user_id:
         return jsonify({
             "success": False,

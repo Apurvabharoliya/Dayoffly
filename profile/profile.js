@@ -1,12 +1,12 @@
 // profile.js - Complete Profile Management System
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Initialize all functionality
     initializeSettings();
     setupSettingsListeners();
     setupSaveButton();
     loadProfileData();
     setupEditFunctionality();
-    
+
     console.log('Profile management system initialized');
 });
 
@@ -15,12 +15,12 @@ document.addEventListener('DOMContentLoaded', function() {
 async function loadProfileData() {
     try {
         showLoading('Loading profile data...');
-        
+
         const response = await fetch('/api/profile');
         const result = await response.json();
-        
+
         hideLoading();
-        
+
         if (result.success) {
             populateProfileData(result.data);
             showNotification('Profile data loaded successfully', 'success');
@@ -40,19 +40,19 @@ async function loadProfileData() {
 
 function populateProfileData(data) {
     if (!data) return;
-    
+
     // Populate profile header
     if (data.personal_info) {
         populatePersonalInfo(data.personal_info);
     }
-    
-    // Populate contact details
-    if (data.personal_info && isContactDetailsPage()) {
+
+    // Populate contact details - always populate on profile page
+    if (data.personal_info) {
         populateContactDetails(data.personal_info);
     }
-    
-    // Populate emergency contacts
-    if (data.emergency_contacts && isContactDetailsPage()) {
+
+    // Populate emergency contacts - always populate on profile page
+    if (data.emergency_contacts) {
         populateEmergencyContacts(data.emergency_contacts);
     }
 }
@@ -64,12 +64,12 @@ function populatePersonalInfo(personalInfo) {
         const pronouns = personalInfo.pronouns ? `(${personalInfo.pronouns})` : '(They/Them)';
         profileName.innerHTML = `${personalInfo.user_name || '--'} <span>${pronouns}</span>`;
     }
-    
+
     const profileTitle = document.querySelector('.profile-title');
     if (profileTitle) {
         profileTitle.textContent = `${personalInfo.designation || '--'} • ${personalInfo.department || '--'}`;
     }
-    
+
     // Update personal information card
     updateInfoField('user_name', personalInfo.user_name);
     updateInfoField('email', personalInfo.email);
@@ -87,12 +87,12 @@ function populateContactDetails(contactInfo) {
 }
 
 function populateEmergencyContacts(contacts) {
-    const container = document.querySelector('.card-body .contact-list') || 
-                     document.querySelector('.emergency-contacts-container') ||
-                     document.querySelector('.card-body');
-    
+    const container = document.querySelector('.card-body .contact-list') ||
+        document.querySelector('.emergency-contacts-container') ||
+        document.querySelector('.card-body');
+
     if (!container) return;
-    
+
     // Find existing contact items or create container
     let contactsContainer = container.querySelector('.contact-list');
     if (!contactsContainer) {
@@ -100,14 +100,14 @@ function populateEmergencyContacts(contacts) {
         contactsContainer.className = 'contact-list';
         container.appendChild(contactsContainer);
     }
-    
+
     contactsContainer.innerHTML = '';
-    
+
     if (contacts.length === 0) {
         contactsContainer.innerHTML = '<div class="no-contacts">No emergency contacts added</div>';
         return;
     }
-    
+
     contacts.forEach(contact => {
         const contactElement = document.createElement('div');
         contactElement.className = 'contact-item';
@@ -147,7 +147,7 @@ function setupEditButton(selector, type) {
 }
 
 function handleEditClick(type, cardElement) {
-    switch(type) {
+    switch (type) {
         case 'personal':
             openPersonalInfoEditor();
             break;
@@ -175,7 +175,7 @@ async function openPersonalInfoEditor() {
     try {
         const response = await fetch('/api/profile');
         const result = await response.json();
-        
+
         if (result.success) {
             const data = result.data.personal_info;
             showPersonalInfoForm(data);
@@ -252,31 +252,31 @@ function showPersonalInfoForm(data) {
             </div>
         </div>
     `;
-    
+
     showModal(formHtml);
     document.getElementById('personalInfoForm').addEventListener('submit', savePersonalInfo);
 }
 
 async function savePersonalInfo(event) {
     event.preventDefault();
-    
+
     const formData = new FormData(event.target);
     const data = Object.fromEntries(formData);
-    
+
     // Basic validation
     if (!data.user_name || !data.email) {
         showNotification('Name and email are required fields', 'error');
         return;
     }
-    
+
     if (data.email && !validateEmail(data.email)) {
         showNotification('Please enter a valid email address', 'error');
         return;
     }
-    
+
     try {
         showLoading('Saving personal information...');
-        
+
         const response = await fetch('/api/profile/personal-info', {
             method: 'PUT',
             headers: {
@@ -284,10 +284,10 @@ async function savePersonalInfo(event) {
             },
             body: JSON.stringify(data)
         });
-        
+
         const result = await response.json();
         hideLoading();
-        
+
         if (result.success) {
             showNotification('Personal information updated successfully', 'success');
             closeModal();
@@ -306,7 +306,7 @@ async function openContactDetailsEditor() {
     try {
         const response = await fetch('/api/profile');
         const result = await response.json();
-        
+
         if (result.success) {
             const data = result.data.personal_info;
             showContactDetailsForm(data);
@@ -361,36 +361,36 @@ function showContactDetailsForm(data) {
             </div>
         </div>
     `;
-    
+
     showModal(formHtml);
     document.getElementById('contactDetailsForm').addEventListener('submit', saveContactDetails);
 }
 
 async function saveContactDetails(event) {
     event.preventDefault();
-    
+
     const formData = new FormData(event.target);
     const data = Object.fromEntries(formData);
-    
+
     // Validation
     if (data.personal_email && !validateEmail(data.personal_email)) {
         showNotification('Please enter a valid personal email', 'error');
         return;
     }
-    
+
     if (data.mobile_phone && !validatePhone(data.mobile_phone)) {
         showNotification('Please enter a valid mobile phone number', 'error');
         return;
     }
-    
+
     if (data.work_phone && !validatePhone(data.work_phone)) {
         showNotification('Please enter a valid work phone number', 'error');
         return;
     }
-    
+
     try {
         showLoading('Saving contact details...');
-        
+
         const response = await fetch('/api/profile/contact-details', {
             method: 'PUT',
             headers: {
@@ -398,10 +398,10 @@ async function saveContactDetails(event) {
             },
             body: JSON.stringify(data)
         });
-        
+
         const result = await response.json();
         hideLoading();
-        
+
         if (result.success) {
             showNotification('Contact details updated successfully', 'success');
             closeModal();
@@ -420,7 +420,7 @@ async function openEmergencyContactsEditor() {
     try {
         const response = await fetch('/api/profile/emergency-contacts');
         const result = await response.json();
-        
+
         if (result.success) {
             showEmergencyContactsForm(result.data);
         } else {
@@ -458,7 +458,7 @@ function showEmergencyContactsForm(contacts) {
             </button>
         </div>
     `).join('');
-    
+
     const formHtml = `
         <div class="modal-overlay active">
             <div class="modal-content wide">
@@ -484,7 +484,7 @@ function showEmergencyContactsForm(contacts) {
             </div>
         </div>
     `;
-    
+
     showModal(formHtml);
     document.getElementById('emergencyContactsForm').addEventListener('submit', saveEmergencyContacts);
 }
@@ -492,7 +492,7 @@ function showEmergencyContactsForm(contacts) {
 function addEmergencyContactField() {
     const container = document.getElementById('emergencyContactsContainer');
     const contactCount = container.querySelectorAll('.emergency-contact-form').length;
-    
+
     const newContactHtml = `
         <div class="emergency-contact-form" data-index="${contactCount}">
             <h4>Emergency Contact ${contactCount + 1}</h4>
@@ -515,13 +515,13 @@ function addEmergencyContactField() {
             </button>
         </div>
     `;
-    
+
     // Remove no contacts message if it exists
     const noContactsMsg = container.querySelector('.no-contacts-message');
     if (noContactsMsg) {
         noContactsMsg.remove();
     }
-    
+
     container.insertAdjacentHTML('beforeend', newContactHtml);
 }
 
@@ -529,24 +529,24 @@ function removeEmergencyContact(index) {
     const contactForm = document.querySelector(`.emergency-contact-form[data-index="${index}"]`);
     if (contactForm) {
         contactForm.remove();
-        
+
         // Reindex remaining contacts
         const remainingContacts = document.querySelectorAll('.emergency-contact-form');
         remainingContacts.forEach((contact, newIndex) => {
             contact.setAttribute('data-index', newIndex);
             contact.querySelector('h4').textContent = `Emergency Contact ${newIndex + 1}`;
-            
+
             // Update input names
             const inputs = contact.querySelectorAll('input');
             inputs[0].name = `contacts[${newIndex}][contact_name]`;
             inputs[1].name = `contacts[${newIndex}][relationship]`;
             inputs[2].name = `contacts[${newIndex}][phone_number]`;
-            
+
             // Update remove button onclick
             const removeBtn = contact.querySelector('.btn-remove-contact');
             removeBtn.setAttribute('onclick', `removeEmergencyContact(${newIndex})`);
         });
-        
+
         // Show no contacts message if all removed
         if (remainingContacts.length === 0) {
             const container = document.getElementById('emergencyContactsContainer');
@@ -557,10 +557,10 @@ function removeEmergencyContact(index) {
 
 async function saveEmergencyContacts(event) {
     event.preventDefault();
-    
+
     const formData = new FormData(event.target);
     const contacts = [];
-    
+
     // Extract contact data from form
     for (let [key, value] of formData.entries()) {
         if (key.startsWith('contacts[')) {
@@ -568,7 +568,7 @@ async function saveEmergencyContacts(event) {
             if (match) {
                 const index = parseInt(match[1]);
                 const field = match[2];
-                
+
                 if (!contacts[index]) {
                     contacts[index] = {};
                 }
@@ -576,12 +576,12 @@ async function saveEmergencyContacts(event) {
             }
         }
     }
-    
+
     // Filter out empty contacts and validate
-    const validContacts = contacts.filter(contact => 
+    const validContacts = contacts.filter(contact =>
         contact && contact.contact_name && contact.relationship && contact.phone_number
     );
-    
+
     // Validation
     for (const contact of validContacts) {
         if (!validatePhone(contact.phone_number)) {
@@ -589,15 +589,15 @@ async function saveEmergencyContacts(event) {
             return;
         }
     }
-    
+
     if (validContacts.length === 0) {
         showNotification('Please add at least one emergency contact', 'error');
         return;
     }
-    
+
     try {
         showLoading('Saving emergency contacts...');
-        
+
         const response = await fetch('/api/profile/emergency-contacts', {
             method: 'PUT',
             headers: {
@@ -605,10 +605,10 @@ async function saveEmergencyContacts(event) {
             },
             body: JSON.stringify({ contacts: validContacts })
         });
-        
+
         const result = await response.json();
         hideLoading();
-        
+
         if (result.success) {
             showNotification('Emergency contacts updated successfully', 'success');
             closeModal();
@@ -636,10 +636,10 @@ function formatDate(dateString) {
     if (!dateString) return '--';
     try {
         const date = new Date(dateString);
-        return date.toLocaleDateString('en-US', { 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric' 
+        return date.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
         });
     } catch (error) {
         return dateString;
@@ -673,13 +673,13 @@ function isContactDetailsPage() {
 function showModal(html) {
     // Remove any existing modal
     closeModal();
-    
+
     document.body.insertAdjacentHTML('beforeend', html);
     document.body.style.overflow = 'hidden';
-    
+
     // Add click outside to close
     const overlay = document.querySelector('.modal-overlay');
-    overlay.addEventListener('click', function(e) {
+    overlay.addEventListener('click', function (e) {
         if (e.target === this) {
             closeModal();
         }
@@ -697,14 +697,14 @@ function closeModal() {
 function showLoading(message = 'Loading...') {
     // Remove existing loading
     hideLoading();
-    
+
     const loadingHtml = `
         <div class="loading-overlay">
             <div class="loading-spinner"></div>
             <div class="loading-message">${message}</div>
         </div>
     `;
-    
+
     document.body.insertAdjacentHTML('beforeend', loadingHtml);
 }
 
@@ -719,7 +719,7 @@ function showNotification(message, type = 'info') {
     // Remove existing notifications
     const existingNotifications = document.querySelectorAll('.notification');
     existingNotifications.forEach(notification => notification.remove());
-    
+
     const notification = document.createElement('div');
     notification.className = `notification ${type}`;
     notification.innerHTML = `
@@ -728,9 +728,9 @@ function showNotification(message, type = 'info') {
             <button class="notification-close" onclick="this.parentElement.parentElement.remove()">&times;</button>
         </div>
     `;
-    
+
     document.body.appendChild(notification);
-    
+
     // Auto remove after 5 seconds
     setTimeout(() => {
         if (notification.parentElement) {
@@ -743,7 +743,7 @@ function showNotification(message, type = 'info') {
 
 function loadMockData() {
     console.log('Loading mock data for demonstration');
-    
+
     const mockData = {
         personal_info: {
             user_name: 'Emily Chen',
@@ -773,7 +773,7 @@ function loadMockData() {
             }
         ]
     };
-    
+
     populateProfileData(mockData);
 }
 
@@ -787,7 +787,7 @@ function initializeSettings() {
         darkModeToggle.checked = darkMode;
         if (darkMode) document.body.classList.add('dark-mode');
     }
-    
+
     // Compact View
     const compactView = localStorage.getItem('compactView') === 'true';
     const compactViewToggle = document.getElementById('compactViewToggle');
@@ -795,7 +795,7 @@ function initializeSettings() {
         compactViewToggle.checked = compactView;
         if (compactView) document.body.classList.add('compact-view');
     }
-    
+
     // Font Size
     const fontSize = localStorage.getItem('fontSize') || 'medium';
     const fontSizeSelect = document.getElementById('fontSizeSelect');
@@ -803,7 +803,7 @@ function initializeSettings() {
         fontSizeSelect.value = fontSize;
         document.body.classList.add(`font-${fontSize}`);
     }
-    
+
     // Sidebar Position
     const sidebarPosition = localStorage.getItem('sidebarPosition') || 'left';
     const sidebarPositionSelect = document.getElementById('sidebarPositionSelect');
@@ -811,7 +811,7 @@ function initializeSettings() {
         sidebarPositionSelect.value = sidebarPosition;
         document.body.classList.add(`sidebar-${sidebarPosition}`);
     }
-    
+
     // Save Preferences
     const savePreferencesToggle = document.getElementById('savePreferencesToggle');
     if (savePreferencesToggle) {
@@ -823,29 +823,29 @@ function setupSettingsListeners() {
     // Dark Mode Toggle
     const darkModeToggle = document.getElementById('darkModeToggle');
     if (darkModeToggle) {
-        darkModeToggle.addEventListener('change', function() {
+        darkModeToggle.addEventListener('change', function () {
             document.body.classList.toggle('dark-mode', this.checked);
             if (shouldSavePreferences()) {
                 localStorage.setItem('darkMode', this.checked);
             }
         });
     }
-    
+
     // Compact View Toggle
     const compactViewToggle = document.getElementById('compactViewToggle');
     if (compactViewToggle) {
-        compactViewToggle.addEventListener('change', function() {
+        compactViewToggle.addEventListener('change', function () {
             document.body.classList.toggle('compact-view', this.checked);
             if (shouldSavePreferences()) {
                 localStorage.setItem('compactView', this.checked);
             }
         });
     }
-    
+
     // Font Size Select
     const fontSizeSelect = document.getElementById('fontSizeSelect');
     if (fontSizeSelect) {
-        fontSizeSelect.addEventListener('change', function() {
+        fontSizeSelect.addEventListener('change', function () {
             document.body.classList.remove('font-small', 'font-medium', 'font-large');
             document.body.classList.add(`font-${this.value}`);
             if (shouldSavePreferences()) {
@@ -853,11 +853,11 @@ function setupSettingsListeners() {
             }
         });
     }
-    
+
     // Sidebar Position Select
     const sidebarPositionSelect = document.getElementById('sidebarPositionSelect');
     if (sidebarPositionSelect) {
-        sidebarPositionSelect.addEventListener('change', function() {
+        sidebarPositionSelect.addEventListener('change', function () {
             document.body.classList.remove('sidebar-left', 'sidebar-right');
             document.body.classList.add(`sidebar-${this.value}`);
             if (shouldSavePreferences()) {
@@ -865,11 +865,11 @@ function setupSettingsListeners() {
             }
         });
     }
-    
+
     // Clear Data Button
     const clearDataBtn = document.getElementById('clearDataBtn');
     if (clearDataBtn) {
-        clearDataBtn.addEventListener('click', function() {
+        clearDataBtn.addEventListener('click', function () {
             if (confirm('Are you sure you want to clear all saved data? This will reset all your preferences.')) {
                 localStorage.clear();
                 alert('All data cleared! Page will reload.');
@@ -883,20 +883,20 @@ function setupSaveButton() {
     const saveButton = document.querySelector('.edit-btn');
     if (saveButton && !saveButton.hasAttribute('data-listener-added')) {
         saveButton.setAttribute('data-listener-added', 'true');
-        saveButton.addEventListener('click', function() {
+        saveButton.addEventListener('click', function () {
             // Save all current settings
             if (shouldSavePreferences()) {
                 const darkModeToggle = document.getElementById('darkModeToggle');
                 const compactViewToggle = document.getElementById('compactViewToggle');
                 const fontSizeSelect = document.getElementById('fontSizeSelect');
                 const sidebarPositionSelect = document.getElementById('sidebarPositionSelect');
-                
+
                 if (darkModeToggle) localStorage.setItem('darkMode', darkModeToggle.checked);
                 if (compactViewToggle) localStorage.setItem('compactView', compactViewToggle.checked);
                 if (fontSizeSelect) localStorage.setItem('fontSize', fontSizeSelect.value);
                 if (sidebarPositionSelect) localStorage.setItem('sidebarPosition', sidebarPositionSelect.value);
             }
-            
+
             showNotification('Settings saved successfully!', 'success');
         });
     }
