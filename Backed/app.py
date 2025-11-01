@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, session, redirect, url_for
+from flask import Flask, render_template, request, jsonify, session, redirect, url_for, send_from_directory
 import mysql.connector
 import os
 from datetime import datetime, date
@@ -20,7 +20,7 @@ from reports_analytics_backendEmployee import reports_analytics_bp
 print("=== DayOffly Flask Application Starting ===")
 print("Current directory:", os.getcwd())
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='..', static_folder='..')
 app.secret_key = 'your-secret-key-here'
 
 # In app.py - update CORS configuration
@@ -410,6 +410,24 @@ def get_mock_leave_status_data():
         ]
     }
 
+# Static file routes for loginPage
+@app.route('/loginPage/<path:filename>')
+def login_page_static(filename):
+    """Serve static files from loginPage directory"""
+    return send_from_directory('../loginPage', filename)
+
+# Static file routes for HRDashboard
+@app.route('/HRDashboard/<path:filename>')
+def hr_dashboard_static(filename):
+    """Serve static files from HRDashboard directory"""
+    return send_from_directory('../HRDashboard', filename)
+
+# Static file routes for EmployeeDashboard
+@app.route('/EmployeeDashboard/<path:filename>')
+def employee_dashboard_static(filename):
+    """Serve static files from EmployeeDashboard directory"""
+    return send_from_directory('../EmployeeDashboard', filename)
+
 # Routes - REMOVED DUPLICATE /profile ROUTE
 
 @app.route('/')
@@ -427,7 +445,7 @@ def dashboard():
 @app.route('/login-page')
 def login_page():
     """Serve the login page"""
-    return render_template('HRDashboard.html')
+    return render_template('loginPage/loginPage.html')
 
 @app.route('/employee-dashboard')
 def employee_dashboard():
@@ -609,7 +627,7 @@ def debug_leave_data():
 def hr_settings():
     """Serve HR Settings/User Management page"""
     if 'logged_in' not in session or not session['logged_in']:
-        return redirect('/login-page')
+        return redirect('/login-page') 
     
     # Check if user is HR
     user = session.get('user', {})
@@ -623,6 +641,19 @@ def hr_settings():
 def api_users():
     """API endpoint to get all users"""
     return settingsHR_bp.get_all_users()
+
+# @app.route('/hr-dashboard')
+# def serve_hr_dashboard():
+#     return send_from_directory('.', 'HRDashboard.html')
+
+# @app.route('/employee-dashboard')  
+# def serve_employee_dashboard():
+#     return send_from_directory('.', 'EmployeeDashboard.html')
+
+# @app.route('/manager-dashboard')
+# def serve_manager_dashboard():
+#     return send_from_directory('.', 'ManagerDashboard.html')
+
 
 if __name__ == '__main__':
     print("🚀 Starting DayOffly server...")

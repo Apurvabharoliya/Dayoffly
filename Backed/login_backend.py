@@ -97,16 +97,17 @@ def verify_user_credentials(user_id, password):
         
         # Query to check user credentials
         query = """
-        SELECT 
-            u.user_id, 
-            u.user_name, 
-            u.email, 
+        SELECT
+            u.user_id,
+            u.user_name,
+            u.email,
             u.password,
             u.designation,
             u.role_id,
             r.role_name,
             d.department_name,
-            u.department_id
+            u.department_id,
+            u.user_role
         FROM users_master u
         LEFT JOIN role r ON u.role_id = r.role_id
         LEFT JOIN department d ON u.department_id = d.department_id
@@ -138,11 +139,26 @@ def verify_user_credentials(user_id, password):
         # Generate JWT token
         token = generate_jwt_token(user_data)
         
-        # Determine redirect URL based on role
-        if user['role_name'] and user['role_name'].lower() == 'hr':
+        # Determine redirect URL based on role - check both role_name and user_role
+        print(f"DEBUG: User role_name from DB: '{user.get('role_name')}'")
+        print(f"DEBUG: User user_role from DB: '{user.get('user_role')}'")
+
+        # Check both role_name (from role table) and user_role (from users_master table)
+        is_hr = False
+        if user.get('role_name') and user['role_name'].lower() == 'hr':
+            is_hr = True
+        elif user.get('user_role') and user['user_role'].lower() == 'hr':
+            is_hr = True
+
+        # Update user_data role_name to reflect the actual role for session consistency
+        user_data["role_name"] = "HR" if is_hr else "Employee"
+
+        if is_hr:
             redirect_url = "/hr-dashboard"
+            print(f"DEBUG: Redirecting HR user to: {redirect_url}")
         else:
             redirect_url = "/employee-dashboard"
+            print(f"DEBUG: Redirecting non-HR user to: {redirect_url}")
         
         return {
             "success": True, 
@@ -287,72 +303,4 @@ def verify_token():
         print(f"Error verifying token: {e}")
         return jsonify({"success": False, "message": "Token verification failed"}), 500
 
-# Test data insertion function (for development)
-def insert_test_user():
-    """Insert test users for development"""
-    conn = get_db_connection()
-    if not conn:
-        return
-    
-    try:
-        cursor = conn.cursor()
-        
-        # Check if test HR user already exists
-        cursor.execute("SELECT user_id FROM users_master WHERE user_id = 30001")
-        if not cursor.fetchone():
-            # Insert test HR user
-            hr_user_query = """
-            INSERT INTO users_master 
-            (user_id, user_name, email, password, designation, role_id, department_id, is_active)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-            """
-            
-            hr_user = (
-                30001, 
-                'HR Manager', 
-                'hr@company.com', 
-                'password123',
-                'HR Manager', 
-                1,  # Assuming 1 is HR role ID
-                1,  # Assuming 1 is HR department ID
-                1
-            )
-            
-            cursor.execute(hr_user_query, hr_user)
-            print("✓ Test HR user inserted successfully")
-        
-        # Check if test employee user already exists
-        cursor.execute("SELECT user_id FROM users_master WHERE user_id = 30002")
-        if not cursor.fetchone():
-            # Insert test employee user
-            emp_user_query = """
-            INSERT INTO users_master 
-            (user_id, user_name, email, password, designation, role_id, department_id, is_active, approver_id)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-            """
-            
-            emp_user = (
-                30002, 
-                'Jane Austen', 
-                'jane.austen@company.com', 
-                'password123',
-                'Web Developer', 
-                2,  # Assuming 2 is Employee role ID
-                2,  # Assuming 2 is IT department ID
-                1,
-                30001  # HR as approver
-            )
-            
-            cursor.execute(emp_user_query, emp_user)
-            print("✓ Test employee user inserted successfully")
-        
-        conn.commit()
-        
-    except mysql.connector.Error as e:
-        print(f"✗ Error inserting test users: {e}")
-    except Exception as e:
-        print(f"✗ Unexpected error: {e}")
-    finally:
-        if 'cursor' in locals():
-            cursor.close()
-        conn.close()
+

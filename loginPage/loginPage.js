@@ -45,7 +45,12 @@ document.addEventListener('DOMContentLoaded', function () {
         .then(result => {
           if (result.success) {
             localStorage.setItem('user', JSON.stringify(result.user));
-            window.location.href = result.redirectUrl;
+            // Simple navigation based on user role
+            if (result.user.role_name && result.user.role_name.toLowerCase() === 'hr') {
+              window.location.href = '/HRDashboard/HRDashboard.html';
+            } else {
+              window.location.href = '/EmployeeDashboard/EmployeeDashboard.html';
+            }
           } else {
             if (result.field === 'userId') {
               userIdError.textContent = result.message;
@@ -81,33 +86,33 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   });
 
-// Updated the authenticateUser function in loginPage.js
-async function authenticateUser(userId, password) {
-  try {
-    const response = await fetch('http://127.0.0.1:5000/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId, password })
-    });
+  // Updated the authenticateUser function in loginPage.js
+  async function authenticateUser(userId, password) {
+    try {
+      const response = await fetch('http://127.0.0.1:5000/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, password })
+      });
 
-    const data = await response.json();
-    
-    if (data.success && data.token) {
-      // Store token and user data in localStorage
-      localStorage.setItem('authToken', data.token);
-      localStorage.setItem('userData', JSON.stringify(data.user));
-      localStorage.setItem('userRole', data.user.role_name);
+      const data = await response.json();
+
+      if (data.success && data.token) {
+        // Store token and user data in localStorage
+        localStorage.setItem('authToken', data.token);
+        localStorage.setItem('userData', JSON.stringify(data.user));
+        localStorage.setItem('userRole', data.user.role_name);
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Authentication error:', error);
+      return {
+        success: false,
+        message: 'Network error. Please try again.',
+        field: 'system'
+      };
     }
-    
-    return data;
-  } catch (error) {
-    console.error('Authentication error:', error);
-    return {
-      success: false,
-      message: 'Network error. Please try again.',
-      field: 'system'
-    };
   }
-}
 
 });
