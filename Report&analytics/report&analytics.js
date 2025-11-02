@@ -4,15 +4,15 @@ let charts = {};
 let currentUserId = null;
 
 // Initialize application
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     console.log('Initializing Reports & Analytics page...');
-    
+
     // Check if user is logged in
     checkAuthentication();
-    
+
     // Set up event listeners
     setupEventListeners();
-    
+
     // Set default date range to current year
     const currentYear = new Date().getFullYear();
     document.getElementById('date-from').value = `${currentYear}-01-01`;
@@ -23,15 +23,15 @@ document.addEventListener('DOMContentLoaded', function() {
 async function checkAuthentication() {
     try {
         showLoading();
-        
+
         // Try to get user data from session
-        const response = await fetch('/api/current-user', {
+        const response = await fetch('http://127.0.0.1:5000/api/current-user', {
             credentials: 'include',
             headers: {
                 'Content-Type': 'application/json'
             }
         });
-        
+
         if (response.ok) {
             userData = await response.json();
             currentUserId = userData.user_id;
@@ -44,7 +44,7 @@ async function checkAuthentication() {
         showError('Please log in to view your analytics');
         // Redirect to login after 3 seconds
         setTimeout(() => {
-            window.location.href = '/login-page';
+            window.location.href = 'http://127.0.0.1:5000/login-page';
         }, 3000);
     }
 }
@@ -60,34 +60,34 @@ function setupEventListeners() {
 async function loadUserAnalytics() {
     try {
         showLoading();
-        
+
         if (!currentUserId) {
             throw new Error('User ID not available');
         }
-        
+
         // Fetch user-specific analytics data
-        const response = await fetch(`/api/user-analytics/${currentUserId}`, {
+        const response = await fetch(`http://127.0.0.1:5000/api/user-analytics/${currentUserId}`, {
             credentials: 'include',
             headers: {
                 'Content-Type': 'application/json'
             }
         });
-        
+
         if (!response.ok) {
             const errorData = await response.json();
             throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
         }
-        
+
         const analyticsData = await response.json();
-        
+
         // Update UI with user data
         updateUserInterface(analyticsData);
         hideLoading();
-        
+
     } catch (error) {
         console.error('Error loading analytics data:', error);
         showError(`Failed to load your analytics data: ${error.message}`);
-        
+
         // Load demo data as fallback
         setTimeout(() => {
             loadDemoData();
@@ -101,25 +101,25 @@ function updateUserInterface(data) {
         showNoData();
         return;
     }
-    
+
     // Update welcome section
     updateWelcomeSection(data.userInfo);
-    
+
     // Update avatar
     updateUserAvatar(data.userInfo);
-    
+
     // Update statistics
     updateStatistics(data.stats);
-    
+
     // Update charts
     updateCharts(data.charts);
-    
+
     // Update leave history
     updateLeaveHistory(data.leaveHistory);
-    
+
     // Update patterns
     updatePatterns(data.patterns);
-    
+
     // Show all sections
     showContentSections();
 }
@@ -130,15 +130,15 @@ function updateWelcomeSection(userInfo) {
     const welcomeSubtitle = document.getElementById('welcome-subtitle');
     const userDetails = document.getElementById('user-details');
     const userWelcome = document.getElementById('user-welcome');
-    
+
     const userName = userInfo.user_name || 'User';
     welcomeTitle.textContent = `My Leave Analytics - ${userName}`;
     welcomeSubtitle.textContent = `View your personal leave statistics and trends`;
-    
+
     let detailsText = `${userName}`;
     if (userInfo.designation) detailsText += ` • ${userInfo.designation}`;
     if (userInfo.department_name) detailsText += ` • ${userInfo.department_name}`;
-    
+
     userDetails.textContent = detailsText;
     userWelcome.style.display = 'block';
 }
@@ -155,7 +155,7 @@ function updateUserAvatar(userInfo) {
 // Update statistics cards
 function updateStatistics(stats) {
     const statsSection = document.getElementById('stats-section');
-    
+
     // If no stats data, show message
     if (!stats || stats.totalRequests === 0) {
         statsSection.innerHTML = `
@@ -168,9 +168,9 @@ function updateStatistics(stats) {
         statsSection.style.display = 'flex';
         return;
     }
-    
+
     statsSection.innerHTML = ''; // Clear existing content
-    
+
     const statCards = [
         {
             number: stats.totalRequests || 0,
@@ -193,7 +193,7 @@ function updateStatistics(stats) {
             description: stats.mostUsedPercentage || 'No data available'
         }
     ];
-    
+
     statCards.forEach(stat => {
         const statCard = document.createElement('div');
         statCard.className = 'stat-card';
@@ -204,7 +204,7 @@ function updateStatistics(stats) {
         `;
         statsSection.appendChild(statCard);
     });
-    
+
     statsSection.style.display = 'flex';
 }
 
@@ -216,9 +216,9 @@ function updateCharts(chartData) {
             chart.destroy();
         }
     });
-    
+
     charts = {};
-    
+
     // Initialize charts with user data
     initCharts(chartData);
 }
@@ -227,7 +227,7 @@ function updateCharts(chartData) {
 function updateLeaveHistory(history) {
     const tableBody = document.getElementById('leave-history-body');
     const historySection = document.getElementById('history-section');
-    
+
     if (!history || history.length === 0) {
         tableBody.innerHTML = `
             <tr>
@@ -240,13 +240,13 @@ function updateLeaveHistory(history) {
         historySection.style.display = 'block';
         return;
     }
-    
+
     tableBody.innerHTML = '';
-    
+
     history.forEach(leave => {
         const statusClass = getStatusClass(leave.leave_status);
         const statusText = leave.leave_status.charAt(0).toUpperCase() + leave.leave_status.slice(1);
-        
+
         const row = document.createElement('tr');
         row.innerHTML = `
             <td>${leave.start_date} to ${leave.end_date}</td>
@@ -258,7 +258,7 @@ function updateLeaveHistory(history) {
         `;
         tableBody.appendChild(row);
     });
-    
+
     historySection.style.display = 'block';
 }
 
@@ -266,7 +266,7 @@ function updateLeaveHistory(history) {
 function updatePatterns(patterns) {
     const patternsContainer = document.getElementById('patterns-container');
     const patternsSection = document.getElementById('patterns-section');
-    
+
     if (!patterns || patterns.length === 0) {
         patternsContainer.innerHTML = `
             <div class="peak-card medium">
@@ -279,9 +279,9 @@ function updatePatterns(patterns) {
         patternsSection.style.display = 'block';
         return;
     }
-    
+
     patternsContainer.innerHTML = '';
-    
+
     patterns.forEach(pattern => {
         const patternCard = document.createElement('div');
         patternCard.className = `peak-card ${pattern.type}`;
@@ -293,7 +293,7 @@ function updatePatterns(patterns) {
         `;
         patternsContainer.appendChild(patternCard);
     });
-    
+
     patternsSection.style.display = 'block';
 }
 
@@ -322,7 +322,7 @@ function initCharts(chartData) {
         showNoData();
         return;
     }
-    
+
     const chartConfigs = {
         leaveTypeChart: {
             type: 'doughnut',
@@ -343,8 +343,8 @@ function initCharts(chartData) {
                 responsive: true,
                 maintainAspectRatio: false,
                 scales: {
-                    y: { 
-                        beginAtZero: true, 
+                    y: {
+                        beginAtZero: true,
                         title: { display: true, text: 'Number of Leaves' },
                         ticks: { stepSize: 1 }
                     }
@@ -373,8 +373,8 @@ function initCharts(chartData) {
                 responsive: true,
                 maintainAspectRatio: false,
                 scales: {
-                    y: { 
-                        beginAtZero: true, 
+                    y: {
+                        beginAtZero: true,
                         title: { display: true, text: 'Number of Leaves' },
                         ticks: { stepSize: 1 }
                     }
@@ -385,7 +385,7 @@ function initCharts(chartData) {
             }
         }
     };
-    
+
     // Initialize each chart
     Object.entries(chartConfigs).forEach(([chartId, config]) => {
         const canvas = document.getElementById(chartId);
@@ -393,16 +393,16 @@ function initCharts(chartData) {
             console.warn(`Canvas element not found: ${chartId}`);
             return;
         }
-        
+
         const ctx = canvas.getContext('2d');
-        
+
         // Check if we have valid data
-        const hasData = config.data && 
-                       config.data.datasets && 
-                       config.data.datasets[0] && 
-                       config.data.datasets[0].data && 
-                       config.data.datasets[0].data.some(val => val > 0);
-        
+        const hasData = config.data &&
+            config.data.datasets &&
+            config.data.datasets[0] &&
+            config.data.datasets[0].data &&
+            config.data.datasets[0].data.some(val => val > 0);
+
         if (!hasData) {
             // Show no data message for chart
             canvas.style.display = 'none';
@@ -421,7 +421,7 @@ function initCharts(chartData) {
             container.appendChild(noDataDiv);
             return;
         }
-        
+
         charts[chartId] = new Chart(ctx, config);
     });
 }
@@ -430,19 +430,19 @@ function initCharts(chartData) {
 async function applyDateFilter() {
     const fromDate = document.getElementById('date-from').value;
     const toDate = document.getElementById('date-to').value;
-    
+
     if (!fromDate || !toDate) {
         alert('Please select both start and end dates');
         return;
     }
-    
+
     if (new Date(fromDate) > new Date(toDate)) {
         alert('Start date cannot be after end date');
         return;
     }
-    
+
     showLoading();
-    
+
     try {
         // In a real implementation, this would send the date range to the server
         // For now, we'll just reload the data with a message
@@ -450,7 +450,7 @@ async function applyDateFilter() {
             alert(`Date range filter applied: ${fromDate} to ${toDate}\nDisplaying your leave data for the selected period.`);
             loadUserAnalytics(); // Reload data
         }, 500);
-        
+
     } catch (error) {
         console.error('Error applying date filter:', error);
         showError('Failed to apply date filter');
@@ -465,23 +465,23 @@ async function exportReport() {
             alert('Please wait while we load your data');
             return;
         }
-        
+
         const fromDate = document.getElementById('date-from').value;
         const toDate = document.getElementById('date-to').value;
-        
+
         showLoading();
-        
-        const response = await fetch(`/api/export-analytics/${currentUserId}?from=${fromDate}&to=${toDate}`, {
+
+        const response = await fetch(`http://127.0.0.1:5000/api/export-analytics/${currentUserId}?from=${fromDate}&to=${toDate}`, {
             credentials: 'include'
         });
-        
+
         if (response.ok) {
             const result = await response.json();
             alert(`Your personal leave report for ${fromDate} to ${toDate} exported successfully!\n\nDownload URL: ${result.download_url}`);
         } else {
             throw new Error('Export failed');
         }
-        
+
     } catch (error) {
         console.error('Error exporting report:', error);
         alert('Export feature is currently unavailable. Please try again later.');
@@ -545,7 +545,7 @@ function hideContentSections() {
 // Load demo data as fallback
 function loadDemoData() {
     console.log('Loading demo data as fallback...');
-    
+
     const demoData = {
         userInfo: {
             user_name: userData?.user_name || 'Demo User',
@@ -609,13 +609,13 @@ function loadDemoData() {
             }
         ]
     };
-    
+
     updateUserInterface(demoData);
     hideLoading();
 }
 
 // Handle page visibility changes
-document.addEventListener('visibilitychange', function() {
+document.addEventListener('visibilitychange', function () {
     if (!document.hidden) {
         // Page became visible, refresh data after a delay
         setTimeout(() => {

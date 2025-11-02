@@ -466,15 +466,24 @@ def images_static(filename):
 
 # Routes - REMOVED DUPLICATE /profile ROUTE
 
+@app.route('/api/dashboard-data')
+def api_dashboard_data():
+    """API endpoint for employee dashboard data"""
+    if 'logged_in' not in session or not session['logged_in']:
+        return jsonify({'error': 'Authentication required'}), 401
+
+    dashboard_data = get_dashboard_data()
+    return jsonify(dashboard_data)
+
 @app.route('/')
 def dashboard():
     """Employee Dashboard - with basic auth check"""
     # Simple authentication check
     if 'logged_in' not in session or not session['logged_in']:
         return redirect('/login-page')
-    
+
     dashboard_data = get_dashboard_data()
-    return render_template('EmployeeDashboard.html', 
+    return render_template('EmployeeDashboard.html',
                          dashboard_data=dashboard_data,
                          user_info=dashboard_data['user_info'])
 

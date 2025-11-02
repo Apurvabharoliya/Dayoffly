@@ -66,7 +66,12 @@
   // Function to fetch dashboard data from API
   async function fetchDashboardData() {
     try {
-      const response = await fetch('/api/dashboard-data');
+      const response = await fetch('http://127.0.0.1:5000/api/dashboard-data', {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
