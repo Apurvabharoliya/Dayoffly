@@ -13,8 +13,85 @@ const API_BASE_URL = 'http://localhost:5000/api';
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function () {
     console.log('Initializing Employee Management System...');
+    updateUserInfoFromSession();
     initializeApp();
 });
+
+// Update user info from session
+function updateUserInfoFromSession() {
+    try {
+        // Try to get user info from localStorage (set during login)
+        const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+
+        if (userInfo && userInfo.user_name) {
+            const userNameElement = document.getElementById('user-name');
+            const userAvatarElement = document.getElementById('user-avatar');
+            const userRoleElement = document.getElementById('user-role');
+
+            if (userNameElement) {
+                userNameElement.textContent = userInfo.user_name;
+            }
+            if (userAvatarElement) {
+                userAvatarElement.textContent = userInfo.user_name.charAt(0).toUpperCase();
+            }
+            if (userRoleElement && userInfo.designation) {
+                userRoleElement.textContent = userInfo.designation;
+            }
+        } else {
+            // Fallback: Try to fetch user info from API
+            loadUserInfo();
+        }
+    } catch (error) {
+        console.error('Error updating user info:', error);
+        // Fallback: Try to fetch user info from API
+        loadUserInfo();
+    }
+}
+
+// Load user info from API
+async function loadUserInfo() {
+    try {
+        const response = await fetch(`http://127.0.0.1:5000/hr/dashboard-data`, {
+            method: 'GET',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        if (data.success && data.user_info) {
+            updateUserInfo(data.user_info);
+        } else {
+            console.warn('No user info available - user may not be logged in');
+        }
+    } catch (error) {
+        console.error('Error fetching user info:', error);
+    }
+}
+
+function updateUserInfo(userInfo) {
+    const userNameElement = document.getElementById('user-name');
+    const userAvatarElement = document.getElementById('user-avatar');
+    const userRoleElement = document.getElementById('user-role');
+
+    if (userNameElement && userInfo.user_name) {
+        userNameElement.textContent = userInfo.user_name;
+    }
+
+    if (userAvatarElement && userInfo.user_name) {
+        userAvatarElement.textContent = userInfo.user_name.charAt(0).toUpperCase();
+    }
+
+    if (userRoleElement && userInfo.designation) {
+        userRoleElement.textContent = userInfo.designation;
+    }
+}
 
 // Main initialization function
 // Main initialization function
@@ -47,19 +124,19 @@ async function initializeApp() {
 async function loadEmployeeStats() {
     try {
         const response = await fetch(`${API_BASE_URL}/employees/stats`);
-        
+
         if (!response.ok) {
             throw new Error(`Server returned ${response.status}`);
         }
-        
+
         const data = await response.json();
-        
+
         if (data.error) {
             throw new Error(data.error);
         }
-        
+
         updateAnalyticsDisplay(data);
-        
+
     } catch (error) {
         console.error('Error loading employee stats:', error);
         showToast('Cannot load analytics data. Please check server connection.', 'warning');

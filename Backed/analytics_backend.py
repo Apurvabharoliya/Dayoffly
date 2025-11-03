@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, session, request
 import mysql.connector
 from datetime import datetime, timedelta
 import json
+from user import get_user_details
 
 analytics_bp = Blueprint('analytics', __name__)
 
@@ -318,27 +319,43 @@ def get_hr_analytics_data():
                 rate = 0
             approval_rates.append(rate)
         
-        # 9. Get employee leave summary
+        # 9. Get employee leave summary with pagination
+        page = int(request.args.get('page', 1))
+        per_page = int(request.args.get('per_page', 10))
+        offset = (page - 1) * per_page
+
+        # Get total count for pagination
+        count_query = """
+            SELECT COUNT(*) as total
+            FROM users_master u
+            LEFT JOIN department d ON u.department_id = d.department_id
+            LEFT JOIN leave_balance lb ON u.user_id = lb.user_id
+            WHERE u.is_active = 1
+        """
+        cursor.execute(count_query)
+        total_count = cursor.fetchone()['total']
+
         employee_summary_query = """
-            SELECT 
+            SELECT
                 u.user_id,
                 u.user_name,
                 d.department_name,
                 COALESCE(lb.total_leaves, 20) as total_leaves,
                 COALESCE(lb.used_leaves, 0) as used_leaves,
                 COALESCE(lb.remaining_leaves, 20) as remaining_leaves,
-                CASE 
-                    WHEN COALESCE(lb.total_leaves, 20) > 0 THEN 
+                CASE
+                    WHEN COALESCE(lb.total_leaves, 20) > 0 THEN
                         ROUND((COALESCE(lb.used_leaves, 0) / COALESCE(lb.total_leaves, 20)) * 100, 1)
-                    ELSE 0 
+                    ELSE 0
                 END as utilization_rate
             FROM users_master u
             LEFT JOIN department d ON u.department_id = d.department_id
             LEFT JOIN leave_balance lb ON u.user_id = lb.user_id
             WHERE u.is_active = 1
             ORDER BY u.user_name
+            LIMIT %s OFFSET %s
         """
-        cursor.execute(employee_summary_query)
+        cursor.execute(employee_summary_query, (per_page, offset))
         employee_summary = cursor.fetchall()
         
         # Format employee data
@@ -352,6 +369,9 @@ def get_hr_analytics_data():
                 'utilizationRate': emp['utilization_rate']
             })
         
+        # Get detailed user information using the user.py module
+        user_info = get_user_details()
+
         analytics_data = {
             'summary': {
                 'totalLeaves': total_leaves,
@@ -372,10 +392,17 @@ def get_hr_analytics_data():
                 }
             },
             'employees': formatted_employees,
+            'pagination': {
+                'page': page,
+                'per_page': per_page,
+                'total': total_count,
+                'total_pages': (total_count + per_page - 1) // per_page
+            },
             'filters': {
                 'departments': departments,
                 'allEmployees': all_employees
-            }
+            },
+            'user_info': user_info or {}
         }
         
         print("✅ Analytics data prepared successfully")

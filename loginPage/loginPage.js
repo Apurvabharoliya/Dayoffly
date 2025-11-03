@@ -101,6 +101,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // Store token and user data in localStorage
         localStorage.setItem('authToken', data.token);
         localStorage.setItem('userData', JSON.stringify(data.user));
+        localStorage.setItem('userInfo', JSON.stringify(data.user)); // For consistent access across pages
         localStorage.setItem('userRole', data.user.role_name);
       }
 

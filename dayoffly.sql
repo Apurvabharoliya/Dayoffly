@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 03, 2025 at 04:59 PM
+-- Generation Time: Nov 02, 2025 at 08:06 AM
 -- Server version: 10.4.32-MariaDB
--- PHP Version: 8.2.12
+-- PHP Version: 8.0.30
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -64,7 +64,8 @@ CREATE TABLE `emergency_contacts` (
 
 INSERT INTO `emergency_contacts` (`contact_id`, `user_id`, `contact_name`, `relationship`, `phone_number`) VALUES
 (3, 0, 'Michael Chen', 'Spouse', '(555) 987-6543'),
-(4, 0, 'Sarah Johnson', 'Friend', '(555) 456-7890');
+(4, 0, 'Sarah Johnson', 'Friend', '(555) 456-7890'),
+(5, 30003, 'HET', 'Father', '8866378552');
 
 -- --------------------------------------------------------
 
@@ -97,8 +98,8 @@ INSERT INTO `leave_application` (`leave_id`, `user_id`, `leave_type`, `applied_o
 (25, 30002, 'Vacation', '2025-09-30 11:30:00', '2026-01-10', '2026-01-20', 'Winter vacation plans', 'hotel_booking.pdf', 'rejected'),
 (26, 30001, 'Maternity Leave', '2025-10-01 13:00:00', '2026-03-01', '2026-06-01', 'Maternity leave for childbirth', 'pregnancy_confirmation.pdf', 'approved'),
 (27, 30003, 'Paternity Leave', '2025-10-02 09:45:00', '2026-02-15', '2026-03-01', 'Paternity leave for newborn child', 'birth_certificate.pdf', 'declined'),
-(28, 30004, 'Sick Leave', '2025-10-03 19:31:13', '2024-01-15', '2024-01-16', 'Flu', NULL, 'approved'),
-(29, 30004, 'Vacation', '2025-10-03 19:31:13', '2024-03-10', '2024-03-15', 'Family vacation', NULL, 'approved'),
+(28, 30004, 'Sick Leave', '2025-10-03 19:31:13', '2024-01-15', '2024-01-16', 'Flu', NULL, 'declined'),
+(29, 30004, 'Vacation', '2025-10-03 19:31:13', '2024-03-10', '2024-03-15', 'Family vacation', NULL, 'declined'),
 (30, 30005, 'Casual Leave', '2025-10-03 19:31:13', '2024-02-20', '2024-02-20', 'Personal work', NULL, 'approved'),
 (31, 30006, 'Sick Leave', '2025-10-03 19:31:13', '2024-04-05', '2024-04-07', 'Medical appointment', NULL, 'approved'),
 (32, 30007, 'Vacation', '2025-10-03 19:31:13', '2024-06-12', '2024-06-19', 'Summer break', NULL, 'approved'),
@@ -137,7 +138,13 @@ INSERT INTO `leave_balance` (`user_id`, `leave_type`, `total_leaves`, `used_leav
 (30010, 'Casual Leave', 12, 2, 10),
 (30011, 'Sick Leave', 10, 0, 10),
 (30011, 'Vacation', 15, 0, 15),
-(30011, 'Casual Leave', 12, 0, 12);
+(30011, 'Casual Leave', 12, 0, 12),
+(30012, 'Sick Leave', 10, 0, 10),
+(30012, 'Vacation', 15, 0, 15),
+(30012, 'Casual Leave', 12, 0, 12),
+(30013, 'Sick Leave', 10, 0, 10),
+(30013, 'Vacation', 15, 0, 15),
+(30013, 'Casual Leave', 12, 0, 12);
 
 -- --------------------------------------------------------
 
@@ -209,26 +216,28 @@ CREATE TABLE `users_master` (
   `date_of_birth` date DEFAULT NULL,
   `gender` varchar(20) DEFAULT NULL,
   `nationality` varchar(50) DEFAULT NULL,
-  `pronouns` varchar(20) DEFAULT NULL
+  `pronouns` varchar(20) DEFAULT NULL,
+  `user_role` enum('HR','Employee') NOT NULL DEFAULT 'Employee'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `users_master`
 --
 
-INSERT INTO `users_master` (`user_id`, `user_name`, `email`, `password`, `department_id`, `role_id`, `designation`, `contact_number`, `is_active`, `approver_id`, `personal_email`, `mobile_phone`, `work_phone`, `home_address`, `preferred_name`, `date_of_birth`, `gender`, `nationality`, `pronouns`) VALUES
-(2, 'HR Manager', 'hr@company.com', 'hrpassword', 1, 2, 'HR Manager', '0987654321', 1, 2, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(30001, 'Brian', 'a@gmailcom', '124', 1, 3, 'Web Developer', '9087240905', 1, 30001, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(30002, 'Jane Austen', 'jane@gmail.com', 'jane6101', 3, 3, 'Web Developer', '9087240905', 1, 30001, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(30003, 'Meet', 'm@gmail.com', '0002', 3, 3, 'Web Developer', '9087240905', 1, 30001, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(30004, 'het patel', 'het@gmail.com', 'Pass@30004', 3, 2, 'It', '8866378552 ', 1, 2, NULL, NULL, NULL, NULL, NULL, '2025-09-13', 'Male', NULL, NULL),
-(30005, 'Sarah Johnson', 'sarah.johnson@company.com', 'password123', 1, 2, 'HR Specialist', '555-0102', 1, 30001, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(30006, 'Mike Chen', 'mike.chen@company.com', 'password123', 4, 3, 'Sales Executive', '555-0103', 1, 30001, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(30007, 'Emily Davis', 'emily.davis@company.com', 'password123', 5, 4, 'Marketing Coordinato', '555-0104', 1, 30001, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(30008, 'David Wilson', 'david.wilson@company.com', 'password123', 2, 3, 'Financial Analyst', '555-0105', 1, 30001, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(30009, 'Lisa Brown', 'lisa.brown@company.com', 'password123', 6, 3, 'Research Scientist', '555-0106', 1, 30001, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(30010, 'Robert Taylor', 'robert.taylor@company.com', 'password123', 3, 4, 'IT Support', '555-0107', 1, 30001, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(30011, 'Heer', 'soni@gmail.com', 'heer30011', 1, 4, 'senior hr', '1234567899', 1, 30001, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `users_master` (`user_id`, `user_name`, `email`, `password`, `department_id`, `role_id`, `designation`, `contact_number`, `is_active`, `approver_id`, `personal_email`, `mobile_phone`, `work_phone`, `home_address`, `preferred_name`, `date_of_birth`, `gender`, `nationality`, `pronouns`, `user_role`) VALUES
+(2, 'HR Manager', 'hr@company.com', 'hrpassword', 1, 2, 'HR Manager', '0987654321', 1, 2, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'HR'),
+(30001, 'Brian', 'a@gmailcom', '124', 1, 3, 'Web Developer', '9087240905', 1, 30001, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'HR'),
+(30002, 'Justin', 'jane@gmail.com', 'jane6101', 3, 3, 'Web Developer', '', 1, 30001, NULL, NULL, NULL, NULL, 'Justttt', '2013-02-15', 'Male', 'Indian', 'He', 'Employee'),
+(30003, 'Meet', 'm@gmail.com', '0002', 3, 3, 'Web Developer', '', 1, 30001, NULL, NULL, NULL, NULL, 'Mathukiya', '2005-05-10', 'Male', 'indian', 'she', 'Employee'),
+(30004, 'het patel', 'het@gmail.com', 'Pass@30004', 3, 2, 'It', '8866378552 ', 1, 2, NULL, NULL, NULL, NULL, NULL, '2025-09-13', 'Male', NULL, NULL, 'HR'),
+(30005, 'Sarah Johnson', 'sarah.johnson@company.com', 'password123', 1, 2, 'HR Specialist', '555-0102', 1, 30001, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Employee'),
+(30006, 'Mike Chen', 'mike.chen@company.com', 'Krishna', 4, 3, 'Sales Executive', '555-0103', 1, 30001, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Employee'),
+(30007, 'Emily Davis', 'emily.davis@company.com', 'password123', 5, 4, 'Marketing Coordinato', '555-0104', 1, 30001, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Employee'),
+(30008, 'David Wilson', 'david.wilson@company.com', 'password123', 2, 3, 'Financial Analyst', '555-0105', 1, 30001, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Employee'),
+(30009, 'Lisa Brown', 'lisa21', 'password123', 6, 3, 'Research Scientist', '555-0106', 1, 30001, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Employee'),
+(30010, 'Robert Taylor', 'robert.taylor@company.com', 'password123', 3, 4, 'IT Support', '555-0107', 1, 30001, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Employee'),
+(30011, 'Heer', 'soni@gmail.com', 'heer30011', 1, 4, 'senior hr', '1234567899', 1, 30001, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Employee'),
+(30013, 'Zill', 'Suryawala@gmail.com', 'zill30013', 3, 4, 'Senior', '8866378552', 1, 30001, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'HR');
 
 --
 -- Indexes for dumped tables
@@ -292,45 +301,13 @@ ALTER TABLE `users_master`
 -- AUTO_INCREMENT for table `emergency_contacts`
 --
 ALTER TABLE `emergency_contacts`
-  MODIFY `contact_id` int(5) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `contact_id` int(5) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `leave_application`
 --
 ALTER TABLE `leave_application`
   MODIFY `leave_id` int(5) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
-
---
--- Constraints for dumped tables
---
-
---
--- Constraints for table `emergency_contacts`
---
-ALTER TABLE `emergency_contacts`
-  ADD CONSTRAINT `emergency_contacts_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users_master` (`user_id`) ON DELETE CASCADE;
-
---
--- Constraints for table `leave_application`
---
-ALTER TABLE `leave_application`
-  ADD CONSTRAINT `leave_application_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users_master` (`user_id`),
-  ADD CONSTRAINT `leave_application_ibfk_2` FOREIGN KEY (`leave_type`) REFERENCES `leave_types` (`leave_type`);
-
---
--- Constraints for table `leave_balance`
---
-ALTER TABLE `leave_balance`
-  ADD CONSTRAINT `leave_balance_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users_master` (`user_id`),
-  ADD CONSTRAINT `leave_balance_ibfk_2` FOREIGN KEY (`leave_type`) REFERENCES `leave_types` (`leave_type`);
-
---
--- Constraints for table `users_master`
---
-ALTER TABLE `users_master`
-  ADD CONSTRAINT `users_master_ibfk_1` FOREIGN KEY (`department_id`) REFERENCES `department` (`department_id`),
-  ADD CONSTRAINT `users_master_ibfk_2` FOREIGN KEY (`role_id`) REFERENCES `role` (`role_id`),
-  ADD CONSTRAINT `users_master_ibfk_3` FOREIGN KEY (`approver_id`) REFERENCES `users_master` (`user_id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

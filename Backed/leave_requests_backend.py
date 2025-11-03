@@ -35,13 +35,13 @@ def get_leave_requests():
     conn = get_db_connection()
     if not conn:
         return []
-    
+
     try:
         cursor = conn.cursor(dictionary=True)
-        
+
         # Query to get all leave requests with employee details
         query = """
-        SELECT 
+        SELECT
             la.leave_id,
             u.user_name as employee,
             la.leave_type as type,
@@ -61,21 +61,24 @@ def get_leave_requests():
         LEFT JOIN users_master approver ON u.approver_id = approver.user_id
         ORDER BY la.applied_on DESC
         """
-        
+
+        print(f"Executing leave requests query...")  # Debug print
         cursor.execute(query)
         requests = cursor.fetchall()
-        
+        print(f"Found {len(requests)} leave requests in database")  # Debug print
+
         # Format the data for frontend
         formatted_requests = []
         for req in requests:
+            print(f"Processing request ID: {req['leave_id']}, Status: {req['status']}")  # Debug print
             # Format dates
             start_date = req['start_date'].strftime('%b %d, %Y') if req['start_date'] else ''
             end_date = req['end_date'].strftime('%b %d, %Y') if req['end_date'] else ''
             dates = f"{start_date} – {end_date}" if start_date and end_date else ''
-            
+
             # Format duration
             duration = f"{req['duration_days']} day{'s' if req['duration_days'] != 1 else ''}"
-            
+
             # Format status for frontend
             status_map = {
                 'pending': 'Pending',
@@ -83,7 +86,7 @@ def get_leave_requests():
                 'declined': 'Rejected'
             }
             status = status_map.get(req['status'].lower(), req['status'])
-            
+
             formatted_requests.append({
                 'employee': req['employee'],
                 'type': req['type'],
@@ -100,14 +103,17 @@ def get_leave_requests():
                 'start_date': start_date,
                 'end_date': end_date
             })
-        
+
+        print(f"Returning {len(formatted_requests)} formatted requests")  # Debug print
         return formatted_requests
-        
+
     except mysql.connector.Error as e:
         print(f"Database error: {e}")
         return []
     except Exception as e:
         print(f"Unexpected error: {e}")
+        import traceback
+        traceback.print_exc()
         return []
     finally:
         if 'cursor' in locals():

@@ -41,6 +41,59 @@ document.addEventListener('DOMContentLoaded', function () {
         '2025-5-12': { type: 'personal', title: 'Family Event', status: 'approved' },
     };
 
+    // Holiday data - will be fetched from API
+    let holidayData = {};
+
+    // Function to fetch holidays from dashboard API
+    async function loadHolidays() {
+        try {
+            const token = localStorage.getItem('authToken');
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+
+            const response = await fetch('http://127.0.0.1:5000/api/dashboard-data', {
+                credentials: 'include',
+                headers: headers
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            const holidays = data.holidays || [];
+
+            // Convert holidays to the format expected by calendar
+            holidays.forEach(holiday => {
+                const dateKey = holiday.date; // Already in YYYY-MM-DD format
+                holidayData[dateKey] = {
+                    type: 'holiday',
+                    title: holiday.name,
+                    status: 'holiday'
+                };
+            });
+
+            console.log('✓ Holidays loaded from API:', holidayData);
+            return true;
+        } catch (error) {
+            console.error('Error fetching holidays:', error);
+            // Use fallback holiday data if API fails
+            holidayData = {
+                '2025-01-26': { type: 'holiday', title: 'Republic Day', status: 'holiday' },
+                '2025-03-14': { type: 'holiday', title: 'Holi', status: 'holiday' },
+                '2025-08-15': { type: 'holiday', title: 'Independence Day', status: 'holiday' },
+                '2025-10-02': { type: 'holiday', title: 'Gandhi Jayanti', status: 'holiday' },
+                '2025-12-25': { type: 'holiday', title: 'Christmas', status: 'holiday' }
+            };
+            return false;
+        }
+    }
+
     // Function to generate calendar days for month view
     function generateMonthCalendar(month, year) {
         const monthNames = ["January", "February", "March", "April", "May", "June",
@@ -107,6 +160,21 @@ document.addEventListener('DOMContentLoaded', function () {
                 dayElement.appendChild(statusIndicator);
             }
 
+            // Add holiday markers if applicable
+            if (holidayData[dateKey]) {
+                const holidayMarker = document.createElement('div');
+                const holiday = holidayData[dateKey];
+                holidayMarker.className = `leave-marker ${holiday.type}-leave ${holiday.status}-status`;
+                holidayMarker.textContent = holiday.title;
+                dayElement.appendChild(holidayMarker);
+
+                // Add holiday indicator
+                const holidayIndicator = document.createElement('div');
+                holidayIndicator.className = `status-indicator ${holiday.status}`;
+                holidayIndicator.title = 'Public Holiday';
+                dayElement.appendChild(holidayIndicator);
+            }
+
             // Add click event to select date
             dayElement.addEventListener('click', function () {
                 // Remove selected class from all days
@@ -120,8 +188,21 @@ document.addEventListener('DOMContentLoaded', function () {
                 // Update selected date
                 selectedDate = new Date(year, month, i);
 
-                // Show date details modal
-                showDateDetails(year, month + 1, i);
+                // Check if this date has leave or holiday - if so, show details modal
+                const dateKey = `${year}-${month + 1}-${i}`;
+                if (leaveData[dateKey] || holidayData[dateKey]) {
+                    // Show date details modal for dates with leave/holiday
+                    showDateDetails(year, month + 1, i);
+                } else {
+                    // For empty dates, redirect to leave application with pre-filled date
+                    const formattedDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+
+                    // Store selected date in localStorage for the leave application form
+                    localStorage.setItem('selectedLeaveDate', formattedDate);
+
+                    // Redirect to leave application page
+                    window.location.href = '../leaveapplication/leaveapplication.html';
+                }
             });
 
             monthCalendar.appendChild(dayElement);
@@ -217,6 +298,19 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // Hide request leave button for dates with existing leaves
             requestLeaveBtn.style.display = 'none';
+        } else if (holidayData[dateKey]) {
+            const holiday = holidayData[dateKey];
+
+            modalContent = `
+                <div class="holiday-details">
+                    <p><strong>Holiday:</strong> <span class="leave-type ${holiday.type}">${holiday.title}</span></p>
+                    <p><strong>Type:</strong> <span class="status-badge status-holiday">Public Holiday</span></p>
+                    <p><strong>Date:</strong> ${formattedDate}</p>
+                </div>
+            `;
+
+            // Hide request leave button for holidays
+            requestLeaveBtn.style.display = 'none';
         } else {
             modalContent = `
                 <div class="no-leave-details">
@@ -233,8 +327,13 @@ document.addEventListener('DOMContentLoaded', function () {
         dateModal.style.display = 'flex';
     }
 
-    // Initialize calendar
-    generateMonthCalendar(currentMonth, currentYear);
+    // Initialize calendar with holidays
+    async function initializeCalendar() {
+        await loadHolidays();
+        generateMonthCalendar(currentMonth, currentYear);
+    }
+
+    initializeCalendar();
 
     // Navigation buttons
     if (prevMonthBtn) {
@@ -266,11 +365,26 @@ document.addEventListener('DOMContentLoaded', function () {
             syncBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Syncing...';
             syncBtn.disabled = true;
 
-            // Simulate API call
-            setTimeout(function () {
-                alert('Calendar synced successfully with your external calendar!');
-                syncBtn.innerHTML = '<i class="fas fa-sync"></i> Sync Calendar';
-                syncBtn.disabled = false;
+            // Refresh calendar data by reloading holidays and regenerating calendar
+            setTimeout(async function () {
+                try {
+                    // Reload holidays from API
+                    await loadHolidays();
+
+                    // Regenerate current month calendar
+                    generateMonthCalendar(currentMonth, currentYear);
+
+                    // Show success message
+                    showToast('Success', 'Calendar synced successfully!', 'success');
+
+                } catch (error) {
+                    console.error('Error syncing calendar:', error);
+                    showToast('Error', 'Failed to sync calendar. Please try again.', 'error');
+                } finally {
+                    // Reset button state
+                    syncBtn.innerHTML = '<i class="fas fa-sync"></i> Sync Calendar';
+                    syncBtn.disabled = false;
+                }
             }, 1500);
         });
     }

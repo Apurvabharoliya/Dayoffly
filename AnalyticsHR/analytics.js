@@ -10,6 +10,8 @@ class HRAnalytics {
             period: '6months',
             view: 'leaves'
         };
+        this.currentPage = 1;
+        this.perPage = 10;
         this.init();
     }
 
@@ -24,22 +26,36 @@ class HRAnalytics {
             this.currentFilters.period = e.target.value;
             this.refreshData();
         });
-        
+
         document.getElementById('departmentFilter')?.addEventListener('change', (e) => {
             this.currentFilters.department = e.target.value;
             // Reset employee filter when department changes
             this.currentFilters.employee = 'all';
             this.refreshData();
         });
-        
+
         document.getElementById('employeeFilter')?.addEventListener('change', (e) => {
             this.currentFilters.employee = e.target.value;
             this.refreshData();
         });
-        
+
         document.getElementById('viewFilter')?.addEventListener('change', (e) => {
             this.currentFilters.view = e.target.value;
             this.refreshData();
+        });
+
+        // Reset pagination when filters change
+        document.getElementById('periodFilter')?.addEventListener('change', () => {
+            this.currentPage = 1;
+        });
+        document.getElementById('departmentFilter')?.addEventListener('change', () => {
+            this.currentPage = 1;
+        });
+        document.getElementById('employeeFilter')?.addEventListener('change', () => {
+            this.currentPage = 1;
+        });
+        document.getElementById('viewFilter')?.addEventListener('change', () => {
+            this.currentPage = 1;
         });
     }
 
@@ -52,7 +68,9 @@ class HRAnalytics {
                 department: this.currentFilters.department,
                 employee: this.currentFilters.employee,
                 period: this.currentFilters.period,
-                view: this.currentFilters.view
+                view: this.currentFilters.view,
+                page: this.currentPage,
+                per_page: this.perPage
             });
 
             const response = await fetch(`http://127.0.0.1:5000/hr/analytics-data?${params}`, {
@@ -93,12 +111,12 @@ class HRAnalytics {
         if (departmentSelect) {
             // Keep current selection
             const currentDept = departmentSelect.value;
-            
+
             // Clear existing options except "All Departments"
             while (departmentSelect.options.length > 1) {
                 departmentSelect.remove(1);
             }
-            
+
             // Add departments from database
             this.analyticsData.filters.departments.forEach(dept => {
                 const option = document.createElement('option');
@@ -106,7 +124,7 @@ class HRAnalytics {
                 option.textContent = dept;
                 departmentSelect.appendChild(option);
             });
-            
+
             // Restore selection if it still exists
             if (currentDept !== 'all') {
                 const optionExists = Array.from(departmentSelect.options).some(opt => opt.value === currentDept);
@@ -124,12 +142,12 @@ class HRAnalytics {
         if (employeeSelect) {
             // Keep current selection
             const currentEmployee = employeeSelect.value;
-            
+
             // Clear existing options except "All Employees"
             while (employeeSelect.options.length > 1) {
                 employeeSelect.remove(1);
             }
-            
+
             // Add employees from database
             this.analyticsData.filters.allEmployees.forEach(emp => {
                 const option = document.createElement('option');
@@ -137,7 +155,7 @@ class HRAnalytics {
                 option.textContent = `${emp.user_name} (${emp.department_name})`;
                 employeeSelect.appendChild(option);
             });
-            
+
             // Restore selection if it still exists
             if (currentEmployee !== 'all') {
                 const optionExists = Array.from(employeeSelect.options).some(opt => opt.value === currentEmployee);
@@ -200,7 +218,7 @@ class HRAnalytics {
         if (!titleElement) return;
 
         let title = 'Leave Analytics Dashboard';
-        
+
         if (this.currentFilters.employee !== 'all') {
             const employeeSelect = document.getElementById('employeeFilter');
             const selectedOption = employeeSelect?.selectedOptions[0];
@@ -346,9 +364,9 @@ class HRAnalytics {
 
         // Show message if no data or when viewing single employee
         if (labels.length === 0 || this.currentFilters.employee !== 'all') {
-            this.showNoDataMessage('departmentChart', 
-                this.currentFilters.employee !== 'all' 
-                    ? 'Department chart not available for individual employees' 
+            this.showNoDataMessage('departmentChart',
+                this.currentFilters.employee !== 'all'
+                    ? 'Department chart not available for individual employees'
                     : 'No department data available');
             return;
         }
@@ -450,13 +468,45 @@ class HRAnalytics {
     populateEmployeeTable() {
         if (!this.analyticsData) return;
 
-        const tableBody = document.querySelector('#employee-leave-table tbody');
-        if (!tableBody) return;
+        const tableContainer = document.getElementById('employee-table-container');
+        if (!tableContainer) return;
 
         const employees = this.analyticsData.employees;
+        const pagination = this.analyticsData.pagination;
+
+        // Create table HTML with pagination
+        let tableHTML = `
+            <div class="table-controls">
+                <div class="table-info">
+                    Showing ${employees.length} of ${pagination.total} employees
+                </div>
+                <div class="pagination-controls">
+                    <button id="prev-page" ${pagination.page <= 1 ? 'disabled' : ''}>
+                        <i class="fas fa-chevron-left"></i> Previous
+                    </button>
+                    <span class="page-info">
+                        Page ${pagination.page} of ${pagination.total_pages}
+                    </span>
+                    <button id="next-page" ${pagination.page >= pagination.total_pages ? 'disabled' : ''}>
+                        Next <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+            <table id="employee-leave-table">
+                <thead>
+                    <tr>
+                        <th>Employee</th>
+                        <th>Department</th>
+                        <th>Leaves Taken</th>
+                        <th>Remaining Balance</th>
+                        <th>Utilization Rate</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
 
         if (employees.length === 0) {
-            tableBody.innerHTML = `
+            tableHTML += `
                 <tr>
                     <td colspan="5" class="empty-state">
                         <i class="fas fa-info-circle"></i>
@@ -464,25 +514,58 @@ class HRAnalytics {
                     </td>
                 </tr>
             `;
-            return;
+        } else {
+            tableHTML += employees.map(emp => `
+                <tr>
+                    <td>${this.escapeHtml(emp.employee)}</td>
+                    <td>${this.escapeHtml(emp.department)}</td>
+                    <td>${emp.leavesTaken}</td>
+                    <td>${emp.remainingBalance}</td>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <div class="progress-bar">
+                                <div class="progress" style="width: ${Math.min(emp.utilizationRate, 100)}%"></div>
+                            </div>
+                            <span>${emp.utilizationRate}%</span>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
         }
 
-        tableBody.innerHTML = employees.map(emp => `
-            <tr>
-                <td>${this.escapeHtml(emp.employee)}</td>
-                <td>${this.escapeHtml(emp.department)}</td>
-                <td>${emp.leavesTaken}</td>
-                <td>${emp.remainingBalance}</td>
-                <td>
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                        <div class="progress-bar">
-                            <div class="progress" style="width: ${Math.min(emp.utilizationRate, 100)}%"></div>
-                        </div>
-                        <span>${emp.utilizationRate}%</span>
-                    </div>
-                </td>
-            </tr>
-        `).join('');
+        tableHTML += `
+                </tbody>
+            </table>
+        `;
+
+        tableContainer.innerHTML = tableHTML;
+
+        // Add pagination event listeners
+        this.setupPaginationListeners();
+    }
+
+    setupPaginationListeners() {
+        const prevButton = document.getElementById('prev-page');
+        const nextButton = document.getElementById('next-page');
+
+        if (prevButton) {
+            prevButton.addEventListener('click', () => {
+                if (this.currentPage > 1) {
+                    this.currentPage--;
+                    this.loadAnalyticsData();
+                }
+            });
+        }
+
+        if (nextButton) {
+            nextButton.addEventListener('click', () => {
+                const totalPages = this.analyticsData?.pagination?.total_pages || 1;
+                if (this.currentPage < totalPages) {
+                    this.currentPage++;
+                    this.loadAnalyticsData();
+                }
+            });
+        }
     }
 
     escapeHtml(text) {
@@ -496,7 +579,55 @@ class HRAnalytics {
     }
 }
 
+// Load user info for dynamic display
+async function loadUserInfo() {
+    try {
+        const response = await fetch(`http://127.0.0.1:5000/hr/dashboard-data`, {
+            method: 'GET',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        if (data.success && data.user_info) {
+            updateUserInfo(data.user_info);
+        } else {
+            console.warn('No user info available - user may not be logged in');
+            // Don't show fallback - let frontend handle empty state
+        }
+    } catch (error) {
+        console.error('Error fetching user info:', error);
+        // Don't show fallback - let frontend handle empty state
+    }
+}
+
+function updateUserInfo(userInfo) {
+    const userNameElement = document.getElementById('user-name');
+    const userAvatarElement = document.getElementById('user-avatar');
+    const userDesignationElement = document.getElementById('user-designation');
+
+    if (userNameElement && userInfo.user_name) {
+        userNameElement.textContent = userInfo.user_name;
+    }
+
+    if (userAvatarElement && userInfo.user_name) {
+        userAvatarElement.textContent = userInfo.user_name.charAt(0).toUpperCase();
+    }
+
+    if (userDesignationElement && userInfo.designation) {
+        userDesignationElement.textContent = userInfo.designation;
+    }
+}
+
 // Initialize analytics when DOM is loaded
 document.addEventListener('DOMContentLoaded', function () {
+    loadUserInfo();
     new HRAnalytics();
 });

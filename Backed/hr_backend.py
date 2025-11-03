@@ -4,6 +4,7 @@ from functools import wraps
 import mysql.connector
 from datetime import datetime
 import os
+from user import get_user_details
 
 # Create Blueprint for HR routes
 hr_bp = Blueprint('hr', __name__)
@@ -206,13 +207,26 @@ def hr_dashboard_data():
         # Get all data
         leave_requests = get_leave_requests()
         dashboard_stats = get_dashboard_stats()
-        
+
+        # Get user info from session - should be set during login
+        user_info = session.get('user', {})
+        if not user_info:
+            # No user logged in - return empty user info
+            # Frontend will handle displaying appropriate message or requiring login
+            user_info = {}
+
+        # Get detailed user information using the user.py module
+        detailed_user_info = get_user_details()
+        if detailed_user_info:
+            user_info.update(detailed_user_info)
+
         return jsonify({
             "success": True,
             "leave_requests": leave_requests,
-            "dashboard_stats": dashboard_stats
+            "dashboard_stats": dashboard_stats,
+            "user_info": user_info
         })
-        
+
     except Exception as e:
         print(f"Error in HR dashboard: {e}")
         return jsonify({

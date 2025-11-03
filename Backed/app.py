@@ -1,9 +1,10 @@
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for, send_from_directory
 import mysql.connector
 import os
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 import json
-from flask_cors import CORS  
+import jwt
+from flask_cors import CORS
 
 # all the Imports for blueprints
 
@@ -64,6 +65,19 @@ def get_db_connection():
         print(f"✗ Database connection failed: {e}")
         return None
 
+def verify_jwt_token(token):
+    """Verify JWT token and return payload"""
+    try:
+        # Use the same secret key as login_backend.py
+        JWT_SECRET_KEY = 'your-jwt-secret-key-change-in-production'
+        JWT_ALGORITHM = 'HS256'
+        payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
+        return payload
+    except jwt.ExpiredSignatureError:
+        return None
+    except jwt.InvalidTokenError:
+        return None
+
 # Add these API routes to app.py to handle the missing endpoints
 @app.route('/api/employees')
 def api_employees():
@@ -95,18 +109,26 @@ def api_add_employee():
     """API endpoint to add employee - redirect to blueprint"""
     return employee_bp.add_employee()
 
-def get_dashboard_data(user_id=30002):
+def get_dashboard_data(user_id=None):
     """Get dashboard data from database"""
+    # Get user_id from session if not provided
+    if user_id is None:
+        if 'user' in session and session['user']:
+            user_id = session['user']['user_id']
+        else:
+            # Fallback to mock data if no session
+            return get_mock_data()
+
     conn = get_db_connection()
     if not conn:
         return get_mock_data()
-    
-    try: 
+
+    try:
         cursor = conn.cursor(dictionary=True)
-        
+
         # Get user info
         cursor.execute("""
-            SELECT u.user_id, u.user_name, u.email, u.designation, 
+            SELECT u.user_id, u.user_name, u.email, u.designation,
                    d.department_name, r.role_name
             FROM users_master u
             LEFT JOIN department d ON u.department_id = d.department_id
@@ -114,33 +136,40 @@ def get_dashboard_data(user_id=30002):
             WHERE u.user_id = %s
         """, (user_id,))
         user_info = cursor.fetchone()
-        
+
         if not user_info:
             user_info = {'user_name': 'Employee User', 'designation': 'Web Developer'}
         
-        # Get leave balance - FIXED QUERY
+        # Get leave balance - SUM all leave types for the user
         cursor.execute("""
-            SELECT total_leaves, used_leaves, remaining_leaves 
-            FROM leave_balance 
+            SELECT
+                SUM(total_leaves) as total_leaves,
+                SUM(used_leaves) as used_leaves,
+                SUM(remaining_leaves) as remaining_leaves
+            FROM leave_balance
             WHERE user_id = %s
         """, (user_id,))
         leave_data = cursor.fetchone()
-        
-        if leave_data:
+
+        if leave_data and leave_data['total_leaves'] is not None:
             total_allowed = leave_data['total_leaves']
             total_used = leave_data['used_leaves']
             total_remaining = leave_data['remaining_leaves']
         else:
+            # Fallback to default values if no leave balance found
             total_allowed = 20
-            total_used = 15
-            total_remaining = 5
+            total_used = 0
+            total_remaining = 20
         
-        # Holidays data
+        # Holidays data - Updated with current/future dates
         holidays = [
-            {"name": "Republic Day", "date": "2024-01-26"},
-            {"name": "Holi", "date": "2024-03-25"},
-            {"name": "Independence Day", "date": "2024-08-15"},
-            {"name": "Diwali", "date": "2024-11-12"}
+            {"name": "Republic Day", "date": "2025-01-26"},
+            {"name": "Holi", "date": "2025-03-14"},
+            {"name": "Good Friday", "date": "2025-04-18"},
+            {"name": "Independence Day", "date": "2025-08-15"},
+            {"name": "Gandhi Jayanti", "date": "2025-10-02"},
+            {"name": "Diwali", "date": "2025-10-20"},
+            {"name": "Christmas", "date": "2025-12-25"}
         ]
         
         today = date.today()
@@ -229,48 +258,59 @@ def get_mock_data():
         ]
     }
 
-def get_leave_status_data(user_id=30002):
+def get_leave_status_data(user_id=None):
     """Get leave status data for the employee"""
+    # Get user_id from session if not provided
+    if user_id is None:
+        if 'user' in session and session['user']:
+            user_id = session['user']['user_id']
+        else:
+            # Fallback to mock data if no session
+            return get_mock_leave_status_data()
+
     conn = get_db_connection()
     if not conn:
         return get_mock_leave_status_data()
-    
+
     try:
         cursor = conn.cursor(dictionary=True)
-        
+
         # Get employee basic info - FIXED QUERY
         cursor.execute("""
-            SELECT u.user_id, u.user_name, u.designation, 
+            SELECT u.user_id, u.user_name, u.designation,
                    d.department_name, u.email, u.contact_number
             FROM users_master u
             LEFT JOIN department d ON u.department_id = d.department_id
             WHERE u.user_id = %s
         """, (user_id,))
         employee_info = cursor.fetchone()
-        
+
         if not employee_info:
             employee_info = {
-                'user_name': 'Employee User', 
+                'user_name': 'Employee User',
                 'designation': 'Web Developer',
                 'department_name': 'IT',
                 'user_id': user_id
             }
         
-        # Get leave balance - FIXED QUERY (using your actual table structure)
+        # Get leave balance - SUM all leave types for the user
         cursor.execute("""
-            SELECT total_leaves, used_leaves, remaining_leaves 
-            FROM leave_balance 
+            SELECT
+                SUM(total_leaves) as total_leaves,
+                SUM(used_leaves) as used_leaves,
+                SUM(remaining_leaves) as remaining_leaves
+            FROM leave_balance
             WHERE user_id = %s
         """, (user_id,))
         leave_balance_data = cursor.fetchone()
-        
+
         print(f"✓ Leave balance query result: {leave_balance_data}")  # Debug print
-        
-        if leave_balance_data:
+
+        if leave_balance_data and leave_balance_data['remaining_leaves'] is not None:
             total_leave_balance = leave_balance_data['remaining_leaves']
         else:
             # If no record found, calculate based on default values
-            total_leave_balance = 6  # Default value
+            total_leave_balance = 20  # Default value
         
         # Get leave applications for this employee - FIXED QUERY
         cursor.execute("""
@@ -469,11 +509,202 @@ def images_static(filename):
 @app.route('/api/dashboard-data')
 def api_dashboard_data():
     """API endpoint for employee dashboard data"""
-    if 'logged_in' not in session or not session['logged_in']:
-        return jsonify({'error': 'Authentication required'}), 401
+    # Check for JWT token in Authorization header
+    auth_header = request.headers.get('Authorization')
 
-    dashboard_data = get_dashboard_data()
-    return jsonify(dashboard_data)
+    if auth_header and auth_header.startswith('Bearer '):
+        token = auth_header[7:]  # Remove 'Bearer ' prefix
+        payload = verify_jwt_token(token)
+
+        if payload:
+            # Use user_id from JWT token
+            user_id = payload['user_id']
+            dashboard_data = get_dashboard_data(user_id)
+            return jsonify(dashboard_data)
+        else:
+            return jsonify({'error': 'Invalid or expired token'}), 401
+    else:
+        # Fallback to session-based authentication for backward compatibility
+        if 'logged_in' not in session or not session['logged_in']:
+            return jsonify({'error': 'Authentication required'}), 401
+
+        dashboard_data = get_dashboard_data()
+        return jsonify(dashboard_data)
+
+@app.route('/api/leave-status-data')
+def api_leave_status_data():
+    """API endpoint for employee leave status data"""
+    # Check for JWT token in Authorization header
+    auth_header = request.headers.get('Authorization')
+
+    if auth_header and auth_header.startswith('Bearer '):
+        token = auth_header[7:]  # Remove 'Bearer ' prefix
+        payload = verify_jwt_token(token)
+
+        if payload:
+            # Use user_id from JWT token
+            user_id = payload['user_id']
+            leave_status_data = get_leave_status_data(user_id)
+            return jsonify(leave_status_data)
+        else:
+            return jsonify({'error': 'Invalid or expired token'}), 401
+    else:
+        # Fallback to session-based authentication for backward compatibility
+        if 'logged_in' not in session or not session['logged_in']:
+            return jsonify({'error': 'Authentication required'}), 401
+
+        leave_status_data = get_leave_status_data()
+        return jsonify(leave_status_data)
+
+@app.route('/api/leave-types')
+def api_leave_types():
+    """API endpoint to get available leave types from database"""
+    # Check for JWT token in Authorization header
+    auth_header = request.headers.get('Authorization')
+
+    if auth_header and auth_header.startswith('Bearer '):
+        token = auth_header[7:]  # Remove 'Bearer ' prefix
+        payload = verify_jwt_token(token)
+
+        if payload:
+            # Use user_id from JWT token
+            user_id = payload['user_id']
+            leave_types_data = get_leave_types(user_id)
+            return jsonify(leave_types_data)
+        else:
+            return jsonify({'error': 'Invalid or expired token'}), 401
+    else:
+        # Fallback to session-based authentication for backward compatibility
+        if 'logged_in' not in session or not session['logged_in']:
+            return jsonify({'error': 'Authentication required'}), 401
+
+        leave_types_data = get_leave_types()
+        return jsonify(leave_types_data)
+
+@app.route('/api/leave-application', methods=['POST'])
+def api_submit_leave_application():
+    """API endpoint to submit a leave application"""
+    # TEMPORARY: For testing purposes, bypass auth completely
+    # TODO: Remove this after testing
+    user_id = 40008  # Use a valid user_id from users_master table
+
+    try:
+        print("=== Starting leave application submission ===")
+        data = request.get_json()
+        print(f"Received data: {data}")
+
+        # Extract form data
+        leave_type = data.get('leaveType')
+        start_date = data.get('startDate')
+        end_date = data.get('endDate')
+        reason = data.get('reason')
+        half_day = data.get('halfDay', False)
+        half_day_option = data.get('halfDayOption')
+        handover = data.get('handover')
+        attachment = data.get('attachment')  # Base64 encoded file
+        attachment_name = data.get('attachmentName')
+        attachment_type = data.get('attachmentType')
+
+        print(f"Extracted: leave_type={leave_type}, start={start_date}, end={end_date}, reason={reason}")
+
+        # Validate required fields
+        if not all([leave_type, start_date, end_date, reason]):
+            print("Missing required fields")
+            return jsonify({'error': 'Missing required fields'}), 400
+
+        # Calculate total days
+        from datetime import datetime
+        print("Parsing dates...")
+        start = datetime.strptime(start_date, '%Y-%m-%d')
+        end = datetime.strptime(end_date, '%Y-%m-%d')
+        total_days = (end - start).days + 1
+        print(f"Calculated total_days: {total_days}")
+
+        # Adjust for half day
+        if half_day:
+            total_days = 0.5
+            print("Adjusted for half day")
+
+        print("Connecting to database...")
+        conn = get_db_connection()
+        if not conn:
+            print("Database connection failed")
+            return jsonify({'error': 'Database connection failed'}), 500
+
+        cursor = conn.cursor()
+        print("Executing insert query...")
+
+        # Insert leave application
+        insert_query = """
+        INSERT INTO leave_application
+        (user_id, leave_type, start_date, end_date, reason, attachment, leave_status, applied_on)
+        VALUES (%s, %s, %s, %s, %s, %s, 'pending', NOW())
+        """
+
+        values = (user_id, leave_type, start_date, end_date, reason, attachment)
+        print(f"Insert values: {values}")
+
+        cursor.execute(insert_query, values)
+
+        print("Committing transaction...")
+        conn.commit()
+
+        # Get the inserted leave_id
+        leave_id = cursor.lastrowid
+        print(f"Inserted leave_id: {leave_id}")
+
+        cursor.close()
+        conn.close()
+
+        print("=== Leave application submitted successfully ===")
+        return jsonify({
+            'success': True,
+            'message': 'Leave application submitted successfully',
+            'leave_id': leave_id
+        })
+
+    except Exception as e:
+        print(f"Error submitting leave application: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': 'Internal server error'}), 500
+
+def get_leave_types(user_id=None):
+    """Get available leave types from database"""
+    conn = get_db_connection()
+    if not conn:
+        return {"leaveTypes": ["Casual Leave", "Sick Leave", "Vacation", "Maternity Leave", "Paternity Leave"]}
+
+    try:
+        cursor = conn.cursor(dictionary=True)
+
+        # Get all leave types from leave_types table
+        cursor.execute("""
+            SELECT leave_type, rules, carry_forward_allowed
+            FROM leave_types
+            ORDER BY leave_type
+        """)
+
+        leave_types = cursor.fetchall()
+
+        # Format the data for frontend
+        formatted_types = []
+        for leave_type in leave_types:
+            formatted_types.append({
+                'name': leave_type['leave_type'],
+                'rules': leave_type['rules'] or 'Standard leave rules apply',
+                'carryForwardAllowed': bool(leave_type['carry_forward_allowed'])
+            })
+
+        return {"leaveTypes": formatted_types}
+
+    except Exception as e:
+        print(f"✗ Error loading leave types: {e}")
+        return {"leaveTypes": ["Casual Leave", "Sick Leave", "Vacation", "Maternity Leave", "Paternity Leave"]}
+    finally:
+        if 'cursor' in locals():
+            cursor.close()
+        conn.close()
 
 @app.route('/')
 def dashboard():
@@ -540,7 +771,7 @@ def hr_employees():
     if user.get('role_name') != 'HR':
         return redirect('/employee-dashboard')
 
-    return render_template('EmployeesHR/employeeHR.html')
+    return render_template('EmployeesHR/employeeHR.html', user_info=user)
 
 
 @app.route('/leave-status')
@@ -565,13 +796,13 @@ def hr_leave_requests_page():
     """Serve HR Leave Requests page"""
     if 'logged_in' not in session or not session['logged_in']:
         return redirect('/login-page')
-    
+
     # Check if user is HR
     user = session.get('user', {})
     if user.get('role_name') != 'HR':
         return redirect('/employee-dashboard')
-    
-    return render_template('HR/leaveRequestHR.html')
+
+    return render_template('HR/leaveRequestHR.html', user_info=user)
     
 @app.route('/debug/all-leave-requests')
 def debug_all_leave_requests():
@@ -601,15 +832,13 @@ def hr_analytics():
     """Serve HR Analytics page"""
     if 'logged_in' not in session or not session['logged_in']:
         return redirect('/login-page')
-    
+
     # Check if user is HR
     user = session.get('user', {})
     if user.get('role_name') != 'HR':
         return redirect('/employee-dashboard')
-    
-    return render_template('HR/analyticsHR.html')
-    
-    return render_template('HR/analyticsHR.html')
+
+    return render_template('HR/analyticsHR.html', user_info=user)
 # HR Dashboard Route
 @app.route('/hr-dashboard')
 def hr_dashboard():
@@ -617,13 +846,13 @@ def hr_dashboard():
     # Simple authentication check
     if 'logged_in' not in session or not session['logged_in']:
         return redirect('/login-page')
-    
+
     # Check if user is HR
     user = session.get('user', {})
     if user.get('role_name') != 'HR':
         return redirect('/employee-dashboard')  # Redirect non-HR users to employee dashboard
-    
-    return render_template('HRDashboard.html')
+
+    return render_template('HRDashboard.html', user_info=user)
 
 # Debug route to check database connection
 @app.route('/debug-leave-data')

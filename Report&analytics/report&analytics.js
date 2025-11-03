@@ -24,16 +24,24 @@ async function checkAuthentication() {
     try {
         showLoading();
 
-        // Try to get user data from session
-        const response = await fetch('http://127.0.0.1:5000/api/current-user', {
+        // Try to get user data from session using the same endpoint as other pages
+        const token = localStorage.getItem('authToken');
+        const headers = {
+            'Content-Type': 'application/json'
+        };
+
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+
+        const response = await fetch('http://127.0.0.1:5000/api/dashboard-data', {
             credentials: 'include',
-            headers: {
-                'Content-Type': 'application/json'
-            }
+            headers: headers
         });
 
         if (response.ok) {
-            userData = await response.json();
+            const dashboardData = await response.json();
+            userData = dashboardData.user_info;
             currentUserId = userData.user_id;
             await loadUserAnalytics();
         } else {
@@ -66,11 +74,18 @@ async function loadUserAnalytics() {
         }
 
         // Fetch user-specific analytics data
+        const token = localStorage.getItem('authToken');
+        const headers = {
+            'Content-Type': 'application/json'
+        };
+
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+
         const response = await fetch(`http://127.0.0.1:5000/api/user-analytics/${currentUserId}`, {
             credentials: 'include',
-            headers: {
-                'Content-Type': 'application/json'
-            }
+            headers: headers
         });
 
         if (!response.ok) {

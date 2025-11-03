@@ -66,12 +66,20 @@
   // Function to fetch dashboard data from API
   async function fetchDashboardData() {
     try {
+      const token = localStorage.getItem('authToken');
+      const headers = {
+        'Content-Type': 'application/json'
+      };
+
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       const response = await fetch('http://127.0.0.1:5000/api/dashboard-data', {
         credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json'
-        }
+        headers: headers
       });
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -103,7 +111,7 @@
     const dashboardData = await fetchDashboardData();
 
     // Extract data
-    const { stats, chartData, holidays } = dashboardData;
+    const { user_info, stats, chartData, holidays } = dashboardData;
     const months = chartData.months;
     const leavesTaken = chartData.leavesTaken;
     const daysPresent = chartData.daysPresent;
@@ -112,12 +120,22 @@
     const totalRemaining = stats.totalRemaining;
     const upcomingHolidaysCount = stats.upcomingHolidays;
 
+    // Update header with user information
+    const employeeNameEl = $("#employeeName");
+    const employeeDesignationEl = $("#employeeDesignation");
+    if (employeeNameEl && user_info && user_info.user_name) {
+      employeeNameEl.textContent = `Welcome, ${user_info.user_name}`;
+    }
+    if (employeeDesignationEl && user_info && user_info.designation) {
+      employeeDesignationEl.textContent = user_info.designation;
+    }
+
     // Calculate carry forward (simple calculation based on remaining)
     const carryForward = Math.max(0, totalAllowed - 20); // Assuming base is 20
 
     // Update stats
     animateCount($("#carryForward"), carryForward);
-    animateCount($("#totalLeaves"), totalLeaves);
+    animateCount($("#totalLeaves"), totalRemaining);
     animateCount($("#totalAllowed"), totalAllowed);
     animateCount($("#upcomingHolidays"), upcomingHolidaysCount);
 
@@ -219,5 +237,10 @@
     filterSelect.addEventListener("change", (e) => {
       renderHolidays(e.target.value);
     });
+
+    // Update remaining leaves stat
+    if (data.stats && data.stats.totalRemaining !== undefined) {
+      animateCount($("#totalLeaves"), data.stats.totalRemaining);
+    }
   });
 })();

@@ -19,10 +19,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function initializePage() {
   await fetchLeaveRequests();
+  await loadUserInfo();
   setupEventListeners();
 
-  // Refresh data every 30 seconds for live updates
-  setInterval(fetchLeaveRequests, 30000);
+  // Refresh data every 1 minute for live updates
+  setInterval(fetchLeaveRequests, 60000);
 }
 
 function setupEventListeners() {
@@ -37,6 +38,10 @@ function setupEventListeners() {
   // Search functionality
   const searchInput = document.getElementById('search-input');
   searchInput.addEventListener('input', debounce(handleSearch, 300));
+
+  // Refresh button
+  const refreshBtn = document.getElementById('refresh-btn');
+  refreshBtn.addEventListener('click', handleManualRefresh);
 
   // Pagination
   document.getElementById('prev-page').addEventListener('click', goToPreviousPage);
@@ -173,6 +178,28 @@ function filterRequests() {
 
 function handleSearch() {
   applyFilter(currentFilter);
+}
+
+async function handleManualRefresh() {
+  const refreshBtn = document.getElementById('refresh-btn');
+  const icon = refreshBtn.querySelector('i');
+
+  // Add refreshing class for animation
+  refreshBtn.classList.add('refreshing');
+  refreshBtn.disabled = true;
+  refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Refreshing...';
+
+  try {
+    await fetchLeaveRequests();
+    showNotification('Data refreshed successfully!', 'success');
+  } catch (error) {
+    showNotification('Failed to refresh data', 'error');
+  } finally {
+    // Remove refreshing class and restore button
+    refreshBtn.classList.remove('refreshing');
+    refreshBtn.disabled = false;
+    refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Refresh';
+  }
 }
 
 function debounce(func, wait) {
@@ -448,7 +475,7 @@ function populateViewModal(request) {
   const statusBadge = document.getElementById('modal-status-badge');
   statusBadge.textContent = request.status || 'Pending';
   statusBadge.className = 'status-badge';
-  
+
   if (request.status === 'Pending') {
     statusBadge.classList.add('status-pending-badge');
   } else if (request.status === 'Approved') {
@@ -460,7 +487,7 @@ function populateViewModal(request) {
   // Show/hide change action section based on current status
   const changeActionSection = document.getElementById('change-action-section');
   const currentStatusElement = document.getElementById('current-status');
-  
+
   if (request.status === 'Pending') {
     changeActionSection.style.display = 'none';
   } else {
@@ -645,4 +672,51 @@ function getNotificationIcon(type) {
     info: 'fa-info-circle'
   };
   return icons[type] || 'fa-info-circle';
+}
+
+// Load user info for dynamic display
+async function loadUserInfo() {
+  try {
+    const response = await fetch(`${API_BASE_URL}/hr/dashboard-data`, {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    if (data.success && data.user_info) {
+      updateUserInfo(data.user_info);
+    } else {
+      console.warn('No user info available - user may not be logged in');
+      // Don't show fallback - let frontend handle empty state
+    }
+  } catch (error) {
+    console.error('Error fetching user info:', error);
+    // Don't show fallback - let frontend handle empty state
+  }
+}
+
+function updateUserInfo(userInfo) {
+  const userNameElement = document.getElementById('user-name');
+  const userAvatarElement = document.getElementById('user-avatar');
+  const userDesignationElement = document.getElementById('user-designation');
+
+  if (userNameElement && userInfo.user_name) {
+    userNameElement.textContent = userInfo.user_name;
+  }
+
+  if (userAvatarElement && userInfo.user_name) {
+    userAvatarElement.textContent = userInfo.user_name.charAt(0).toUpperCase();
+  }
+
+  if (userDesignationElement && userInfo.designation) {
+    userDesignationElement.textContent = userInfo.designation;
+  }
 }

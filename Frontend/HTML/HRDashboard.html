@@ -1,14 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dayoffly - HR Dashboard</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link rel="stylesheet" href="/CSS/HRDashboard.css">
   <link rel="icon" href="/images/rounded logo for Day.png">
 </head>
+
 <body>
   <div class="container">
     <!-- Sidebar -->
@@ -44,10 +46,10 @@
           <p>Manage leave requests and monitor team activity</p>
         </div>
         <div class="user-info">
-          <div class="user-avatar">HR</div>
+          <div class="user-avatar" id="user-avatar">HR</div>
           <div>
-            <div>Sarah Johnson</div>
-            <div style="font-size: 0.8rem; color: var(--gray);">HR Manager</div>
+            <div id="user-name">Loading...</div>
+            <div id="user-designation" style="font-size: 0.8rem; color: var(--gray);">HR Manager</div>
           </div>
         </div>
       </header>
@@ -128,47 +130,47 @@
 
   <script>
     const requests = [
-      { 
-        employee: 'Amit Shah', 
-        type: 'Casual', 
-        dates: 'Sep 20–22, 2023', 
+      {
+        employee: 'Amit Shah',
+        type: 'Casual',
+        dates: 'Sep 20–22, 2023',
         duration: '3 days',
-        status: 'Pending' 
+        status: 'Pending'
       },
-      { 
-        employee: 'Priya Mehta', 
-        type: 'Sick', 
-        dates: 'Sep 15–16, 2023', 
+      {
+        employee: 'Priya Mehta',
+        type: 'Sick',
+        dates: 'Sep 15–16, 2023',
         duration: '2 days',
-        status: 'Approved' 
+        status: 'Approved'
       },
-      { 
-        employee: 'Ravi Patel', 
-        type: 'Earned', 
-        dates: 'Sep 10–12, 2023', 
+      {
+        employee: 'Ravi Patel',
+        type: 'Earned',
+        dates: 'Sep 10–12, 2023',
         duration: '3 days',
-        status: 'Pending' 
+        status: 'Pending'
       },
-      { 
-        employee: 'Sneha Desai', 
-        type: 'Maternity', 
-        dates: 'Oct 1–Dec 31, 2023', 
+      {
+        employee: 'Sneha Desai',
+        type: 'Maternity',
+        dates: 'Oct 1–Dec 31, 2023',
         duration: '92 days',
-        status: 'Approved' 
+        status: 'Approved'
       },
-      { 
-        employee: 'Vikram Singh', 
-        type: 'Casual', 
-        dates: 'Sep 25–26, 2023', 
+      {
+        employee: 'Vikram Singh',
+        type: 'Casual',
+        dates: 'Sep 25–26, 2023',
         duration: '2 days',
-        status: 'Rejected' 
+        status: 'Rejected'
       }
     ];
 
     function populateRequests() {
       const tbody = document.getElementById('request-table');
       tbody.innerHTML = '';
-      
+
       requests.forEach(req => {
         const row = document.createElement('tr');
         row.innerHTML = `
@@ -191,7 +193,7 @@
         `;
         tbody.appendChild(row);
       });
-      
+
       updateSummary();
     }
 
@@ -200,10 +202,10 @@
       if (request && request.status === 'Pending') {
         request.status = 'Approved';
         populateRequests();
-        
+
         // Show notification
         showNotification(`Leave approved for ${name}`, 'success');
-        
+
         // Update charts
         updateCharts();
       }
@@ -214,27 +216,27 @@
       if (request && request.status === 'Pending') {
         request.status = 'Rejected';
         populateRequests();
-        
+
         // Show notification
         showNotification(`Leave rejected for ${name}`, 'error');
-        
+
         // Update charts
         updateCharts();
       }
     }
-    
+
     function updateSummary() {
       const totalCount = requests.length;
       const pendingCount = requests.filter(req => req.status === 'Pending').length;
       const approvedCount = requests.filter(req => req.status === 'Approved').length;
       const rejectedCount = requests.filter(req => req.status === 'Rejected').length;
-      
+
       document.getElementById('total-count').textContent = totalCount;
       document.getElementById('pending-count').textContent = pendingCount;
       document.getElementById('approved-count').textContent = approvedCount;
       document.getElementById('rejected-count').textContent = rejectedCount;
     }
-    
+
     function showNotification(message, type) {
       // Create notification element
       const notification = document.createElement('div');
@@ -248,21 +250,21 @@
       notification.style.zIndex = '1000';
       notification.style.opacity = '0';
       notification.style.transition = 'opacity 0.3s';
-      
+
       if (type === 'success') {
         notification.style.background = 'var(--success)';
       } else {
         notification.style.background = 'var(--danger)';
       }
-      
+
       notification.textContent = message;
       document.body.appendChild(notification);
-      
+
       // Fade in
       setTimeout(() => {
         notification.style.opacity = '1';
       }, 10);
-      
+
       // Remove after 3 seconds
       setTimeout(() => {
         notification.style.opacity = '0';
@@ -271,7 +273,7 @@
         }, 300);
       }, 3000);
     }
-    
+
     // Initialize filter buttons
     function initFilters() {
       const filterBtns = document.querySelectorAll('.filter-btn');
@@ -281,15 +283,15 @@
           filterBtns.forEach(b => b.classList.remove('active'));
           // Add active class to clicked button
           btn.classList.add('active');
-          
+
           // In a real app, you would filter the table here
         });
       });
     }
-    
+
     // Create charts with dummy data
     let leaveTypeChart, monthlyTrendChart;
-    
+
     function createCharts() {
       // Dummy data for leave types
       const leaveTypeData = {
@@ -313,7 +315,7 @@
           borderWidth: 1
         }]
       };
-      
+
       // Dummy data for monthly trends
       const monthlyTrendData = {
         labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
@@ -344,7 +346,7 @@
           }
         ]
       };
-      
+
       // Create leave type chart (pie chart)
       const leaveTypeCtx = document.getElementById('leaveTypeChart').getContext('2d');
       leaveTypeChart = new Chart(leaveTypeCtx, {
@@ -360,7 +362,7 @@
           }
         }
       });
-      
+
       // Create monthly trend chart (line chart)
       const monthlyTrendCtx = document.getElementById('monthlyTrendChart').getContext('2d');
       monthlyTrendChart = new Chart(monthlyTrendCtx, {
@@ -382,7 +384,7 @@
         }
       });
     }
-    
+
     function updateCharts() {
       // Update charts with new data if needed
       // For this example, we'll just regenerate the charts
@@ -391,12 +393,60 @@
       createCharts();
     }
 
+    // Load user info for dynamic display
+    async function loadUserInfo() {
+      try {
+        const response = await fetch('../../Backed/hr_backend.py', {
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        if (data.success && data.user_info) {
+          updateUserInfo(data.user_info);
+        } else {
+          console.warn('No user info available');
+        }
+      } catch (error) {
+        console.error('Error fetching user info:', error);
+        // Don't show fallback - let frontend handle empty state
+      }
+    }
+
+    function updateUserInfo(userInfo) {
+      const userNameElement = document.getElementById('user-name');
+      const userAvatarElement = document.getElementById('user-avatar');
+      const userDesignationElement = document.getElementById('user-designation');
+
+      if (userNameElement && userInfo.user_name) {
+        userNameElement.textContent = userInfo.user_name;
+      }
+
+      if (userAvatarElement && userInfo.user_name) {
+        userAvatarElement.textContent = userInfo.user_name.charAt(0).toUpperCase();
+      }
+
+      if (userDesignationElement && userInfo.designation) {
+        userDesignationElement.textContent = userInfo.designation;
+      }
+    }
+
     // Initialize the dashboard
     document.addEventListener('DOMContentLoaded', () => {
+      loadUserInfo();
       populateRequests();
       initFilters();
       createCharts();
     });
   </script>
 </body>
+
 </html>

@@ -34,6 +34,7 @@ document.body.appendChild(confirmModal);
 // Load users when page loads
 document.addEventListener('DOMContentLoaded', () => {
     loadUsers();
+    loadUserInfo();
     document.getElementById('createdDate').value = new Date().toISOString().split('T')[0];
     setupModalCloseListeners();
 });
@@ -42,15 +43,15 @@ document.addEventListener('DOMContentLoaded', () => {
 async function loadUsers() {
     try {
         showLoading();
-        
+
         const response = await fetch(`${API_BASE_URL}/api/users`, {
             credentials: 'include'
         });
-        
+
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
+
         const users = await response.json();
         renderUsers(users);
         hideLoading();
@@ -164,7 +165,7 @@ function renderUsers(users) {
     }
 
     userTableBody.innerHTML = '';
-    
+
     users.forEach(user => {
         const row = document.createElement('tr');
         row.innerHTML = `
@@ -186,7 +187,7 @@ function renderUsers(users) {
         `;
         userTableBody.appendChild(row);
     });
-    
+
     // Add role badge styles
     if (!document.querySelector('#role-badge-styles')) {
         const styles = document.createElement('style');
@@ -229,7 +230,7 @@ function renderUsers(users) {
         `;
         document.head.appendChild(styles);
     }
-    
+
     attachEventListeners();
 }
 
@@ -248,27 +249,27 @@ function attachEventListeners() {
 function showDeleteConfirmation(userId, username) {
     const confirmMessage = document.getElementById('confirmMessage');
     confirmMessage.textContent = `Are you sure you want to delete user "${username}"? This action cannot be undone.`;
-    
+
     const confirmModal = document.getElementById('confirmModal');
     confirmModal.style.display = 'flex';
-    
+
     // Set up confirmation button
     const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
     const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
-    
+
     // Remove existing event listeners
     const newConfirmBtn = confirmDeleteBtn.cloneNode(true);
     const newCancelBtn = cancelDeleteBtn.cloneNode(true);
-    
+
     confirmDeleteBtn.parentNode.replaceChild(newConfirmBtn, confirmDeleteBtn);
     cancelDeleteBtn.parentNode.replaceChild(newCancelBtn, cancelDeleteBtn);
-    
+
     // Add new event listeners
     document.getElementById('confirmDeleteBtn').addEventListener('click', () => {
         deleteUser(userId);
         confirmModal.style.display = 'none';
     });
-    
+
     document.getElementById('cancelDeleteBtn').addEventListener('click', () => {
         confirmModal.style.display = 'none';
     });
@@ -278,14 +279,14 @@ function showDeleteConfirmation(userId, username) {
 async function deleteUser(userId) {
     try {
         showNotification('Deleting user...', 'info');
-        
+
         const deleteResponse = await fetch(`${API_BASE_URL}/api/users/${userId}`, {
             method: 'DELETE',
             credentials: 'include'
         });
-        
+
         const result = await deleteResponse.json();
-        
+
         if (deleteResponse.ok) {
             showNotification('User deleted successfully!', 'success');
             loadUsers();
@@ -312,20 +313,20 @@ addUserBtn.addEventListener('click', () => {
 function setupModalCloseListeners() {
     const closeButtons = document.querySelectorAll('.close-btn');
     const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
-    
+
     closeButtons.forEach(btn => {
         btn.addEventListener('click', () => {
             userModal.style.display = 'none';
             confirmModal.style.display = 'none';
         });
     });
-    
+
     if (cancelDeleteBtn) {
         cancelDeleteBtn.addEventListener('click', () => {
             confirmModal.style.display = 'none';
         });
     }
-    
+
     // Close modals when clicking outside
     window.addEventListener('click', (event) => {
         if (event.target === userModal) {
@@ -344,7 +345,7 @@ cancelBtn.addEventListener('click', () => {
 // Form submission
 userForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    
+
     const formData = {
         username: document.getElementById('username').value,
         email: document.getElementById('email').value,
@@ -354,7 +355,7 @@ userForm.addEventListener('submit', async (e) => {
         designation: document.getElementById('role').value.charAt(0).toUpperCase() + document.getElementById('role').value.slice(1),
         is_active: document.getElementById('isActive').checked
     };
-    
+
     try {
         let response;
         if (currentEditingUserId) {
@@ -376,13 +377,13 @@ userForm.addEventListener('submit', async (e) => {
                 body: JSON.stringify(formData)
             });
         }
-        
+
         const result = await response.json();
-        
+
         if (response.ok) {
             showNotification(
-                currentEditingUserId 
-                    ? 'User updated successfully!' 
+                currentEditingUserId
+                    ? 'User updated successfully!'
                     : `User added successfully! User ID: ${result.user_id}, Password: ${result.password}`,
                 'success'
             );
@@ -408,24 +409,24 @@ function applyFilters() {
     const department = departmentFilter.value;
     const role = roleFilter.value;
     const status = statusFilter.value;
-    
+
     const rows = userTableBody.querySelectorAll('tr');
-    
+
     rows.forEach(row => {
         const username = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
         const email = row.querySelector('td:nth-child(3)').textContent.toLowerCase();
         const userRole = row.querySelector('td:nth-child(5)').textContent.toLowerCase();
         const userDepartment = row.querySelector('td:nth-child(6)').textContent.toLowerCase().replace(' ', '-');
         const userStatus = row.querySelector('td:nth-child(8)').textContent.toLowerCase();
-        
-        const matchesSearch = searchTerm === '' || 
-                             username.includes(searchTerm) || 
-                             email.includes(searchTerm);
-        
+
+        const matchesSearch = searchTerm === '' ||
+            username.includes(searchTerm) ||
+            email.includes(searchTerm);
+
         const matchesDepartment = department === 'all' || userDepartment === department;
         const matchesRole = role === 'all' || userRole === role;
         const matchesStatus = status === 'all' || userStatus === status;
-        
+
         row.style.display = (matchesSearch && matchesDepartment && matchesRole && matchesStatus) ? '' : 'none';
     });
 }
@@ -434,3 +435,50 @@ searchInput.addEventListener('input', applyFilters);
 departmentFilter.addEventListener('change', applyFilters);
 roleFilter.addEventListener('change', applyFilters);
 statusFilter.addEventListener('change', applyFilters);
+
+// Load user info for dynamic display
+async function loadUserInfo() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/hr/dashboard-data`, {
+            method: 'GET',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        if (data.success && data.user_info) {
+            updateUserInfo(data.user_info);
+        } else {
+            console.warn('No user info available - user may not be logged in');
+            // Don't show fallback - let frontend handle empty state
+        }
+    } catch (error) {
+        console.error('Error fetching user info:', error);
+        // Don't show fallback - let frontend handle empty state
+    }
+}
+
+function updateUserInfo(userInfo) {
+    const userNameElement = document.getElementById('user-name');
+    const userAvatarElement = document.getElementById('user-avatar');
+    const userDesignationElement = document.getElementById('user-designation');
+
+    if (userNameElement && userInfo.user_name) {
+        userNameElement.textContent = userInfo.user_name;
+    }
+
+    if (userAvatarElement && userInfo.user_name) {
+        userAvatarElement.textContent = userInfo.user_name.charAt(0).toUpperCase();
+    }
+
+    if (userDesignationElement && userInfo.designation) {
+        userDesignationElement.textContent = userInfo.designation;
+    }
+}

@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function initializeDashboard() {
     await fetchHRData();
-    
+
     // Refresh data every 30 seconds for live updates
     setInterval(fetchHRData, 30000);
 }
@@ -19,7 +19,7 @@ async function initializeDashboard() {
 async function fetchHRData() {
     try {
         showLoadingState();
-        
+
         const response = await fetch('http://localhost:5000/hr/dashboard-data', {
             method: 'GET',
             credentials: 'include',
@@ -27,13 +27,13 @@ async function fetchHRData() {
                 'Content-Type': 'application/json',
             }
         });
-        
+
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
+
         const data = await response.json();
-        
+
         if (data.success) {
             console.log('✅ HR data fetched successfully');
             requests = data.leave_requests || [];
@@ -42,7 +42,7 @@ async function fetchHRData() {
         } else {
             throw new Error(data.message || 'Failed to load data');
         }
-        
+
     } catch (error) {
         console.error('❌ Error fetching HR data:', error);
         handleDataError(error);
@@ -53,6 +53,7 @@ function updateDashboard(data) {
     populateRecentRequests();
     updateSummary(data.dashboard_stats?.leave_requests || {});
     updateCharts(data.dashboard_stats || {});
+    updateUserInfo(data.user_info || {});
 }
 
 function showLoadingState() {
@@ -72,7 +73,7 @@ function handleDataError(error) {
     populateRecentRequests();
     updateSummary({ total: 0, pending: 0, approved: 0, rejected: 0 });
     updateEmptyCharts();
-    
+
     if (error.message.includes('Authentication')) {
         showNotification('Authentication required to access HR dashboard', 'error');
     } else {
@@ -83,17 +84,17 @@ function handleDataError(error) {
 // Request management functions - Read-only overview
 function populateRecentRequests() {
     const tbody = document.getElementById('request-table');
-    
+
     if (!requests || requests.length === 0) {
         tbody.innerHTML = getEmptyStateHTML();
         return;
     }
-    
+
     tbody.innerHTML = '';
-    
+
     // Display recent 5 requests for overview
     const recentRequests = requests.slice(0, 5);
-    
+
     recentRequests.forEach(req => {
         const row = createRequestRow(req);
         tbody.appendChild(row);
@@ -130,7 +131,7 @@ function createRequestRow(req) {
             </a>
         </td>
     `;
-    
+
     return row;
 }
 
@@ -160,7 +161,7 @@ function updateSummary(stats) {
 function updateCharts(dashboardStats) {
     // Safely destroy existing charts
     destroyCharts();
-    
+
     // Create charts with actual data
     createCharts(dashboardStats);
 }
@@ -180,14 +181,14 @@ function createCharts(dashboardStats) {
 }
 
 function createLeaveTypeChart(dashboardStats) {
-    const leaveTypeLabels = dashboardStats.leave_types ? 
-        dashboardStats.leave_types.map(item => item.leave_type) : 
+    const leaveTypeLabels = dashboardStats.leave_types ?
+        dashboardStats.leave_types.map(item => item.leave_type) :
         ['No Data Available'];
-    
-    const leaveTypeCounts = dashboardStats.leave_types ? 
-        dashboardStats.leave_types.map(item => item.count) : 
+
+    const leaveTypeCounts = dashboardStats.leave_types ?
+        dashboardStats.leave_types.map(item => item.count) :
         [1];
-    
+
     const leaveTypeData = {
         labels: leaveTypeLabels,
         datasets: [{
@@ -212,7 +213,7 @@ function createLeaveTypeChart(dashboardStats) {
             hoverOffset: 15
         }]
     };
-    
+
     const leaveTypeCtx = document.getElementById('leaveTypeChart').getContext('2d');
     window.leaveTypeChart = new Chart(leaveTypeCtx, {
         type: 'doughnut',
@@ -231,7 +232,7 @@ function createLeaveTypeChart(dashboardStats) {
                 },
                 tooltip: {
                     callbacks: {
-                        label: function(context) {
+                        label: function (context) {
                             const label = context.label || '';
                             const value = context.raw || 0;
                             const total = context.dataset.data.reduce((a, b) => a + b, 0);
@@ -252,7 +253,7 @@ function createMonthlyTrendChart(dashboardStats) {
         pending: new Array(12).fill(0),
         rejected: new Array(12).fill(0)
     };
-    
+
     const monthlyTrendData = {
         labels: months,
         datasets: [
@@ -285,7 +286,7 @@ function createMonthlyTrendChart(dashboardStats) {
             }
         ]
     };
-    
+
     const monthlyTrendCtx = document.getElementById('monthlyTrendChart').getContext('2d');
     window.monthlyTrendChart = new Chart(monthlyTrendCtx, {
         type: 'line',
@@ -362,7 +363,7 @@ function createEmptyCharts() {
             }
         }
     });
-    
+
     const monthlyTrendCtx = document.getElementById('monthlyTrendChart').getContext('2d');
     window.monthlyTrendChart = new Chart(monthlyTrendCtx, {
         type: 'line',
@@ -407,7 +408,7 @@ function showNotification(message, type) {
             document.body.removeChild(notification);
         }
     });
-    
+
     // Create notification element
     const notification = document.createElement('div');
     notification.className = `custom-notification notification-${type}`;
@@ -425,14 +426,14 @@ function showNotification(message, type) {
             </button>
         </div>
     `;
-    
+
     document.body.appendChild(notification);
-    
+
     // Animate in
     setTimeout(() => {
         notification.classList.add('show');
     }, 10);
-    
+
     // Auto remove after 5 seconds
     setTimeout(() => {
         if (document.body.contains(notification)) {
@@ -469,6 +470,29 @@ function getNotificationTitle(type) {
 // Utility function to format numbers with commas
 function formatNumber(num) {
     return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+// User info update function
+function updateUserInfo(userInfo) {
+    if (userInfo && userInfo.user_name) {
+        // Update user name
+        const userNameElement = document.getElementById('user-name');
+        if (userNameElement) {
+            userNameElement.textContent = userInfo.user_name;
+        }
+
+        // Update user avatar with first letter of name
+        const userAvatarElement = document.getElementById('user-avatar');
+        if (userAvatarElement) {
+            userAvatarElement.textContent = userInfo.user_name.charAt(0).toUpperCase();
+        }
+
+        // Update designation if available
+        const designationElement = document.getElementById('user-designation');
+        if (designationElement && userInfo.designation) {
+            designationElement.textContent = userInfo.designation;
+        }
+    }
 }
 
 // Export functions for global access if needed

@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dayoffly - Logout</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
@@ -187,12 +188,13 @@
 
     /* Animation for logout */
     @keyframes fadeOut {
-      from { 
-        opacity: 1; 
+      from {
+        opacity: 1;
         transform: scale(1);
       }
-      to { 
-        opacity: 0; 
+
+      to {
+        opacity: 0;
         transform: scale(0.9);
       }
     }
@@ -232,56 +234,57 @@
       .logout-container {
         padding: 30px 20px;
       }
-      
+
       .logo h2 {
         font-size: 1.5rem;
       }
-      
+
       .logout-title {
         font-size: 1.5rem;
       }
-      
+
       .logout-actions {
         flex-direction: column;
       }
-      
+
       .btn {
         width: 100%;
       }
     }
   </style>
 </head>
+
 <body>
   <div class="logout-container" id="logoutContainer">
     <div class="logo">
       <h2><i class="fas fa-calendar-alt"></i> Dayoffly</h2>
     </div>
-    
+
     <div class="logout-icon">
       <i class="fas fa-sign-out-alt"></i>
     </div>
-    
+
     <h2 class="logout-title" id="logoutTitle">Ready to Leave?</h2>
-    
+
     <p class="logout-message" id="logoutMessage">Are you sure you want to log out of your Dayoffly account?</p>
-    
+
     <div class="user-info" id="userInfo">
-      <div class="user-avatar">SJ</div>
+      <div class="user-avatar" id="user-avatar">HR</div>
       <div class="user-details">
-        <h3>Sarah Johnson</h3>
-        <p>HR Manager • sarah.johnson@company.com</p>
+        <h3 id="user-name">Loading...</h3>
+        <p id="user-designation">HR Manager</p> • <span id="user-email">loading...</span></p>
       </div>
     </div>
-    
+
     <div class="logout-actions" id="logoutActions">
       <button class="btn btn-outline" id="cancelBtn">Cancel</button>
       <button class="btn btn-primary" id="logoutBtn">Log Out</button>
     </div>
-    
+
     <div class="logout-timer" id="logoutTimer">
       You will be automatically logged out in <span class="timer" id="timer">30</span> seconds
     </div>
-    
+
     <div class="redirect-countdown" id="redirectCountdown" style="display: none;">
       Redirecting to login page in <span class="redirect-timer" id="redirectTimer">3</span> seconds
     </div>
@@ -302,24 +305,27 @@
     const logoutActions = document.getElementById('logoutActions');
     const logoutTimer = document.getElementById('logoutTimer');
     const redirectCountdown = document.getElementById('redirectCountdown');
-    
+
+    // Load user info on page load
+    document.addEventListener('DOMContentLoaded', loadUserInfo);
+
     // Update timer every second
     const timerInterval = setInterval(() => {
       timeLeft--;
       timerElement.textContent = timeLeft;
-      
+
       if (timeLeft <= 0) {
         performLogout();
       }
     }, 1000);
-    
+
     // Logout function
     function performLogout() {
       clearInterval(timerInterval);
-      
+
       // Add logging out animation and change to success state
       logoutContainer.classList.add('logout-success');
-      
+
       // Update UI for logout confirmation
       logoutTitle.textContent = 'Logged Out Successfully';
       logoutMessage.textContent = 'You have been securely logged out of your account.';
@@ -327,12 +333,12 @@
       logoutActions.style.display = 'none';
       logoutTimer.style.display = 'none';
       redirectCountdown.style.display = 'block';
-      
+
       // Start redirect countdown
       const redirectInterval = setInterval(() => {
         redirectTimeLeft--;
         redirectTimerElement.textContent = redirectTimeLeft;
-        
+
         if (redirectTimeLeft <= 0) {
           clearInterval(redirectInterval);
           // Redirect to login page with the correct path
@@ -340,25 +346,77 @@
         }
       }, 1000);
     }
-    
+
+    // Load user info for dynamic display
+    async function loadUserInfo() {
+      try {
+        const response = await fetch('../Backed/hr_backend.py', {
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        if (data.success && data.user_info) {
+          updateUserInfo(data.user_info);
+        } else {
+          console.warn('No user info available');
+        }
+      } catch (error) {
+        console.error('Error fetching user info:', error);
+        // Don't show fallback - let frontend handle empty state
+      }
+    }
+
+    function updateUserInfo(userInfo) {
+      const userNameElement = document.getElementById('user-name');
+      const userAvatarElement = document.getElementById('user-avatar');
+      const userDesignationElement = document.getElementById('user-designation');
+      const userEmailElement = document.getElementById('user-email');
+
+      if (userNameElement && userInfo.user_name) {
+        userNameElement.textContent = userInfo.user_name;
+      }
+
+      if (userAvatarElement && userInfo.user_name) {
+        userAvatarElement.textContent = userInfo.user_name.charAt(0).toUpperCase();
+      }
+
+      if (userDesignationElement && userInfo.designation) {
+        userDesignationElement.textContent = userInfo.designation;
+      }
+
+      if (userEmailElement && userInfo.email) {
+        userEmailElement.textContent = userInfo.email;
+      }
+    }
+
     // Manual logout button
     logoutBtn.addEventListener('click', performLogout);
-    
+
     // Cancel button
     cancelBtn.addEventListener('click', () => {
       clearInterval(timerInterval);
       // Redirect back to dashboard
       window.location.href = '../HRDashboard/HRDashboard.html';
     });
-    
+
     // Reset timer on user interaction
     document.addEventListener('mousemove', resetTimer);
     document.addEventListener('keypress', resetTimer);
-    
+
     function resetTimer() {
       timeLeft = 30;
       timerElement.textContent = timeLeft;
     }
   </script>
 </body>
+
 </html>

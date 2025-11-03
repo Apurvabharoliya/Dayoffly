@@ -98,11 +98,10 @@
                     <!-- Step 1: Leave Details -->
                     <div class="form-group">
                         <label class="form-label">Leave Type</label>
-                        <div class="manual-leave-type" id="manualLeaveType">
-                            <input type="text" class="form-control" id="customLeaveType"
-                                placeholder="Enter your leave type" required>
-                        </div>
-                        <input type="hidden" id="leaveType" name="leaveType">
+                        <select class="form-control" id="leaveType" name="leaveType" required>
+                            <option value="">Select Leave Type</option>
+                            <!-- Options will be populated by JavaScript -->
+                        </select>
                     </div>
 
                     <div class="form-group">
@@ -131,14 +130,21 @@
                             required></textarea>
                     </div>
 
-                    <div class="form-group" id="attachmentSection" style="display: none;">
-                        <label class="form-label">Attachments</label>
+                    <div class="form-group" id="attachmentSection">
+                        <label class="form-label">Attachments (Optional)</label>
                         <div class="file-upload">
-                            <input type="file" id="attachment" class="file-input">
+                            <input type="file" id="attachment" class="file-input"
+                                accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
                             <label for="attachment" class="file-label">
-                                <i class="fas fa-upload"></i> Upload File
+                                <i class="fas fa-upload"></i> Upload File (PDF, JPG, PNG, DOC, DOCX)
                             </label>
+                            <div class="file-info" id="fileInfo" style="display: none;">
+                                <span id="fileName"></span>
+                                <button type="button" id="removeFile" class="remove-file-btn">×</button>
+                            </div>
                         </div>
+                        <small class="form-help">Upload supporting documents like medical certificates, bills, or other
+                            proof for your leave application.</small>
                     </div>
 
                     <!-- Step 3: Handover -->
