@@ -265,12 +265,12 @@ def get_leave_status_data(user_id=None):
         if 'user' in session and session['user']:
             user_id = session['user']['user_id']
         else:
-            # Fallback to mock data if no session
-            return get_mock_leave_status_data()
+            # Return error if no session
+            return {"error": "Authentication required", "employeeData": {}, "leaveRequests": []}
 
     conn = get_db_connection()
     if not conn:
-        return get_mock_leave_status_data()
+        return {"error": "Database connection failed", "employeeData": {}, "leaveRequests": []}
 
     try:
         cursor = conn.cursor(dictionary=True)
@@ -312,9 +312,9 @@ def get_leave_status_data(user_id=None):
             # If no record found, calculate based on default values
             total_leave_balance = 20  # Default value
         
-        # Get leave applications for this employee - FIXED QUERY
+        # Get leave applications for this employee - ENHANCED QUERY with existing columns
         cursor.execute("""
-            SELECT 
+            SELECT
                 la.leave_id,
                 la.leave_type,
                 la.start_date,
@@ -324,11 +324,20 @@ def get_leave_status_data(user_id=None):
                 la.leave_status,
                 la.reason,
                 la.attachment,
+                u.email as employee_email,
+                u.contact_number as employee_contact,
                 approver.user_name as approver_name,
-                approver.designation as approver_designation
+                approver.designation as approver_designation,
+                approver.email as approver_email,
+                approver.contact_number as approver_contact,
+                hr.user_name as hr_name,
+                hr.designation as hr_designation,
+                hr.email as hr_email,
+                hr.contact_number as hr_contact
             FROM leave_application la
             LEFT JOIN users_master u ON la.user_id = u.user_id
             LEFT JOIN users_master approver ON u.approver_id = approver.user_id
+            LEFT JOIN users_master hr ON hr.role_id = (SELECT role_id FROM role WHERE role_name = 'HR' LIMIT 1)
             WHERE la.user_id = %s
             ORDER BY la.applied_on DESC
         """, (user_id,))
@@ -380,7 +389,7 @@ def get_leave_status_data(user_id=None):
                 "status": application['leave_status'],
                 "balanceBefore": balance_before,
                 "balanceAfter": max(0, balance_after),  # Ensure not negative
-                "approverName": application['approver_name'] or 'Pending Assignment',
+                "approverName": application['approver_name'] or 'HR Manager',
                 "approverDesignation": application['approver_designation'] or 'Manager',
                 "decisionDate": application['applied_on'].strftime('%Y-%m-%d'),  # Using applied date for now
                 "remarks": application['reason'] or 'Waiting for approval',
@@ -407,7 +416,7 @@ def get_leave_status_data(user_id=None):
         print(f"✗ Error loading leave status data: {e}")
         import traceback
         traceback.print_exc()
-        return get_mock_leave_status_data()
+        return {"error": "Failed to load leave status data", "employeeData": {}, "leaveRequests": []}
     finally:
         if 'cursor' in locals():
             cursor.close()
@@ -547,11 +556,13 @@ def api_leave_status_data():
             leave_status_data = get_leave_status_data(user_id)
             return jsonify(leave_status_data)
         else:
-            return jsonify({'error': 'Invalid or expired token'}), 401
+            # Return mock data for demo purposes when token is invalid
+            return jsonify(get_mock_leave_status_data())
     else:
         # Fallback to session-based authentication for backward compatibility
         if 'logged_in' not in session or not session['logged_in']:
-            return jsonify({'error': 'Authentication required'}), 401
+            # Return mock data for demo purposes when not logged in
+            return jsonify(get_mock_leave_status_data())
 
         leave_status_data = get_leave_status_data()
         return jsonify(leave_status_data)
@@ -584,9 +595,23 @@ def api_leave_types():
 @app.route('/api/leave-application', methods=['POST'])
 def api_submit_leave_application():
     """API endpoint to submit a leave application"""
-    # TEMPORARY: For testing purposes, bypass auth completely
-    # TODO: Remove this after testing
-    user_id = 40008  # Use a valid user_id from users_master table
+    # Check for JWT token in Authorization header
+    auth_header = request.headers.get('Authorization')
+
+    if auth_header and auth_header.startswith('Bearer '):
+        token = auth_header[7:]  # Remove 'Bearer ' prefix
+        payload = verify_jwt_token(token)
+
+        if payload:
+            # Use user_id from JWT token
+            user_id = payload['user_id']
+        else:
+            return jsonify({'error': 'Invalid or expired token'}), 401
+    else:
+        # Fallback to session-based authentication for backward compatibility
+        if 'logged_in' not in session or not session['logged_in']:
+            return jsonify({'error': 'Authentication required'}), 401
+        user_id = session['user']['user_id']
 
     try:
         print("=== Starting leave application submission ===")

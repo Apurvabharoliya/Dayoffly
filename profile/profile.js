@@ -1,4 +1,8 @@
 // profile.js - Complete Profile Management System
+
+// API Base URL - adjust based on your server configuration
+const API_BASE_URL = 'http://127.0.0.1:5000';
+
 document.addEventListener('DOMContentLoaded', function () {
     // Initialize all functionality
     initializeSettings();
@@ -16,7 +20,23 @@ async function loadProfileData() {
     try {
         showLoading('Loading profile data...');
 
-        const response = await fetch('/api/profile');
+        // Get auth token from localStorage
+        const token = localStorage.getItem('authToken');
+        const headers = {
+            'Content-Type': 'application/json'
+        };
+
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+
+        const response = await fetch(`${API_BASE_URL}/api/profile`, {
+            headers: headers
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
         const result = await response.json();
 
         hideLoading();
@@ -173,7 +193,23 @@ function handleEditClick(type, cardElement) {
 
 async function openPersonalInfoEditor() {
     try {
-        const response = await fetch('/api/profile');
+        // Get auth token from localStorage
+        const token = localStorage.getItem('authToken');
+        const headers = {
+            'Content-Type': 'application/json'
+        };
+
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+
+        const response = await fetch(`${API_BASE_URL}/api/profile`, {
+            headers: headers
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
         const result = await response.json();
 
         if (result.success) {
@@ -277,13 +313,25 @@ async function savePersonalInfo(event) {
     try {
         showLoading('Saving personal information...');
 
-        const response = await fetch('/api/profile/personal-info', {
+        // Get auth token from localStorage
+        const token = localStorage.getItem('authToken');
+        const headers = {
+            'Content-Type': 'application/json'
+        };
+
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+
+        const response = await fetch(`${API_BASE_URL}/api/profile/personal-info`, {
             method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: headers,
             body: JSON.stringify(data)
         });
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
 
         const result = await response.json();
         hideLoading();
@@ -304,7 +352,23 @@ async function savePersonalInfo(event) {
 
 async function openContactDetailsEditor() {
     try {
-        const response = await fetch('/api/profile');
+        // Get auth token from localStorage
+        const token = localStorage.getItem('authToken');
+        const headers = {
+            'Content-Type': 'application/json'
+        };
+
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+
+        const response = await fetch(`${API_BASE_URL}/api/profile`, {
+            headers: headers
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
         const result = await response.json();
 
         if (result.success) {
@@ -391,13 +455,25 @@ async function saveContactDetails(event) {
     try {
         showLoading('Saving contact details...');
 
-        const response = await fetch('/api/profile/contact-details', {
+        // Get auth token from localStorage
+        const token = localStorage.getItem('authToken');
+        const headers = {
+            'Content-Type': 'application/json'
+        };
+
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+
+        const response = await fetch(`${API_BASE_URL}/api/profile/contact-details`, {
             method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: headers,
             body: JSON.stringify(data)
         });
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
 
         const result = await response.json();
         hideLoading();
@@ -418,7 +494,23 @@ async function saveContactDetails(event) {
 
 async function openEmergencyContactsEditor() {
     try {
-        const response = await fetch('/api/profile/emergency-contacts');
+        // Get auth token from localStorage
+        const token = localStorage.getItem('authToken');
+        const headers = {
+            'Content-Type': 'application/json'
+        };
+
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+
+        const response = await fetch(`${API_BASE_URL}/api/profile/emergency-contacts`, {
+            headers: headers
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
         const result = await response.json();
 
         if (result.success) {
@@ -598,13 +690,25 @@ async function saveEmergencyContacts(event) {
     try {
         showLoading('Saving emergency contacts...');
 
-        const response = await fetch('/api/profile/emergency-contacts', {
+        // Get auth token from localStorage
+        const token = localStorage.getItem('authToken');
+        const headers = {
+            'Content-Type': 'application/json'
+        };
+
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+
+        const response = await fetch(`${API_BASE_URL}/api/profile/emergency-contacts`, {
             method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: headers,
             body: JSON.stringify({ contacts: validContacts })
         });
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
 
         const result = await response.json();
         hideLoading();

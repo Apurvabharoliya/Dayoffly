@@ -3,9 +3,15 @@ from flask import Blueprint, request, jsonify, session
 import mysql.connector
 from datetime import datetime
 import re
+import jwt
+from functools import wraps
 
 # Create Blueprint for profile routes
 profile_bp = Blueprint('profile', __name__)
+
+# JWT Secret Key - must match login_backend.py
+JWT_SECRET_KEY = 'your-jwt-secret-key-change-in-production'
+JWT_ALGORITHM = 'HS256'
 
 # Database configuration
 DB_CONFIG = {
@@ -35,6 +41,31 @@ def validate_phone(phone):
     # Basic phone validation - can be enhanced based on requirements
     pattern = r'^[\+]?[(]?[\d\s\-\(\)]{10,}$'
     return re.match(pattern, phone) is not None
+
+def token_required(f):
+    """Decorator to protect routes that require authentication"""
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = request.headers.get('Authorization')
+
+        if not token:
+            return jsonify({"success": False, "message": "Token is missing"}), 401
+
+        # Remove 'Bearer ' prefix if present
+        if token.startswith('Bearer '):
+            token = token[7:]
+
+        try:
+            payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
+            request.user = payload
+        except jwt.ExpiredSignatureError:
+            return jsonify({"success": False, "message": "Token has expired"}), 401
+        except jwt.InvalidTokenError:
+            return jsonify({"success": False, "message": "Invalid token"}), 401
+
+        return f(*args, **kwargs)
+
+    return decorated
 
 def get_user_profile(user_id):
     """
@@ -117,22 +148,36 @@ def get_user_profile(user_id):
 @profile_bp.route('/api/profile', methods=['GET'])
 def get_profile():
     """Get user profile data"""
-    # Check authentication
-    if 'logged_in' not in session or not session['logged_in']:
-        return jsonify({
-            "success": False,
-            "message": "Authentication required"
-        }), 401
-    
-    user_id = session.get('user', {}).get('user_id')
-    if not user_id:
-        return jsonify({
-            "success": False,
-            "message": "User not found in session"
-        }), 400
-    
+    # Check for JWT token first
+    auth_header = request.headers.get('Authorization')
+    user_id = None
+
+    if auth_header and auth_header.startswith('Bearer '):
+        token = auth_header[7:]
+        try:
+            payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
+            user_id = payload['user_id']
+        except jwt.ExpiredSignatureError:
+            return jsonify({"success": False, "message": "Token has expired"}), 401
+        except jwt.InvalidTokenError:
+            return jsonify({"success": False, "message": "Invalid token"}), 401
+    else:
+        # Fallback to session-based authentication
+        if 'logged_in' not in session or not session['logged_in']:
+            return jsonify({
+                "success": False,
+                "message": "Authentication required"
+            }), 401
+
+        user_id = session.get('user', {}).get('user_id')
+        if not user_id:
+            return jsonify({
+                "success": False,
+                "message": "User not found in session"
+            }), 400
+
     profile_data = get_user_profile(user_id)
-    
+
     if profile_data:
         return jsonify({
             "success": True,
@@ -148,21 +193,35 @@ def get_profile():
 @profile_bp.route('/api/profile/personal-info', methods=['PUT'])
 def update_personal_info():
     """Update personal information"""
-    # Check authentication
-    if 'logged_in' not in session or not session['logged_in']:
-        return jsonify({
-            "success": False,
-            "message": "Authentication required"
-        }), 401
+    # Check for JWT token first
+    auth_header = request.headers.get('Authorization')
+    user_id = None
 
-    user_id = session.get('user', {}).get('user_id')
-    print(f"DEBUG: Session user: {session.get('user')}")
-    print(f"DEBUG: User ID from session: {user_id}")
-    if not user_id:
-        return jsonify({
-            "success": False,
-            "message": "User not found in session"
-        }), 400
+    if auth_header and auth_header.startswith('Bearer '):
+        token = auth_header[7:]
+        try:
+            payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
+            user_id = payload['user_id']
+        except jwt.ExpiredSignatureError:
+            return jsonify({"success": False, "message": "Token has expired"}), 401
+        except jwt.InvalidTokenError:
+            return jsonify({"success": False, "message": "Invalid token"}), 401
+    else:
+        # Fallback to session-based authentication
+        if 'logged_in' not in session or not session['logged_in']:
+            return jsonify({
+                "success": False,
+                "message": "Authentication required"
+            }), 401
+
+        user_id = session.get('user', {}).get('user_id')
+        print(f"DEBUG: Session user: {session.get('user')}")
+        print(f"DEBUG: User ID from session: {user_id}")
+        if not user_id:
+            return jsonify({
+                "success": False,
+                "message": "User not found in session"
+            }), 400
     
     try:
         data = request.get_json()
@@ -295,18 +354,33 @@ def update_personal_info():
 @profile_bp.route('/api/profile/emergency-contacts', methods=['GET'])
 def get_emergency_contacts():
     """Get emergency contacts for user"""
-    if 'logged_in' not in session or not session['logged_in']:
-        return jsonify({
-            "success": False,
-            "message": "Authentication required"
-        }), 401
-    
-    user_id = session.get('user', {}).get('user_id')
-    if not user_id:
-        return jsonify({
-            "success": False,
-            "message": "User not found in session"
-        }), 400
+    # Check for JWT token first
+    auth_header = request.headers.get('Authorization')
+    user_id = None
+
+    if auth_header and auth_header.startswith('Bearer '):
+        token = auth_header[7:]
+        try:
+            payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
+            user_id = payload['user_id']
+        except jwt.ExpiredSignatureError:
+            return jsonify({"success": False, "message": "Token has expired"}), 401
+        except jwt.InvalidTokenError:
+            return jsonify({"success": False, "message": "Invalid token"}), 401
+    else:
+        # Fallback to session-based authentication
+        if 'logged_in' not in session or not session['logged_in']:
+            return jsonify({
+                "success": False,
+                "message": "Authentication required"
+            }), 401
+
+        user_id = session.get('user', {}).get('user_id')
+        if not user_id:
+            return jsonify({
+                "success": False,
+                "message": "User not found in session"
+            }), 400
     
     conn = get_db_connection()
     if not conn:
@@ -353,18 +427,33 @@ def get_emergency_contacts():
 @profile_bp.route('/api/profile/emergency-contacts', methods=['PUT'])
 def update_emergency_contacts():
     """Update emergency contacts"""
-    if 'logged_in' not in session or not session['logged_in']:
-        return jsonify({
-            "success": False,
-            "message": "Authentication required"
-        }), 401
-    
-    user_id = session.get('user', {}).get('user_id')
-    if not user_id:
-        return jsonify({
-            "success": False,
-            "message": "User not found in session"
-        }), 400
+    # Check for JWT token first
+    auth_header = request.headers.get('Authorization')
+    user_id = None
+
+    if auth_header and auth_header.startswith('Bearer '):
+        token = auth_header[7:]
+        try:
+            payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
+            user_id = payload['user_id']
+        except jwt.ExpiredSignatureError:
+            return jsonify({"success": False, "message": "Token has expired"}), 401
+        except jwt.InvalidTokenError:
+            return jsonify({"success": False, "message": "Invalid token"}), 401
+    else:
+        # Fallback to session-based authentication
+        if 'logged_in' not in session or not session['logged_in']:
+            return jsonify({
+                "success": False,
+                "message": "Authentication required"
+            }), 401
+
+        user_id = session.get('user', {}).get('user_id')
+        if not user_id:
+            return jsonify({
+                "success": False,
+                "message": "User not found in session"
+            }), 400
     
     try:
         data = request.get_json()
@@ -448,18 +537,33 @@ def update_emergency_contacts():
 @profile_bp.route('/api/profile/contact-details', methods=['PUT'])
 def update_contact_details():
     """Update contact details (email, phone, address)"""
-    if 'logged_in' not in session or not session['logged_in']:
-        return jsonify({
-            "success": False,
-            "message": "Authentication required"
-        }), 401
-    
-    user_id = session.get('user', {}).get('user_id')
-    if not user_id:
-        return jsonify({
-            "success": False,
-            "message": "User not found in session"
-        }), 400
+    # Check for JWT token first
+    auth_header = request.headers.get('Authorization')
+    user_id = None
+
+    if auth_header and auth_header.startswith('Bearer '):
+        token = auth_header[7:]
+        try:
+            payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
+            user_id = payload['user_id']
+        except jwt.ExpiredSignatureError:
+            return jsonify({"success": False, "message": "Token has expired"}), 401
+        except jwt.InvalidTokenError:
+            return jsonify({"success": False, "message": "Invalid token"}), 401
+    else:
+        # Fallback to session-based authentication
+        if 'logged_in' not in session or not session['logged_in']:
+            return jsonify({
+                "success": False,
+                "message": "Authentication required"
+            }), 401
+
+        user_id = session.get('user', {}).get('user_id')
+        if not user_id:
+            return jsonify({
+                "success": False,
+                "message": "User not found in session"
+            }), 400
     
     try:
         data = request.get_json()

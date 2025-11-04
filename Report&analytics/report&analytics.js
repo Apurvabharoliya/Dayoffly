@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', function () {
 // Check authentication and load user data
 async function checkAuthentication() {
     try {
-        showLoading();
+        showPageLoading();
 
         // Try to get user data from session using the same endpoint as other pages
         const token = localStorage.getItem('authToken');
@@ -34,8 +34,9 @@ async function checkAuthentication() {
             headers['Authorization'] = `Bearer ${token}`;
         }
 
-        const response = await fetch('http://127.0.0.1:5000/api/dashboard-data', {
-            credentials: 'include',
+        const apiBaseUrl = 'http://localhost:5000';
+        const response = await fetch(`${apiBaseUrl}/api/dashboard-data`, {
+            method: 'GET',
             headers: headers
         });
 
@@ -49,10 +50,11 @@ async function checkAuthentication() {
         }
     } catch (error) {
         console.error('Authentication check failed:', error);
+        hidePageLoading();
         showError('Please log in to view your analytics');
         // Redirect to login after 3 seconds
         setTimeout(() => {
-            window.location.href = 'http://127.0.0.1:5000/login-page';
+            window.location.href = 'http://localhost:5000/login-page';
         }, 3000);
     }
 }
@@ -83,8 +85,9 @@ async function loadUserAnalytics() {
             headers['Authorization'] = `Bearer ${token}`;
         }
 
-        const response = await fetch(`http://127.0.0.1:5000/api/user-analytics/${currentUserId}`, {
-            credentials: 'include',
+        const apiBaseUrl = 'http://localhost:5000';
+        const response = await fetch(`${apiBaseUrl}/api/user-analytics/${currentUserId}`, {
+            method: 'GET',
             headers: headers
         });
 
@@ -97,16 +100,11 @@ async function loadUserAnalytics() {
 
         // Update UI with user data
         updateUserInterface(analyticsData);
-        hideLoading();
+        hidePageLoading();
 
     } catch (error) {
         console.error('Error loading analytics data:', error);
         showError(`Failed to load your analytics data: ${error.message}`);
-
-        // Load demo data as fallback
-        setTimeout(() => {
-            loadDemoData();
-        }, 2000);
     }
 }
 
@@ -486,8 +484,9 @@ async function exportReport() {
 
         showLoading();
 
-        const response = await fetch(`http://127.0.0.1:5000/api/export-analytics/${currentUserId}?from=${fromDate}&to=${toDate}`, {
-            credentials: 'include'
+        const apiBaseUrl = 'http://localhost:5000';
+        const response = await fetch(`${apiBaseUrl}/api/export-analytics/${currentUserId}?from=${fromDate}&to=${toDate}`, {
+            method: 'GET'
         });
 
         if (response.ok) {
@@ -508,6 +507,22 @@ async function exportReport() {
 // Retry loading data
 function retryLoading() {
     loadUserAnalytics();
+}
+
+// Show full page loading overlay
+function showPageLoading() {
+    const overlay = document.getElementById('page-loading-overlay');
+    if (overlay) {
+        overlay.classList.remove('hidden');
+    }
+}
+
+// Hide full page loading overlay
+function hidePageLoading() {
+    const overlay = document.getElementById('page-loading-overlay');
+    if (overlay) {
+        overlay.classList.add('hidden');
+    }
 }
 
 // Show loading state
@@ -629,21 +644,4 @@ function loadDemoData() {
     hideLoading();
 }
 
-// Handle page visibility changes
-document.addEventListener('visibilitychange', function () {
-    if (!document.hidden) {
-        // Page became visible, refresh data after a delay
-        setTimeout(() => {
-            if (currentUserId) {
-                loadUserAnalytics();
-            }
-        }, 1000);
-    }
-});
-
-// Periodic data refresh (every 5 minutes)
-setInterval(() => {
-    if (currentUserId && !document.hidden) {
-        loadUserAnalytics();
-    }
-}, 300000); 
+// Auto-refresh removed as per user request

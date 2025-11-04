@@ -44,6 +44,9 @@ function hideToast(toast) {
 }
 
 document.addEventListener('DOMContentLoaded', async function () {
+    // Update user avatar
+    await updateUserAvatar();
+
     // Fetch and display live leave balance data
     await loadLeaveBalance();
 
@@ -464,6 +467,45 @@ async function submitLeaveApplication(formData) {
         console.error('Error submitting leave application:', error);
         // Show error toast if submission fails
         showToast('Error', 'Failed to submit leave application. Please try again.', 'error');
+    }
+}
+
+// Function to update user avatar
+async function updateUserAvatar() {
+    try {
+        const token = localStorage.getItem('authToken');
+        const headers = {
+            'Content-Type': 'application/json'
+        };
+
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+
+        const response = await fetch('http://127.0.0.1:5000/api/dashboard-data', {
+            credentials: 'include',
+            headers: headers
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        const userInfo = data.user_info;
+
+        if (userInfo && userInfo.user_name) {
+            const avatarImg = document.getElementById('user-avatar-img');
+            if (avatarImg) {
+                const userName = userInfo.user_name;
+                const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=667eea&color=fff&size=36`;
+                avatarImg.src = avatarUrl;
+                avatarImg.alt = `${userName}'s Avatar`;
+            }
+        }
+    } catch (error) {
+        console.error('Error updating user avatar:', error);
+        // Keep default avatar if API fails
     }
 }
 

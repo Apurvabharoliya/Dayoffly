@@ -1,16 +1,21 @@
-from flask import Blueprint, jsonify, session
+from flask import Blueprint, jsonify, session, request
 import mysql.connector
 from datetime import datetime
 from functools import wraps
+import jwt
 
 # Create Blueprint
 reports_analytics_bp = Blueprint('reports_analytics', __name__)
+
+# JWT Secret Key - same as login_backend.py
+JWT_SECRET_KEY = 'your-jwt-secret-key-change-in-production'
+JWT_ALGORITHM = 'HS256'
 
 # Database configuration (same as app.py)
 DB_CONFIG = {
     'host': 'localhost',
     'user': 'root',
-    'password': '',      
+    'password': '',
     'database': 'dayoffly',
     'port': 3306
 }
@@ -24,13 +29,38 @@ def get_db_connection():
         print(f"✗ Database connection failed: {e}")
         return None
 
+def verify_jwt_token(token):
+    """Verify JWT token and return payload"""
+    try:
+        payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
+        return payload
+    except jwt.ExpiredSignatureError:
+        return None
+    except jwt.InvalidTokenError:
+        return None
+
 def login_required(f):
-    """Decorator to check if user is logged in"""
+    """Decorator to check if user is logged in - supports both JWT and session"""
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if 'logged_in' not in session or not session['logged_in']:
-            return jsonify({'error': 'Authentication required'}), 401
-        return f(*args, **kwargs)
+        # Check for JWT token in Authorization header first
+        auth_header = request.headers.get('Authorization')
+
+        if auth_header and auth_header.startswith('Bearer '):
+            token = auth_header[7:]  # Remove 'Bearer ' prefix
+            payload = verify_jwt_token(token)
+
+            if payload:
+                # Add user info to request context for JWT users
+                request.user = payload
+                return f(*args, **kwargs)
+            else:
+                return jsonify({'error': 'Invalid or expired token'}), 401
+        else:
+            # Fallback to session-based authentication for backward compatibility
+            if 'logged_in' not in session or not session['logged_in']:
+                return jsonify({'error': 'Authentication required'}), 401
+            return f(*args, **kwargs)
     return decorated_function
 
 @reports_analytics_bp.route('/api/current-user')
@@ -56,8 +86,20 @@ def get_current_user():
 def get_user_analytics(user_id):
     """Get personalized analytics data for a specific user"""
     try:
+        # Get current user ID from JWT or session
+        current_user_id = None
+
+        # Check if using JWT (from request.user set by decorator)
+        if hasattr(request, 'user') and request.user:
+            current_user_id = request.user.get('user_id')
+        else:
+            # Fallback to session
+            current_user_id = session.get('user', {}).get('user_id')
+
+        if not current_user_id:
+            return jsonify({'error': 'Authentication required'}), 401
+
         # Verify the requested user matches logged-in user (security check)
-        current_user_id = session.get('user', {}).get('user_id')
         if current_user_id != user_id:
             return jsonify({'error': 'Access denied'}), 403
         
@@ -348,8 +390,20 @@ def generate_leave_patterns(leave_types, monthly_data, duration_data, user_id):
 def export_analytics_report(user_id):
     """Export analytics data as PDF/Excel (placeholder)"""
     try:
+        # Get current user ID from JWT or session
+        current_user_id = None
+
+        # Check if using JWT (from request.user set by decorator)
+        if hasattr(request, 'user') and request.user:
+            current_user_id = request.user.get('user_id')
+        else:
+            # Fallback to session
+            current_user_id = session.get('user', {}).get('user_id')
+
+        if not current_user_id:
+            return jsonify({'error': 'Authentication required'}), 401
+
         # Verify the requested user matches logged-in user
-        current_user_id = session.get('user', {}).get('user_id')
         if current_user_id != user_id:
             return jsonify({'error': 'Access denied'}), 403
         

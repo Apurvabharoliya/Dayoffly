@@ -130,6 +130,15 @@
       employeeDesignationEl.textContent = user_info.designation;
     }
 
+    // Update user avatar
+    const avatarImg = $("#user-avatar-img");
+    if (avatarImg && user_info && user_info.user_name) {
+      const userName = user_info.user_name;
+      const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=667eea&color=fff&size=36`;
+      avatarImg.src = avatarUrl;
+      avatarImg.alt = `${userName}'s Avatar`;
+    }
+
     // Calculate carry forward (simple calculation based on remaining)
     const carryForward = Math.max(0, totalAllowed - 20); // Assuming base is 20
 
@@ -239,8 +248,8 @@
     });
 
     // Update remaining leaves stat
-    if (data.stats && data.stats.totalRemaining !== undefined) {
-      animateCount($("#totalLeaves"), data.stats.totalRemaining);
+    if (stats && stats.totalRemaining !== undefined) {
+      animateCount($("#totalLeaves"), stats.totalRemaining);
     }
   });
 })();
