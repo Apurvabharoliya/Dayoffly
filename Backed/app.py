@@ -156,22 +156,25 @@ def get_dashboard_data(user_id=None):
             total_used = leave_data['used_leaves']
             total_remaining = leave_data['remaining_leaves']
         else:
-            # Fallback to default values if no leave balance found
-            total_allowed = 20
-            total_used = 0
-            total_remaining = 20
+            # Return error if no leave balance found - no hard-coded defaults
+            print("✗ No leave balance data found in database")
+            return {"error": "No leave balance data available", "user_info": user_info or {}, "stats": {}, "chartData": {}, "holidays": []}
         
-        # Holidays data - Updated with current/future dates
-        holidays = [
-            {"name": "Republic Day", "date": "2025-01-26"},
-            {"name": "Holi", "date": "2025-03-14"},
-            {"name": "Good Friday", "date": "2025-04-18"},
-            {"name": "Independence Day", "date": "2025-08-15"},
-            {"name": "Gandhi Jayanti", "date": "2025-10-02"},
-            {"name": "Diwali", "date": "2025-10-20"},
-            {"name": "Christmas", "date": "2025-12-25"}
-        ]
-        
+        # Get holidays from database
+        cursor.execute("""
+            SELECT holiday_name, holiday_date
+            FROM holidays
+            ORDER BY holiday_date
+        """)
+        holidays_data = cursor.fetchall()
+
+        holidays = []
+        for holiday in holidays_data:
+            holidays.append({
+                "name": holiday['holiday_name'],
+                "date": holiday['holiday_date'].strftime('%Y-%m-%d')
+            })
+
         today = date.today()
         upcoming_holidays_count = sum(1 for h in holidays if datetime.strptime(h['date'], '%Y-%m-%d').date() >= today)
         
@@ -511,7 +514,7 @@ def profile_static(filename):
 @app.route('/images/<path:filename>')
 def images_static(filename):
     """Serve static files from images directory"""
-    return send_from_directory('../images', filename)
+    return send_from_directory('images', filename)
 
 # Routes - REMOVED DUPLICATE /profile ROUTE
 
@@ -671,6 +674,15 @@ def api_submit_leave_application():
 
         cursor.execute(insert_query, values)
 
+        # Get user info for notification BEFORE closing connection
+        try:
+            cursor.execute("SELECT user_name FROM users_master WHERE user_id = %s", (user_id,))
+            user_info = cursor.fetchone()
+            print(f"✓ Got user info for notification: {user_info}")
+        except Exception as e:
+            print(f"⚠️  Error getting user info for notification: {e}")
+            user_info = {'user_name': 'Employee'}
+
         print("Committing transaction...")
         conn.commit()
 
@@ -682,6 +694,24 @@ def api_submit_leave_application():
         conn.close()
 
         print("=== Leave application submitted successfully ===")
+
+        # Send SMS notification to HR
+        try:
+            from notification_service import notify_hr_leave_request
+            notification_sent = notify_hr_leave_request(
+                employee_name=user_info.get('user_name', 'Employee') if user_info else 'Employee',
+                leave_type=leave_type,
+                start_date=start_date,
+                end_date=end_date,
+                reason=reason
+            )
+            if notification_sent:
+                print("✓ HR notification sent successfully")
+            else:
+                print("⚠️  HR notification failed")
+        except Exception as e:
+            print(f"⚠️  Error sending HR notification: {e}")
+
         return jsonify({
             'success': True,
             'message': 'Leave application submitted successfully',
@@ -968,4 +998,4 @@ if __name__ == '__main__':
     print("🚀 Starting DayOffly server...")
     print("🌐 Application will be available at: http://localhost:5000")
     print("📁 Static files should be in: /static/ folder")
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=True, host='0.0.0.0', port=5000) 

@@ -484,6 +484,17 @@ function populateViewModal(request) {
     statusBadge.classList.add('status-rejected-badge');
   }
 
+  // Populate HR remarks if available
+  const hrRemarksSection = document.getElementById('hr-remarks-section');
+  const hrRemarksElement = document.getElementById('modal-hr-remarks');
+
+  if (request.hr_remarks && request.status !== 'Pending') {
+    hrRemarksElement.textContent = request.hr_remarks;
+    hrRemarksSection.style.display = 'block';
+  } else {
+    hrRemarksSection.style.display = 'none';
+  }
+
   // Show/hide change action section based on current status
   const changeActionSection = document.getElementById('change-action-section');
   const currentStatusElement = document.getElementById('current-status');
@@ -519,6 +530,10 @@ function showApproveConfirmation(leaveId, employeeName, isChangeAction = false) 
   modalTitle.textContent = 'Approve Leave Request';
   modalMessage.innerHTML = `
         <p>Are you sure you want to approve the leave request for <strong>${employeeName}</strong>?</p>
+        <div class="form-group">
+            <label for="hr-remarks-approve">HR Remarks <span style="color: red;">*</span></label>
+            <textarea id="hr-remarks-approve" rows="3" placeholder="Please provide a reason for approval..." required></textarea>
+        </div>
         ${isChangeAction ? `<p class="text-warning"><i class="fas fa-exclamation-triangle"></i> This will change the current status to Approved.</p>` : ''}
     `;
 
@@ -545,6 +560,10 @@ function showRejectConfirmation(leaveId, employeeName, isChangeAction = false) {
   modalTitle.textContent = 'Reject Leave Request';
   modalMessage.innerHTML = `
         <p>Are you sure you want to reject the leave request for <strong>${employeeName}</strong>?</p>
+        <div class="form-group">
+            <label for="hr-remarks-reject">HR Remarks <span style="color: red;">*</span></label>
+            <textarea id="hr-remarks-reject" rows="3" placeholder="Please provide a reason for rejection..." required></textarea>
+        </div>
         ${isChangeAction ? '<p class="text-warning"><i class="fas fa-exclamation-triangle"></i> This will change the current status to Rejected.</p>' : ''}
     `;
 
@@ -576,6 +595,16 @@ async function executePendingAction() {
 
   const { type, leaveId, employeeName, isChangeAction } = pendingAction;
 
+  // Get HR remarks from the appropriate textarea
+  const remarksTextareaId = type === 'approve' ? 'hr-remarks-approve' : 'hr-remarks-reject';
+  const hrRemarks = document.getElementById(remarksTextareaId).value.trim();
+
+  // Validate HR remarks
+  if (!hrRemarks) {
+    showNotification('HR remarks are required', 'error');
+    return;
+  }
+
   try {
     showNotification(`Processing ${type} action...`, 'info');
 
@@ -588,7 +617,8 @@ async function executePendingAction() {
       body: JSON.stringify({
         leave_id: leaveId,
         status: type === 'approve' ? 'Approved' : 'Rejected',
-        employee_name: employeeName
+        employee_name: employeeName,
+        hr_remarks: hrRemarks
       })
     });
 

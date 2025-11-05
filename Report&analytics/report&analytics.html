@@ -1,3 +1,4 @@
+a
 <!DOCTYPE html>
 <html lang="en">
 
@@ -5,6 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Reports & Analytics - Employee Dashboard</title>
+  <link rel="icon" href="../images/favicon.ico" type="image/x-icon">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -98,11 +100,7 @@
           <div style="margin-top: 20px;">
             <button id="apply-date-range" class="btn">Apply</button>
           </div>
-          <div style="margin-top: 20px; margin-left: auto;">
-            <button id="export-report" class="btn btn-export">
-              <i class="fas fa-file-export mr-2"></i>Export My Report
-            </button>
-          </div>
+
         </div>
       </section>
 
@@ -192,6 +190,14 @@
         </p>
       </div>
     </main>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast" style="display: none;">
+    <div class="toast-content">
+      <i id="toast-icon" class="fas"></i>
+      <span id="toast-message"></span>
+    </div>
   </div>
 
   <script src="report&analytics.js"></script>

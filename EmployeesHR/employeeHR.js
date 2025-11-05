@@ -447,9 +447,21 @@ function displayEmployeeDetails(employee) {
                     <div class="leave-dates">
                         ${formatDate(leave.start_date)} - ${formatDate(leave.end_date)}
                     </div>
+                    <div class="leave-reason">
+                        ${leave.reason || 'No reason provided'}
+                    </div>
+                    <div class="leave-hr-remarks-container" data-leave-id="${leave.leave_id}">
+                        ${leave.hr_remarks ?
+                `<div class="leave-hr-remarks">${leave.hr_remarks}</div>` :
+                `<div class="leave-hr-remarks empty">No HR remarks yet</div>`
+            }
+                        <button class="leave-hr-remarks-btn edit" onclick="editHRRemarks(${leave.leave_id}, '${(leave.hr_remarks || '').replace(/'/g, "\\'")}')">
+                            <i class="fas fa-edit"></i> ${leave.hr_remarks ? 'Edit' : 'Add'} Remarks
+                        </button>
+                    </div>
                 </div>
-                <div class="status status-${(leave.leave_status || 'pending').toLowerCase()}">
-                    ${leave.leave_status || 'Pending'}
+                <div class="status status-${(leave.status || 'pending').toLowerCase()}">
+                    ${leave.status || 'Pending'}
                 </div>
             </div>
         `).join('') :
@@ -552,6 +564,16 @@ function showAddEmployeeForm() {
                             <input type="text" id="employee-position" name="designation" required>
                         </div>
                         <div class="form-group">
+                            <label for="employee-role">User Role *</label>
+                            <select id="employee-role" name="user_role" required>
+                                <option value="Employee">Employee</option>
+                                <option value="HR">HR</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
                             <label for="employee-status">Status *</label>
                             <select id="employee-status" name="status" required>
                                 <option value="Active">Active</option>
@@ -585,6 +607,7 @@ async function handleAddEmployee(event) {
         contact_number: formData.get('contact_number'),
         department: formData.get('department'),
         designation: formData.get('designation'),
+        user_role: formData.get('user_role'),
         status: formData.get('status')
     };
 
@@ -702,6 +725,100 @@ function hideLoadingState() {
     document.body.classList.remove('loading');
 }
 
+// Edit HR Remarks functionality
+function editHRRemarks(leaveId, currentRemarks) {
+    const container = document.querySelector(`.leave-hr-remarks-container[data-leave-id="${leaveId}"]`);
+    if (!container) return;
+
+    // Replace current content with edit form
+    container.innerHTML = `
+        <div class="leave-hr-remarks-edit">
+            <textarea class="leave-hr-remarks-textarea" placeholder="Enter HR remarks...">${currentRemarks}</textarea>
+            <div class="leave-hr-remarks-actions">
+                <button class="leave-hr-remarks-btn save" onclick="saveHRRemarks(${leaveId})">
+                    <i class="fas fa-save"></i> Save
+                </button>
+                <button class="leave-hr-remarks-btn cancel" onclick="cancelEditHRRemarks(${leaveId}, '${currentRemarks.replace(/'/g, "\\'")}')">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+            </div>
+        </div>
+    `;
+
+    // Focus on textarea
+    const textarea = container.querySelector('.leave-hr-remarks-textarea');
+    if (textarea) {
+        textarea.focus();
+        textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+    }
+}
+
+async function saveHRRemarks(leaveId) {
+    const container = document.querySelector(`.leave-hr-remarks-container[data-leave-id="${leaveId}"]`);
+    if (!container) return;
+
+    const textarea = container.querySelector('.leave-hr-remarks-textarea');
+    if (!textarea) return;
+
+    const newRemarks = textarea.value.trim();
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/employees/update-hr-remarks`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                leave_id: leaveId,
+                hr_remarks: newRemarks
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`Server returned ${response.status}`);
+        }
+
+        const result = await response.json();
+
+        if (result.error) {
+            throw new Error(result.error);
+        }
+
+        // Update the display
+        container.innerHTML = `
+            ${newRemarks ?
+                `<div class="leave-hr-remarks">${newRemarks}</div>` :
+                `<div class="leave-hr-remarks empty">No HR remarks yet</div>`
+            }
+            <button class="leave-hr-remarks-btn edit" onclick="editHRRemarks(${leaveId}, '${newRemarks.replace(/'/g, "\\'")}')">
+                <i class="fas fa-edit"></i> ${newRemarks ? 'Edit' : 'Add'} Remarks
+            </button>
+        `;
+
+        showToast('HR remarks updated successfully', 'success');
+
+    } catch (error) {
+        console.error('Error updating HR remarks:', error);
+        showToast('Failed to update HR remarks: ' + error.message, 'error');
+    }
+}
+
+function cancelEditHRRemarks(leaveId, originalRemarks) {
+    const container = document.querySelector(`.leave-hr-remarks-container[data-leave-id="${leaveId}"]`);
+    if (!container) return;
+
+    // Restore original content
+    container.innerHTML = `
+        ${originalRemarks ?
+            `<div class="leave-hr-remarks">${originalRemarks}</div>` :
+            `<div class="leave-hr-remarks empty">No HR remarks yet</div>`
+        }
+        <button class="leave-hr-remarks-btn edit" onclick="editHRRemarks(${leaveId}, '${originalRemarks.replace(/'/g, "\\'")}')">
+            <i class="fas fa-edit"></i> ${originalRemarks ? 'Edit' : 'Add'} Remarks
+        </button>
+    `;
+}
+
 // Make functions globally available
 window.filterEmployees = filterEmployees;
 window.viewEmployeeDetails = viewEmployeeDetails;
@@ -711,3 +828,6 @@ window.showAddEmployeeForm = showAddEmployeeForm;
 window.handleAddEmployee = handleAddEmployee;
 window.clearFilters = clearFilters;
 window.closeModal = closeModal;
+window.editHRRemarks = editHRRemarks;
+window.saveHRRemarks = saveHRRemarks;
+window.cancelEditHRRemarks = cancelEditHRRemarks;

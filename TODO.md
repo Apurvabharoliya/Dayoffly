@@ -1,12 +1,10 @@
-# Leave Status Page Fixes
-
-## Current Issues
-- Hardcoded default values in HTML (employee name, ID, department, etc.)
-- API falls back to mock data when database fails
-- Need to ensure only live data is shown
+# TODO: Add Logout Page for Employee Section
 
 ## Tasks
-- [ ] Remove hardcoded values from leaveStatus.html
-- [ ] Update leaveStatus.js to load employee info dynamically
-- [ ] Modify app.py API to remove mock data fallbacks
-- [ ] Test the changes to ensure live data loads properly
+- [x] Create EmployeeLogout directory
+- [x] Create employeeLogout.html based on HR logout page, adjusted for employees
+- [x] Modify performLogout to call backend logout API
+- [x] Adjust cancel button to redirect to employee dashboard
+- [x] Add logout navigation item in EmployeeDashboard sidebar
+- [x] Test logout functionality and redirection (Backend running, browser tool disabled but manual testing can be done)
+- [x] Removed logout buttons from all employee pages except dashboard

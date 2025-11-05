@@ -603,6 +603,120 @@ header {
   color: var(--gray);
 }
 
+.leave-reason {
+  font-size: 0.75rem;
+  color: var(--dark);
+  margin-top: 3px;
+  font-style: italic;
+}
+
+.leave-hr-remarks {
+  font-size: 0.75rem;
+  color: var(--primary);
+  margin-top: 5px;
+  font-weight: 500;
+  background: rgba(0, 51, 102, 0.1);
+  padding: 4px 8px;
+  border-radius: 4px;
+  border-left: 2px solid var(--primary);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.leave-hr-remarks::before {
+  content: '💬';
+  font-size: 0.8rem;
+}
+
+.leave-hr-remarks.empty {
+  color: var(--gray);
+  font-style: italic;
+  background: rgba(108, 117, 125, 0.1);
+  border-left-color: var(--gray);
+}
+
+.leave-hr-remarks.empty::before {
+  content: '📝';
+}
+
+.leave-hr-remarks-edit {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 5px;
+}
+
+.leave-hr-remarks-textarea {
+  width: 100%;
+  min-height: 60px;
+  padding: 8px 12px;
+  border: 1px solid var(--primary);
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-family: inherit;
+  resize: vertical;
+  background: white;
+  transition: var(--transition);
+}
+
+.leave-hr-remarks-textarea:focus {
+  outline: none;
+  border-color: var(--secondary);
+  box-shadow: 0 0 0 2px rgba(23, 162, 184, 0.1);
+}
+
+.leave-hr-remarks-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.leave-hr-remarks-btn {
+  padding: 4px 12px;
+  border: none;
+  border-radius: 3px;
+  font-size: 0.7rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.leave-hr-remarks-btn.save {
+  background: var(--success);
+  color: white;
+}
+
+.leave-hr-remarks-btn.save:hover {
+  background: #218838;
+  transform: translateY(-1px);
+}
+
+.leave-hr-remarks-btn.cancel {
+  background: var(--gray);
+  color: white;
+}
+
+.leave-hr-remarks-btn.cancel:hover {
+  background: #5a6268;
+  transform: translateY(-1px);
+}
+
+.leave-hr-remarks-btn.edit {
+  background: var(--secondary);
+  color: white;
+  padding: 6px 12px;
+  font-size: 0.75rem;
+}
+
+.leave-hr-remarks-btn.edit:hover {
+  background: #138496;
+  transform: translateY(-1px);
+}
+
 .status {
   padding: 5px 10px;
   border-radius: 20px;
@@ -695,6 +809,7 @@ header {
   0% {
     transform: rotate(0deg);
   }
+
   100% {
     transform: rotate(360deg);
   }
@@ -761,6 +876,7 @@ header {
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -771,6 +887,7 @@ header {
     opacity: 0;
     transform: translateY(-50px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -980,6 +1097,7 @@ header {
     transform: translateX(100%);
     opacity: 0;
   }
+
   to {
     transform: translateX(0);
     opacity: 1;
@@ -991,6 +1109,7 @@ header {
     transform: translateX(0);
     opacity: 1;
   }
+
   to {
     transform: translateX(100%);
     opacity: 0;
@@ -1096,12 +1215,12 @@ header {
   .search-input {
     width: 100%;
   }
-  
+
   .chart-container {
     height: 300px;
     padding: 15px;
   }
-  
+
   .modal-content {
     padding: 20px;
   }

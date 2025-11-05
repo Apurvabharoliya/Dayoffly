@@ -404,12 +404,13 @@ def get_employee_details(employee_id):
         
         # Get leave history
         cursor.execute("""
-            SELECT 
+            SELECT
                 leave_type,
                 start_date,
                 end_date,
                 leave_status as status,
-                reason
+                reason,
+                hr_remarks
             FROM leave_application
             WHERE user_id = %s
             ORDER BY start_date DESC
@@ -443,7 +444,7 @@ def add_employee():
         print(f"DEBUG: Received data: {data}")
         
         # Required fields
-        required_fields = ['user_name', 'email', 'contact_number', 'department', 'designation', 'status']
+        required_fields = ['user_name', 'email', 'contact_number', 'department', 'designation', 'user_role', 'status']
         for field in required_fields:
             if field not in data or not data[field]:
                 return jsonify({'error': f'Missing required field: {field}'}), 400
@@ -498,9 +499,9 @@ def add_employee():
         # Insert new employee
         cursor.execute("""
             INSERT INTO users_master (
-                user_id, user_name, email, password, department_id, role_id, 
-                designation, contact_number, is_active, approver_id
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                user_id, user_name, email, password, department_id, role_id,
+                designation, contact_number, is_active, approver_id, user_role
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """, (
             new_user_id,
             data['user_name'],
@@ -511,19 +512,16 @@ def add_employee():
             data['designation'],
             data['contact_number'],
             is_active,
-            30001  # Default approver (Brian)
+            30001,  # Default approver (Brian)
+            data['user_role']
         ))
         
-        # Initialize leave balance for different leave types
+        # Initialize leave balance for different leave types (zero for new employees)
         leave_types = ['Sick Leave', 'Vacation', 'Casual Leave']
         for leave_type in leave_types:
-            if leave_type == 'Sick Leave':
-                total = 10
-            elif leave_type == 'Vacation':
-                total = 15
-            else:  # Casual Leave
-                total = 12
-                
+            # New employees start with 0 leaves (no carry forward)
+            total = 0
+
             cursor.execute("""
                 INSERT INTO leave_balance (user_id, leave_type, total_leaves, used_leaves, remaining_leaves)
                 VALUES (%s, %s, %s, %s, %s)
@@ -532,14 +530,14 @@ def add_employee():
         conn.commit()
         cursor.close()
         conn.close()
-        
+
         return jsonify({
             'success': True,
             'message': 'Employee added successfully',
             'employee_id': new_user_id,
             'default_password': default_password
         })
-        
+
     except mysql.connector.Error as e:
         print(f"Database error adding employee: {e}")
         if conn:
@@ -550,3 +548,55 @@ def add_employee():
         import traceback
         traceback.print_exc()
         return jsonify({'error': f'Failed to add employee: {str(e)}'}), 500
+
+@employee_bp.route('/api/employees/update-hr-remarks', methods=['POST'])
+def update_hr_remarks():
+    """Update HR remarks for a specific leave request"""
+    try:
+        data = request.get_json()
+        leave_id = data.get('leave_id')
+        hr_remarks = data.get('hr_remarks', '')
+
+        if not leave_id:
+            return jsonify({'error': 'Leave ID is required'}), 400
+
+        print(f"DEBUG: Updating HR remarks for leave_id: {leave_id}")
+
+        conn = get_db_connection()
+        if not conn:
+            return jsonify({'error': 'Database connection failed'}), 500
+
+        cursor = conn.cursor()
+
+        # Update HR remarks
+        cursor.execute("""
+            UPDATE leave_application
+            SET hr_remarks = %s
+            WHERE leave_id = %s
+        """, (hr_remarks, leave_id))
+
+        conn.commit()
+
+        # Check if update was successful
+        if cursor.rowcount == 0:
+            cursor.close()
+            conn.close()
+            return jsonify({'error': 'Leave request not found'}), 404
+
+        cursor.close()
+        conn.close()
+
+        print(f"DEBUG: Successfully updated HR remarks for leave_id: {leave_id}")
+        return jsonify({
+            'success': True,
+            'message': 'HR remarks updated successfully'
+        })
+
+    except mysql.connector.Error as e:
+        print(f"Database error updating HR remarks: {e}")
+        return jsonify({'error': f'Database error: {str(e)}'}), 500
+    except Exception as e:
+        print(f"Error updating HR remarks: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': f'Failed to update HR remarks: {str(e)}'}), 500

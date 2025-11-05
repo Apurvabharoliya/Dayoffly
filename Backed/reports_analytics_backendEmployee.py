@@ -84,6 +84,9 @@ def get_current_user():
 @reports_analytics_bp.route('/api/user-analytics/<int:user_id>')
 @login_required
 def get_user_analytics(user_id):
+    # Get date range parameters
+    from_date = request.args.get('from')
+    to_date = request.args.get('to')
     """Get personalized analytics data for a specific user"""
     try:
         # Get current user ID from JWT or session
@@ -123,17 +126,24 @@ def get_user_analytics(user_id):
         if not user_info:
             return jsonify({'error': 'User not found'}), 404
         
+        # Build date filter condition
+        date_filter = ""
+        date_params = [user_id]
+        if from_date and to_date:
+            date_filter = " AND start_date >= %s AND end_date <= %s"
+            date_params.extend([from_date, to_date])
+
         # Get leave statistics
-        cursor.execute("""
-            SELECT 
+        cursor.execute(f"""
+            SELECT
                 COUNT(*) as total_requests,
                 SUM(CASE WHEN leave_status = 'approved' THEN 1 ELSE 0 END) as approved_requests,
                 SUM(CASE WHEN leave_status = 'pending' THEN 1 ELSE 0 END) as pending_requests,
                 SUM(CASE WHEN leave_status IN ('rejected', 'declined') THEN 1 ELSE 0 END) as rejected_requests,
                 SUM(DATEDIFF(end_date, start_date) + 1) as total_days_used
-            FROM leave_application 
-            WHERE user_id = %s
-        """, (user_id,))
+            FROM leave_application
+            WHERE user_id = %s{date_filter}
+        """, tuple(date_params))
         stats = cursor.fetchone()
         
         # Get leave balance
@@ -147,50 +157,61 @@ def get_user_analytics(user_id):
         balance = cursor.fetchone()
         
         # Get leave type distribution
-        cursor.execute("""
+        cursor.execute(f"""
             SELECT leave_type, COUNT(*) as count
-            FROM leave_application 
-            WHERE user_id = %s
+            FROM leave_application
+            WHERE user_id = %s{date_filter}
             GROUP BY leave_type
             ORDER BY count DESC
-        """, (user_id,))
+        """, tuple(date_params))
         leave_types = cursor.fetchall()
         
-        # Get monthly trends for current year
-        current_year = datetime.now().year
-        cursor.execute("""
-            SELECT MONTH(start_date) as month, COUNT(*) as count
-            FROM leave_application 
-            WHERE user_id = %s AND YEAR(start_date) = %s
-            GROUP BY MONTH(start_date)
-            ORDER BY month
-        """, (user_id, current_year))
+        # Get monthly trends for current year or date range
+        if from_date and to_date:
+            # Use date range for monthly trends
+            cursor.execute(f"""
+                SELECT MONTH(start_date) as month, COUNT(*) as count
+                FROM leave_application
+                WHERE user_id = %s{date_filter}
+                GROUP BY MONTH(start_date)
+                ORDER BY month
+            """, tuple(date_params))
+        else:
+            # Use current year for monthly trends
+            current_year = datetime.now().year
+            cursor.execute("""
+                SELECT MONTH(start_date) as month, COUNT(*) as count
+                FROM leave_application
+                WHERE user_id = %s AND YEAR(start_date) = %s
+                GROUP BY MONTH(start_date)
+                ORDER BY month
+            """, (user_id, current_year))
         monthly_data = cursor.fetchall()
         
         # Get leave status distribution
-        cursor.execute("""
+        cursor.execute(f"""
             SELECT leave_status, COUNT(*) as count
-            FROM leave_application 
-            WHERE user_id = %s
+            FROM leave_application
+            WHERE user_id = %s{date_filter}
             GROUP BY leave_status
-        """, (user_id,))
+        """, tuple(date_params))
         status_data = cursor.fetchall()
         
         # Get leave duration patterns
-        cursor.execute("""
-            SELECT 
-                CASE 
+        cursor.execute(f"""
+            SELECT
+                CASE
                     WHEN DATEDIFF(end_date, start_date) = 0 THEN '1 day'
                     WHEN DATEDIFF(end_date, start_date) = 1 THEN '2 days'
-                    WHEN DATEDIff(end_date, start_date) = 2 THEN '3 days'
+                    WHEN DATEDIFF(end_date, start_date) = 2 THEN '3 days'
                     WHEN DATEDIFF(end_date, start_date) BETWEEN 3 AND 4 THEN '4-5 days'
                     ELSE '5+ days'
                 END as duration_category,
                 COUNT(*) as count
-            FROM leave_application 
-            WHERE user_id = %s AND leave_status = 'approved'
+            FROM leave_application
+            WHERE user_id = %s AND leave_status = 'approved'{date_filter}
             GROUP BY duration_category
-            ORDER BY 
+            ORDER BY
                 CASE duration_category
                     WHEN '1 day' THEN 1
                     WHEN '2 days' THEN 2
@@ -198,25 +219,25 @@ def get_user_analytics(user_id):
                     WHEN '4-5 days' THEN 4
                     ELSE 5
                 END
-        """, (user_id,))
+        """, tuple(date_params))
         duration_data = cursor.fetchall()
         
         # Get recent leave history
-        cursor.execute("""
-            SELECT 
-                la.start_date, 
-                la.end_date, 
-                la.leave_type, 
+        cursor.execute(f"""
+            SELECT
+                la.start_date,
+                la.end_date,
+                la.leave_type,
                 DATEDIFF(la.end_date, la.start_date) + 1 as duration,
-                la.leave_status, 
+                la.leave_status,
                 la.reason,
                 um.user_name as approved_by
             FROM leave_application la
             LEFT JOIN users_master um ON la.user_id = um.user_id
-            WHERE la.user_id = %s
+            WHERE la.user_id = %s{date_filter}
             ORDER BY la.start_date DESC
             LIMIT 10
-        """, (user_id,))
+        """, tuple(date_params))
         leave_history = cursor.fetchall()
         
         # Calculate approval rate

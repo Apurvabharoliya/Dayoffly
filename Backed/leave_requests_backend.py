@@ -54,7 +54,8 @@ def get_leave_requests():
             d.department_name,
             approver.user_name as approver_name,
             la.reason,
-            u.contact_number as contact_info
+            u.contact_number as contact_info,
+            la.hr_remarks
         FROM leave_application la
         JOIN users_master u ON la.user_id = u.user_id
         LEFT JOIN department d ON u.department_id = d.department_id
@@ -101,7 +102,8 @@ def get_leave_requests():
                 'reason': req['reason'],
                 'contact_info': req['contact_info'],
                 'start_date': start_date,
-                'end_date': end_date
+                'end_date': end_date,
+                'hr_remarks': req['hr_remarks']
             })
 
         print(f"Returning {len(formatted_requests)} formatted requests")  # Debug print
@@ -131,7 +133,7 @@ def get_leave_request_details(leave_id):
         cursor = conn.cursor(dictionary=True)
         
         query = """
-        SELECT 
+        SELECT
             la.leave_id,
             u.user_name as employee,
             la.leave_type as type,
@@ -146,7 +148,8 @@ def get_leave_request_details(leave_id):
             la.reason,
             u.contact_number as contact_info,
             u.email,
-            la.attachment
+            la.attachment,
+            la.hr_remarks
         FROM leave_application la
         JOIN users_master u ON la.user_id = u.user_id
         LEFT JOIN department d ON u.department_id = d.department_id
@@ -189,7 +192,8 @@ def get_leave_request_details(leave_id):
                 'reason': request_details['reason'],
                 'contact_info': request_details['contact_number'],
                 'email': request_details['email'],
-                'attachment': request_details['attachment']
+                'attachment': request_details['attachment'],
+                'hr_remarks': request_details['hr_remarks']
             }
             
             print(f"Formatted details: {formatted_details}")  # Debug print
@@ -273,16 +277,23 @@ def update_leave_status():
     """Update leave request status"""
     if request.method == 'OPTIONS':
         return jsonify({"success": True}), 200
-        
+
     try:
         data = request.get_json()
         leave_id = data.get('leave_id')
         status = data.get('status')
         employee_name = data.get('employee_name')
-        
+        hr_remarks = data.get('hr_remarks')
+
+        print(f"DEBUG: Received data - leave_id: {leave_id}, status: {status}, hr_remarks: '{hr_remarks}'")
+
         if not leave_id or not status:
             return jsonify({"success": False, "message": "Missing required fields"}), 400
-        
+
+        # Validate hr_remarks for approved/declined status
+        if status in ['Approved', 'Rejected'] and not hr_remarks:
+            return jsonify({"success": False, "message": "HR remarks are required when approving or rejecting leave"}), 400
+
         # Map frontend status to database status
         status_map = {
             'Approved': 'approved',
@@ -290,17 +301,34 @@ def update_leave_status():
             'Pending': 'pending'
         }
         db_status = status_map.get(status, status.lower())
-        
+
         conn = get_db_connection()
         if not conn:
             return jsonify({"success": False, "message": "Database connection failed"}), 500
-        
+
         cursor = conn.cursor()
-        
-        # Update leave status
-        update_query = "UPDATE leave_application SET leave_status = %s WHERE leave_id = %s"
-        cursor.execute(update_query, (db_status, leave_id))
+
+        # Update leave status and hr_remarks
+        update_query = "UPDATE leave_application SET leave_status = %s, hr_remarks = %s WHERE leave_id = %s"
+        print(f"DEBUG: Executing query: {update_query} with params: ({db_status}, '{hr_remarks}', {leave_id})")
+        cursor.execute(update_query, (db_status, hr_remarks, leave_id))
+        print(f"DEBUG: Update executed, affected rows: {cursor.rowcount}")
+
+        # Verify the update worked
+        cursor.execute("SELECT leave_status, hr_remarks FROM leave_application WHERE leave_id = %s", (leave_id,))
+        verification_result = cursor.fetchone()
+        print(f"DEBUG: Verification after update - status: {verification_result[0]}, hr_remarks: '{verification_result[1]}'")
+
         conn.commit()
+        print("DEBUG: Transaction committed successfully")
+
+        # Verify the update was successful
+        cursor.execute("SELECT leave_status, hr_remarks FROM leave_application WHERE leave_id = %s", (leave_id,))
+        verification_result = cursor.fetchone()
+        if verification_result:
+            print(f"DEBUG: Verification - Status: {verification_result[0]}, HR Remarks: '{verification_result[1]}'")
+        else:
+            print("DEBUG: Verification failed - no record found")
         
         # If approved, update leave balance
         if db_status == 'approved':
@@ -340,10 +368,12 @@ def update_leave_status():
         
         cursor.close()
         conn.close()
-        
+
+        # Include HR remarks in success message
+        remarks_text = f" with remarks: '{hr_remarks}'" if hr_remarks else ""
         return jsonify({
             "success": True,
-            "message": f"Leave {status.lower()} for {employee_name}"
+            "message": f"Leave {status.lower()} for {employee_name}{remarks_text}"
         })
         
     except Exception as e:

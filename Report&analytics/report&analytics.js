@@ -37,7 +37,8 @@ async function checkAuthentication() {
         const apiBaseUrl = 'http://localhost:5000';
         const response = await fetch(`${apiBaseUrl}/api/dashboard-data`, {
             method: 'GET',
-            headers: headers
+            headers: headers,
+            credentials: 'include'
         });
 
         if (response.ok) {
@@ -62,7 +63,6 @@ async function checkAuthentication() {
 // Setup event listeners
 function setupEventListeners() {
     document.getElementById('apply-date-range').addEventListener('click', applyDateFilter);
-    document.getElementById('export-report').addEventListener('click', exportReport);
     document.getElementById('retry-button').addEventListener('click', retryLoading);
 }
 
@@ -88,7 +88,8 @@ async function loadUserAnalytics() {
         const apiBaseUrl = 'http://localhost:5000';
         const response = await fetch(`${apiBaseUrl}/api/user-analytics/${currentUserId}`, {
             method: 'GET',
-            headers: headers
+            headers: headers,
+            credentials: 'include'
         });
 
         if (!response.ok) {
@@ -445,64 +446,58 @@ async function applyDateFilter() {
     const toDate = document.getElementById('date-to').value;
 
     if (!fromDate || !toDate) {
-        alert('Please select both start and end dates');
+        showToast('Please select both start and end dates', 'warning');
         return;
     }
 
     if (new Date(fromDate) > new Date(toDate)) {
-        alert('Start date cannot be after end date');
+        showToast('Start date cannot be after end date', 'error');
         return;
     }
 
     showLoading();
 
     try {
-        // In a real implementation, this would send the date range to the server
-        // For now, we'll just reload the data with a message
-        setTimeout(() => {
-            alert(`Date range filter applied: ${fromDate} to ${toDate}\nDisplaying your leave data for the selected period.`);
-            loadUserAnalytics(); // Reload data
-        }, 500);
+        // Send date range to server for filtered analytics
+        const token = localStorage.getItem('authToken');
+        const headers = {
+            'Content-Type': 'application/json'
+        };
+
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+
+        const apiBaseUrl = 'http://localhost:5000';
+        const response = await fetch(`${apiBaseUrl}/api/user-analytics/${currentUserId}?from=${fromDate}&to=${toDate}`, {
+            method: 'GET',
+            headers: headers,
+            credentials: 'include'
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+        }
+
+        const analyticsData = await response.json();
+
+        // Update UI with filtered data
+        updateUserInterface(analyticsData);
+        hidePageLoading();
+
+        showToast(`Date range filter applied: ${fromDate} to ${toDate}`, 'success');
 
     } catch (error) {
         console.error('Error applying date filter:', error);
-        showError('Failed to apply date filter');
-        hideLoading();
-    }
-}
-
-// Export report
-async function exportReport() {
-    try {
-        if (!currentUserId) {
-            alert('Please wait while we load your data');
-            return;
-        }
-
-        const fromDate = document.getElementById('date-from').value;
-        const toDate = document.getElementById('date-to').value;
-
-        showLoading();
-
-        const apiBaseUrl = 'http://localhost:5000';
-        const response = await fetch(`${apiBaseUrl}/api/export-analytics/${currentUserId}?from=${fromDate}&to=${toDate}`, {
-            method: 'GET'
-        });
-
-        if (response.ok) {
-            const result = await response.json();
-            alert(`Your personal leave report for ${fromDate} to ${toDate} exported successfully!\n\nDownload URL: ${result.download_url}`);
-        } else {
-            throw new Error('Export failed');
-        }
-
-    } catch (error) {
-        console.error('Error exporting report:', error);
-        alert('Export feature is currently unavailable. Please try again later.');
+        showError(`Failed to apply date filter: ${error.message}`);
+        showToast('Failed to apply date filter', 'error');
     } finally {
         hideLoading();
     }
 }
+
+
 
 // Retry loading data
 function retryLoading() {
@@ -644,4 +639,42 @@ function loadDemoData() {
     hideLoading();
 }
 
-// Auto-refresh removed as per user request
+// Toast notification functions
+function showToast(message, type = 'info') {
+    const toast = document.getElementById('toast');
+    const toastIcon = document.getElementById('toast-icon');
+    const toastMessage = document.getElementById('toast-message');
+
+    // Set message
+    toastMessage.textContent = message;
+
+    // Set icon and class based on type
+    toast.className = 'toast'; // Reset classes
+    toast.classList.add(type);
+
+    switch (type) {
+        case 'success':
+            toastIcon.className = 'fas fa-check-circle';
+            break;
+        case 'error':
+            toastIcon.className = 'fas fa-exclamation-circle';
+            break;
+        case 'warning':
+            toastIcon.className = 'fas fa-exclamation-triangle';
+            break;
+        default:
+            toastIcon.className = 'fas fa-info-circle';
+    }
+
+    // Show toast
+    toast.style.display = 'flex';
+
+    // Auto-hide after 3 seconds
+    setTimeout(() => {
+        toast.style.animation = 'slideOut 0.3s ease-out';
+        setTimeout(() => {
+            toast.style.display = 'none';
+            toast.style.animation = '';
+        }, 300);
+    }, 3000);
+}
