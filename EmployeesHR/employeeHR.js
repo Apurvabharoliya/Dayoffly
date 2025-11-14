@@ -94,7 +94,6 @@ function updateUserInfo(userInfo) {
 }
 
 // Main initialization function
-// Main initialization function
 async function initializeApp() {
     try {
         showLoadingState();
@@ -106,7 +105,7 @@ async function initializeApp() {
         // Then load employees and stats
         await Promise.all([
             loadEmployees(),
-            loadEmployeeStats() // Fixed: removed extra 's'
+            loadEmployeeStats()
         ]);
 
         setupEventListeners();
@@ -182,7 +181,6 @@ async function loadDepartments() {
     }
 }
 
-
 // Load employees data from API
 async function loadEmployees() {
     try {
@@ -190,11 +188,13 @@ async function loadEmployees() {
 
         const params = new URLSearchParams({
             page: currentPage,
-            per_page: perPage, // Fixed: changed per_page to perPage
+            per_page: perPage,
             ...(currentFilter !== 'all' && { status: currentFilter }),
             ...(currentDepartment !== 'all' && { department: currentDepartment }),
             ...(currentSearch && { search: currentSearch })
         });
+
+        console.log('Loading employees with params:', params.toString());
 
         const response = await fetch(`${API_BASE_URL}/employees?${params}`);
 
@@ -203,12 +203,14 @@ async function loadEmployees() {
         }
 
         const data = await response.json();
+        console.log('Employees data received:', data);
 
         if (data.error) {
             throw new Error(data.error);
         }
 
         employees = data.employees || [];
+        console.log('Processed employees:', employees);
         renderEmployeeCards();
         updatePagination(data.pagination);
 
@@ -247,6 +249,14 @@ function setupEventListeners() {
         loadEmployees();
     });
 
+    // Status filter buttons
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const status = this.getAttribute('data-status') || 'all';
+            filterEmployees(status);
+        });
+    });
+
     // Search input with debounce
     let searchTimeout;
     document.getElementById('employee-search').addEventListener('input', function (e) {
@@ -257,6 +267,24 @@ function setupEventListeners() {
             loadEmployees();
         }, 500);
     });
+
+    // Add employee button
+    const addEmployeeBtn = document.getElementById('add-employee-btn');
+    if (addEmployeeBtn) {
+        addEmployeeBtn.addEventListener('click', showAddEmployeeForm);
+    }
+
+    // Back button
+    const backBtn = document.getElementById('back-btn');
+    if (backBtn) {
+        backBtn.addEventListener('click', showEmployeeList);
+    }
+
+    // Refresh button
+    const refreshBtn = document.getElementById('refresh-btn');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', refreshData);
+    }
 
     // Keyboard shortcuts
     document.addEventListener('keydown', function (e) {
@@ -269,6 +297,29 @@ function setupEventListeners() {
             }
         }
     });
+}
+
+// Filter employees by status
+function filterEmployees(status) {
+    // Update active state of filter buttons
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.getAttribute('data-status') === status) {
+            btn.classList.add('active');
+        }
+    });
+
+    currentFilter = status;
+    currentPage = 1;
+    loadEmployees();
+}
+
+// Refresh data
+function refreshData() {
+    currentPage = 1;
+    loadEmployees();
+    loadEmployeeStats();
+    showToast('Data refreshed successfully', 'success');
 }
 
 // Render employee cards
@@ -299,6 +350,7 @@ function renderEmployeeCards() {
         const remainingLeaves = employee.remaining_leaves || 0;
         const department = employee.department || 'No Department';
         const position = employee.position || 'Employee';
+        const employeeType = employee.employee_type || 'Full-time';
 
         return `
             <div class="employee-card" data-id="${employee.id}">
@@ -307,7 +359,10 @@ function renderEmployeeCards() {
                     <div class="employee-info">
                         <h3>${employee.name || 'Unknown Employee'}</h3>
                         <p>${position}</p>
-                        <div class="employee-department">${department}</div>
+                        <div class="employee-meta">
+                            <span class="employee-department">${department}</span>
+                            <span class="employee-type">${employeeType}</span>
+                        </div>
                     </div>
                 </div>
                 
@@ -322,11 +377,19 @@ function renderEmployeeCards() {
                     </div>
                 </div>
                 
-                <div class="employee-status status-${status}">${status}</div>
+                <div class="employee-status status-${status.toLowerCase()}">
+                    <span>${status}</span>
+                    <button class="status-toggle-btn" onclick="toggleEmployeeStatus(${employee.id}, '${status}')" title="Toggle Status">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
                 
                 <div class="employee-actions">
                     <button class="view-btn" onclick="viewEmployeeDetails(${employee.id})">
                         <i class="fas fa-eye"></i> View Details
+                    </button>
+                    <button class="edit-btn" onclick="editEmployee(${employee.id})">
+                        <i class="fas fa-edit"></i> Edit
                     </button>
                 </div>
             </div>
@@ -379,28 +442,67 @@ function changePage(page) {
     loadEmployees();
 }
 
-// Filter employees
-function filterEmployees(status) {
-    document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-    event.target.classList.add('active');
+// Toggle employee status
+async function toggleEmployeeStatus(employeeId, currentStatus) {
+    const newStatus = currentStatus.toLowerCase() === 'active' ? 'Inactive' : 'Active';
 
-    currentFilter = status;
-    currentPage = 1;
-    loadEmployees();
-}
+    if (!confirm(`Are you sure you want to set this employee to ${newStatus}?`)) {
+        return;
+    }
 
-// View employee details
-async function viewEmployeeDetails(employeeId) {
     try {
         showLoadingState();
 
-        const response = await fetch(`${API_BASE_URL}/employees/${employeeId}`);
+        const response = await fetch(`${API_BASE_URL}/employees/${employeeId}/status`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                status: newStatus.toLowerCase()
+            })
+        });
 
         if (!response.ok) {
             throw new Error(`Server returned ${response.status}`);
         }
 
+        const result = await response.json();
+
+        if (result.error) {
+            throw new Error(result.error);
+        }
+
+        showToast(`Employee status updated to ${newStatus}`, 'success');
+
+        // Reload employees to reflect the change
+        await loadEmployees();
+        await loadEmployeeStats();
+
+    } catch (error) {
+        console.error('Error updating employee status:', error);
+        showToast('Failed to update employee status: ' + error.message, 'error');
+    } finally {
+        hideLoadingState();
+    }
+}
+
+// View employee details
+async function viewEmployeeDetails(employeeId) {
+    try {
+        console.log('Loading details for employee ID:', employeeId);
+        showLoadingState();
+
+        const response = await fetch(`${API_BASE_URL}/employees/${employeeId}`);
+
+        console.log('Response status:', response.status);
+
+        if (!response.ok) {
+            throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+        }
+
         const employee = await response.json();
+        console.log('Employee data received:', employee);
 
         if (employee.error) {
             throw new Error(employee.error);
@@ -411,6 +513,28 @@ async function viewEmployeeDetails(employeeId) {
     } catch (error) {
         console.error('Error loading employee details:', error);
         showToast('Error loading employee details: ' + error.message, 'error');
+
+        // Show error in details section
+        const detailsSection = document.getElementById('employee-details');
+        detailsSection.innerHTML = `
+            <div class="error-state">
+                <i class="fas fa-exclamation-triangle"></i>
+                <h3>Error Loading Employee Details</h3>
+                <p>${error.message}</p>
+                <button class="view-btn" onclick="showEmployeeList()">
+                    <i class="fas fa-arrow-left"></i> Back to Employee List
+                </button>
+            </div>
+        `;
+
+        // Show details section, hide list
+        document.getElementById('employee-list').style.display = 'none';
+        detailsSection.style.display = 'block';
+        document.getElementById('back-btn').style.display = 'flex';
+
+        const pagination = document.getElementById('pagination-container');
+        if (pagination) pagination.style.display = 'none';
+
     } finally {
         hideLoadingState();
     }
@@ -426,16 +550,21 @@ function displayEmployeeDetails(employee) {
     // Show details, hide list
     listSection.style.display = 'none';
     detailsSection.style.display = 'block';
-    backBtn.style.display = 'flex';
+    if (backBtn) backBtn.style.display = 'flex';
     if (pagination) pagination.style.display = 'none';
 
-    const initials = getInitials(employee.name);
+    const initials = getInitials(employee.name || 'Unknown');
     const status = employee.status || 'Active';
     const leavesTaken = employee.leaves_taken || 0;
     const remainingLeaves = employee.remaining_leaves || 0;
     const totalLeaves = employee.total_leaves || (leavesTaken + remainingLeaves);
     const department = employee.department || 'No Department';
     const position = employee.position || 'Employee';
+    const email = employee.email || 'No email';
+    const contact = employee.contact || 'No contact';
+    const gender = employee.gender || 'Not specified';
+    const dateOfBirth = employee.date_of_birth || 'Not specified';
+    const employeeType = employee.employee_type || 'Full-time';
 
     // Format leave history
     const leaveHistory = employee.leave_history || [];
@@ -475,38 +604,71 @@ function displayEmployeeDetails(employee) {
             <div class="employee-detail-header">
                 <div class="employee-avatar large">${initials}</div>
                 <div class="employee-detail-info">
-                    <h2>${employee.name}</h2>
+                    <h2>${employee.name || 'Unknown Employee'}</h2>
                     <p>${position} • ${department}</p>
-                    <div class="employee-status status-${status}" style="margin-top: 10px;">
-                        ${status}
+                    <div class="employee-meta">
+                        <span class="employee-type">${employeeType}</span>
+                        <span class="employee-status status-${status.toLowerCase()}">
+                            ${status}
+                            <button class="status-toggle-btn" onclick="toggleEmployeeStatus(${employee.id}, '${status}')" title="Toggle Status">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </span>
                     </div>
                 </div>
             </div>
             
-            <div class="employee-contact">
-                <span><i class="fas fa-envelope"></i> ${employee.email || 'No email'}</span>
-                <span><i class="fas fa-phone"></i> ${employee.contact || 'No contact'}</span>
-                <span><i class="fas fa-calendar-alt"></i> ${leavesTaken} Leaves Taken</span>
-            </div>
-            
-            <div class="employee-stats">
-                <div class="stat">
-                    <span class="stat-value">${leavesTaken}</span>
-                    <span class="stat-label">Leaves Taken</span>
+            <div class="employee-detail-content">
+                <div class="detail-section">
+                    <h3><i class="fas fa-info-circle"></i> Personal Information</h3>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <label>Employee ID:</label>
+                            <span>${employee.id || 'N/A'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Email:</label>
+                            <span>${email}</span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Contact:</label>
+                            <span>${contact}</span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Gender:</label>
+                            <span>${gender}</span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Date of Birth:</label>
+                            <span>${dateOfBirth}</span>
+                        </div>
+                    </div>
                 </div>
-                <div class="stat">
-                    <span class="stat-value">${remainingLeaves}</span>
-                    <span class="stat-label">Remaining Leaves</span>
+                
+                <div class="detail-section">
+                    <h3><i class="fas fa-chart-bar"></i> Leave Statistics</h3>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-value">${leavesTaken}</div>
+                            <div class="stat-label">Leaves Taken</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${remainingLeaves}</div>
+                            <div class="stat-label">Remaining Leaves</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${totalLeaves}</div>
+                            <div class="stat-label">Total Leaves</div>
+                        </div>
+                    </div>
                 </div>
-                <div class="stat">
-                    <span class="stat-value">${totalLeaves}</span>
-                    <span class="stat-label">Total Leaves</span>
+                
+                <div class="detail-section">
+                    <h3><i class="fas fa-history"></i> Leave History</h3>
+                    <div class="leave-history-section">
+                        ${leaveHistoryHTML}
+                    </div>
                 </div>
-            </div>
-            
-            <div class="leave-history">
-                <h3><i class="fas fa-history"></i> Leave History</h3>
-                ${leaveHistoryHTML}
             </div>
         </div>
     `;
@@ -514,11 +676,14 @@ function displayEmployeeDetails(employee) {
 
 // Show employee list
 function showEmployeeList() {
-    document.getElementById('employee-details').style.display = 'none';
-    document.getElementById('employee-list').style.display = 'grid';
-    document.getElementById('back-btn').style.display = 'none';
-
+    const detailsSection = document.getElementById('employee-details');
+    const listSection = document.getElementById('employee-list');
+    const backBtn = document.getElementById('back-btn');
     const pagination = document.getElementById('pagination-container');
+
+    if (detailsSection) detailsSection.style.display = 'none';
+    if (listSection) listSection.style.display = 'grid';
+    if (backBtn) backBtn.style.display = 'none';
     if (pagination) pagination.style.display = 'flex';
 }
 
@@ -564,15 +729,27 @@ function showAddEmployeeForm() {
                             <input type="text" id="employee-position" name="designation" required>
                         </div>
                         <div class="form-group">
-                            <label for="employee-role">User Role *</label>
-                            <select id="employee-role" name="user_role" required>
-                                <option value="Employee">Employee</option>
-                                <option value="HR">HR</option>
+                            <label for="employee-type">Employee Type *</label>
+                            <select id="employee-type" name="employee_type" required>
+                                <option value="Full-time">Full-time</option>
+                                <option value="Part-time">Part-time</option>
+                                <option value="Contract">Contract</option>
+                                <option value="Intern">Intern</option>
+                                <option value="Trainee">Trainee</option>
                             </select>
                         </div>
                     </div>
 
                     <div class="form-row">
+                        <div class="form-group">
+                            <label for="employee-role">User Role *</label>
+                            <select id="employee-role" name="user_role" required>
+                                <option value="employee">Employee</option>
+                                <option value="manager">Manager</option>
+                                <option value="hr">HR</option>
+                                <option value="admin">Admin</option>
+                            </select>
+                        </div>
                         <div class="form-group">
                             <label for="employee-status">Status *</label>
                             <select id="employee-status" name="status" required>
@@ -607,11 +784,13 @@ async function handleAddEmployee(event) {
         contact_number: formData.get('contact_number'),
         department: formData.get('department'),
         designation: formData.get('designation'),
+        employee_type: formData.get('employee_type'),
         user_role: formData.get('user_role'),
         status: formData.get('status')
     };
 
     try {
+        console.log('Adding employee:', employeeData);
         const response = await fetch(`${API_BASE_URL}/employees`, {
             method: 'POST',
             headers: {
@@ -626,18 +805,142 @@ async function handleAddEmployee(event) {
         }
 
         const result = await response.json();
+        console.log('Add employee response:', result);
 
         closeModal();
         showToast(`Employee added successfully! ID: ${result.employee_id}`, 'success');
 
-        // Reload data
+        // Reload data to show the new employee
         currentPage = 1;
         await loadEmployees();
         await loadEmployeeStats();
 
+        // Show the generated password if available
+        if (result.default_password) {
+            setTimeout(() => {
+                alert(`Employee added successfully!\nGenerated Password: ${result.default_password}\nPlease share this with the employee.`);
+            }, 500);
+        }
+
     } catch (error) {
         console.error('Error adding employee:', error);
         showToast('Failed to add employee: ' + error.message, 'error');
+    }
+}
+
+// Edit employee
+function editEmployee(employeeId) {
+    // Find the employee in the current list
+    const employee = employees.find(emp => emp.id === employeeId);
+    if (!employee) {
+        showToast('Employee not found', 'error');
+        return;
+    }
+
+    const modalHTML = `
+        <div class="modal" id="edit-employee-modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2><i class="fas fa-edit"></i> Edit Employee</h2>
+                    <button class="close-modal" onclick="closeModal()">&times;</button>
+                </div>
+                
+                <form id="edit-employee-form" onsubmit="handleEditEmployee(event, ${employeeId})">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="edit-employee-name">Full Name *</label>
+                            <input type="text" id="edit-employee-name" name="user_name" value="${employee.name || ''}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-employee-email">Email Address *</label>
+                            <input type="email" id="edit-employee-email" name="email" value="${employee.email || ''}" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="edit-employee-contact">Contact Number *</label>
+                            <input type="tel" id="edit-employee-contact" name="contact_number" value="${employee.contact || ''}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-employee-department">Department *</label>
+                            <select id="edit-employee-department" name="department" required>
+                                <option value="">Select Department</option>
+                                ${departments.map(dept =>
+        `<option value="${dept}" ${dept === employee.department ? 'selected' : ''}>${dept}</option>`
+    ).join('')}
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="edit-employee-position">Position *</label>
+                            <input type="text" id="edit-employee-position" name="designation" value="${employee.position || ''}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-employee-status">Status *</label>
+                            <select id="edit-employee-status" name="status" required>
+                                <option value="Active" ${employee.status === 'Active' ? 'selected' : ''}>Active</option>
+                                <option value="Inactive" ${employee.status === 'Inactive' ? 'selected' : ''}>Inactive</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="cancel-btn" onclick="closeModal()">Cancel</button>
+                        <button type="submit" class="submit-btn">
+                            <i class="fas fa-save"></i> Update Employee
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+}
+
+// Handle edit employee
+async function handleEditEmployee(event, employeeId) {
+    event.preventDefault();
+
+    const formData = new FormData(event.target);
+    const employeeData = {
+        user_name: formData.get('user_name'),
+        email: formData.get('email'),
+        contact_number: formData.get('contact_number'),
+        department: formData.get('department'),
+        designation: formData.get('designation'),
+        status: formData.get('status')
+    };
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/employees/${employeeId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(employeeData)
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Failed to update employee');
+        }
+
+        const result = await response.json();
+
+        closeModal();
+        showToast('Employee updated successfully!', 'success');
+
+        // Reload data
+        await loadEmployees();
+        await loadEmployeeStats();
+
+    } catch (error) {
+        console.error('Error updating employee:', error);
+        showToast('Failed to update employee: ' + error.message, 'error');
     }
 }
 
@@ -656,12 +959,153 @@ function clearFilters() {
     currentSearch = '';
     currentPage = 1;
 
-    document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-    document.querySelector('.filter-btn[onclick="filterEmployees(\'all\')"]').classList.add('active');
+    // Reset filter buttons
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.getAttribute('data-status') === 'all') {
+            btn.classList.add('active');
+        }
+    });
+
     document.getElementById('department-filter').value = 'all';
     document.getElementById('employee-search').value = '';
 
     loadEmployees();
+}
+
+// Edit HR Remarks functionality
+function editHRRemarks(leaveId, currentRemarks) {
+    const container = document.querySelector(`.leave-hr-remarks-container[data-leave-id="${leaveId}"]`);
+    if (!container) return;
+
+    // Replace current content with edit form
+    container.innerHTML = `
+        <div class="leave-hr-remarks-edit">
+            <textarea class="leave-hr-remarks-textarea" placeholder="Enter HR remarks...">${currentRemarks}</textarea>
+            <div class="leave-hr-remarks-actions">
+                <button class="leave-hr-remarks-btn save" onclick="saveHRRemarks(${leaveId})">
+                    <i class="fas fa-save"></i> Save
+                </button>
+                <button class="leave-hr-remarks-btn cancel" onclick="cancelEditHRRemarks(${leaveId}, '${currentRemarks.replace(/'/g, "\\'")}')">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+            </div>
+        </div>
+    `;
+
+    // Focus on textarea
+    const textarea = container.querySelector('.leave-hr-remarks-textarea');
+    if (textarea) {
+        textarea.focus();
+        textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+    }
+}
+
+async function saveHRRemarks(leaveId) {
+    const container = document.querySelector(`.leave-hr-remarks-container[data-leave-id="${leaveId}"]`);
+    if (!container) return;
+
+    const textarea = container.querySelector('.leave-hr-remarks-textarea');
+    if (!textarea) return;
+
+    const newRemarks = textarea.value.trim();
+
+    try {
+        showLoadingState();
+
+        const response = await fetch(`${API_BASE_URL}/leaves/${leaveId}/remarks`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                hr_remarks: newRemarks
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`Server returned ${response.status}`);
+        }
+
+        const result = await response.json();
+
+        if (result.error) {
+            throw new Error(result.error);
+        }
+
+        showToast('HR remarks updated successfully', 'success');
+
+        // Update the display
+        container.innerHTML = `
+            ${newRemarks ?
+                `<div class="leave-hr-remarks">${newRemarks}</div>` :
+                `<div class="leave-hr-remarks empty">No HR remarks yet</div>`
+            }
+            <button class="leave-hr-remarks-btn edit" onclick="editHRRemarks(${leaveId}, '${newRemarks.replace(/'/g, "\\'")}')">
+                <i class="fas fa-edit"></i> ${newRemarks ? 'Edit' : 'Add'} Remarks
+            </button>
+        `;
+
+    } catch (error) {
+        console.error('Error updating HR remarks:', error);
+        showToast('Failed to update HR remarks: ' + error.message, 'error');
+
+        // Restore the edit form with current value
+        container.innerHTML = `
+            <div class="leave-hr-remarks-edit">
+                <textarea class="leave-hr-remarks-textarea" placeholder="Enter HR remarks...">${newRemarks}</textarea>
+                <div class="leave-hr-remarks-actions">
+                    <button class="leave-hr-remarks-btn save" onclick="saveHRRemarks(${leaveId})">
+                        <i class="fas fa-save"></i> Save
+                    </button>
+                    <button class="leave-hr-remarks-btn cancel" onclick="cancelEditHRRemarks(${leaveId}, '${textarea.value.replace(/'/g, "\\'")}')">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                </div>
+            </div>
+        `;
+    } finally {
+        hideLoadingState();
+    }
+}
+
+function cancelEditHRRemarks(leaveId, originalRemarks) {
+    const container = document.querySelector(`.leave-hr-remarks-container[data-leave-id="${leaveId}"]`);
+    if (!container) return;
+
+    // Restore original display
+    container.innerHTML = `
+        ${originalRemarks && originalRemarks !== 'null' ?
+            `<div class="leave-hr-remarks">${originalRemarks}</div>` :
+            `<div class="leave-hr-remarks empty">No HR remarks yet</div>`
+        }
+        <button class="leave-hr-remarks-btn edit" onclick="editHRRemarks(${leaveId}, '${(originalRemarks || '').replace(/'/g, "\\'")}')">
+            <i class="fas fa-edit"></i> ${originalRemarks && originalRemarks !== 'null' ? 'Edit' : 'Add'} Remarks
+        </button>
+    `;
+}
+
+// Enhanced error handling for API calls
+function handleApiError(error, context) {
+    console.error(`Error in ${context}:`, error);
+
+    if (error.name === 'TypeError' && error.message.includes('fetch')) {
+        showToast('Cannot connect to server. Please check if the backend is running on localhost:5000', 'error');
+    } else if (error.message.includes('401')) {
+        showToast('Session expired. Please log in again.', 'error');
+        // Redirect to login page after a delay
+        setTimeout(() => {
+            window.location.href = '/login';
+        }, 2000);
+    } else if (error.message.includes('403')) {
+        showToast('You do not have permission to perform this action.', 'error');
+    } else if (error.message.includes('404')) {
+        showToast('Requested resource not found.', 'error');
+    } else if (error.message.includes('500')) {
+        showToast('Server error. Please try again later.', 'error');
+    } else {
+        showToast(`Error: ${error.message}`, 'error');
+    }
 }
 
 // Utility functions
@@ -725,109 +1169,33 @@ function hideLoadingState() {
     document.body.classList.remove('loading');
 }
 
-// Edit HR Remarks functionality
-function editHRRemarks(leaveId, currentRemarks) {
-    const container = document.querySelector(`.leave-hr-remarks-container[data-leave-id="${leaveId}"]`);
-    if (!container) return;
+// Add window error handling for uncaught errors
+window.addEventListener('error', function (event) {
+    console.error('Uncaught error:', event.error);
+    showToast('An unexpected error occurred. Please refresh the page.', 'error');
+});
 
-    // Replace current content with edit form
-    container.innerHTML = `
-        <div class="leave-hr-remarks-edit">
-            <textarea class="leave-hr-remarks-textarea" placeholder="Enter HR remarks...">${currentRemarks}</textarea>
-            <div class="leave-hr-remarks-actions">
-                <button class="leave-hr-remarks-btn save" onclick="saveHRRemarks(${leaveId})">
-                    <i class="fas fa-save"></i> Save
-                </button>
-                <button class="leave-hr-remarks-btn cancel" onclick="cancelEditHRRemarks(${leaveId}, '${currentRemarks.replace(/'/g, "\\'")}')">
-                    <i class="fas fa-times"></i> Cancel
-                </button>
-            </div>
-        </div>
-    `;
+// Add unhandled promise rejection handling
+window.addEventListener('unhandledrejection', function (event) {
+    console.error('Unhandled promise rejection:', event.reason);
+    showToast('An unexpected error occurred. Please refresh the page.', 'error');
+    event.preventDefault();
+});
 
-    // Focus on textarea
-    const textarea = container.querySelector('.leave-hr-remarks-textarea');
-    if (textarea) {
-        textarea.focus();
-        textarea.setSelectionRange(textarea.value.length, textarea.value.length);
-    }
-}
+// Export functions for global access (if needed in other modules)
+window.EmployeeManager = {
+    loadEmployees,
+    loadEmployeeStats,
+    viewEmployeeDetails,
+    showAddEmployeeForm,
+    editEmployee,
+    toggleEmployeeStatus,
+    filterEmployees,
+    clearFilters,
+    refreshData,
+    showEmployeeList,
+    closeModal,
+    showToast
+};
 
-async function saveHRRemarks(leaveId) {
-    const container = document.querySelector(`.leave-hr-remarks-container[data-leave-id="${leaveId}"]`);
-    if (!container) return;
-
-    const textarea = container.querySelector('.leave-hr-remarks-textarea');
-    if (!textarea) return;
-
-    const newRemarks = textarea.value.trim();
-
-    try {
-        const response = await fetch(`${API_BASE_URL}/employees/update-hr-remarks`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                leave_id: leaveId,
-                hr_remarks: newRemarks
-            })
-        });
-
-        if (!response.ok) {
-            throw new Error(`Server returned ${response.status}`);
-        }
-
-        const result = await response.json();
-
-        if (result.error) {
-            throw new Error(result.error);
-        }
-
-        // Update the display
-        container.innerHTML = `
-            ${newRemarks ?
-                `<div class="leave-hr-remarks">${newRemarks}</div>` :
-                `<div class="leave-hr-remarks empty">No HR remarks yet</div>`
-            }
-            <button class="leave-hr-remarks-btn edit" onclick="editHRRemarks(${leaveId}, '${newRemarks.replace(/'/g, "\\'")}')">
-                <i class="fas fa-edit"></i> ${newRemarks ? 'Edit' : 'Add'} Remarks
-            </button>
-        `;
-
-        showToast('HR remarks updated successfully', 'success');
-
-    } catch (error) {
-        console.error('Error updating HR remarks:', error);
-        showToast('Failed to update HR remarks: ' + error.message, 'error');
-    }
-}
-
-function cancelEditHRRemarks(leaveId, originalRemarks) {
-    const container = document.querySelector(`.leave-hr-remarks-container[data-leave-id="${leaveId}"]`);
-    if (!container) return;
-
-    // Restore original content
-    container.innerHTML = `
-        ${originalRemarks ?
-            `<div class="leave-hr-remarks">${originalRemarks}</div>` :
-            `<div class="leave-hr-remarks empty">No HR remarks yet</div>`
-        }
-        <button class="leave-hr-remarks-btn edit" onclick="editHRRemarks(${leaveId}, '${originalRemarks.replace(/'/g, "\\'")}')">
-            <i class="fas fa-edit"></i> ${originalRemarks ? 'Edit' : 'Add'} Remarks
-        </button>
-    `;
-}
-
-// Make functions globally available
-window.filterEmployees = filterEmployees;
-window.viewEmployeeDetails = viewEmployeeDetails;
-window.showEmployeeList = showEmployeeList;
-window.changePage = changePage;
-window.showAddEmployeeForm = showAddEmployeeForm;
-window.handleAddEmployee = handleAddEmployee;
-window.clearFilters = clearFilters;
-window.closeModal = closeModal;
-window.editHRRemarks = editHRRemarks;
-window.saveHRRemarks = saveHRRemarks;
-window.cancelEditHRRemarks = cancelEditHRRemarks;
+console.log('Employee Management System JavaScript loaded successfully');

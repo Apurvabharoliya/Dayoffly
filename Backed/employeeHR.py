@@ -279,6 +279,7 @@ def get_employee_stats():
         import traceback
         traceback.print_exc()
         return jsonify({'error': f'Failed to fetch employee statistics: {str(e)}'}), 500
+
 @employee_bp.route('/api/departments')
 def get_departments():
     """Get all departments"""
@@ -402,9 +403,10 @@ def get_employee_details(employee_id):
         
         employee['total_leaves'] = employee['leaves_taken'] + employee['remaining_leaves']
         
-        # Get leave history
+        # Get leave history - FIXED: Added leave_id to the query
         cursor.execute("""
             SELECT
+                leave_id,
                 leave_type,
                 start_date,
                 end_date,
@@ -421,8 +423,8 @@ def get_employee_details(employee_id):
         
         # Convert dates to strings
         for leave in leave_history:
-            leave['start_date'] = leave['start_date'].strftime('%Y-%m-%d')
-            leave['end_date'] = leave['end_date'].strftime('%Y-%m-%d')
+            leave['start_date'] = leave['start_date'].strftime('%Y-%m-%d') if leave['start_date'] else None
+            leave['end_date'] = leave['end_date'].strftime('%Y-%m-%d') if leave['end_date'] else None
         
         employee['leave_history'] = leave_history
         
@@ -436,6 +438,7 @@ def get_employee_details(employee_id):
         import traceback
         traceback.print_exc()
         return jsonify({'error': 'Failed to fetch employee details'}), 500
+
 @employee_bp.route('/api/employees', methods=['POST'])
 def add_employee():
     """Add new employee"""
@@ -516,16 +519,7 @@ def add_employee():
             data['user_role']
         ))
         
-        # Initialize leave balance for different leave types (zero for new employees)
-        leave_types = ['Sick Leave', 'Vacation', 'Casual Leave']
-        for leave_type in leave_types:
-            # New employees start with 0 leaves (no carry forward)
-            total = 0
-
-            cursor.execute("""
-                INSERT INTO leave_balance (user_id, leave_type, total_leaves, used_leaves, remaining_leaves)
-                VALUES (%s, %s, %s, %s, %s)
-            """, (new_user_id, leave_type, total, 0, total))
+        # ⚠️ REMOVED: Manual leave balance insertion - database trigger handles this
         
         conn.commit()
         cursor.close()
@@ -548,7 +542,7 @@ def add_employee():
         import traceback
         traceback.print_exc()
         return jsonify({'error': f'Failed to add employee: {str(e)}'}), 500
-
+    
 @employee_bp.route('/api/employees/update-hr-remarks', methods=['POST'])
 def update_hr_remarks():
     """Update HR remarks for a specific leave request"""

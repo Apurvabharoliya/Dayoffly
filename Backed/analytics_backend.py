@@ -28,7 +28,7 @@ def get_db_connection():
 
 @analytics_bp.route('/hr/analytics-data')
 def get_hr_analytics_data():
-    """Get comprehensive HR analytics data with employee filtering"""
+    """Get comprehensive HR analytics data with employee filtering and paid leaves distribution"""
     
     print("📊 HR Analytics endpoint called")
     
@@ -37,8 +37,9 @@ def get_hr_analytics_data():
     employee_filter = request.args.get('employee', 'all')
     period_filter = request.args.get('period', '6months')
     view_filter = request.args.get('view', 'leaves')
+    employee_type_filter = request.args.get('employee_type', 'all')
     
-    print(f"🔍 Filters - Department: {department_filter}, Employee: {employee_filter}, Period: {period_filter}")
+    print(f"🔍 Filters - Department: {department_filter}, Employee: {employee_filter}, Period: {period_filter}, Employee Type: {employee_type_filter}")
     
     conn = get_db_connection()
     if not conn:
@@ -56,13 +57,17 @@ def get_hr_analytics_data():
         
         # Get all employees for filter dropdown
         cursor.execute("""
-            SELECT u.user_id, u.user_name, d.department_name 
+            SELECT u.user_id, u.user_name, d.department_name, u.employee_type
             FROM users_master u 
             LEFT JOIN department d ON u.department_id = d.department_id 
             WHERE u.is_active = 1
             ORDER BY u.user_name
         """)
         all_employees = cursor.fetchall()
+        
+        # Get all employee types
+        cursor.execute("SELECT DISTINCT employee_type FROM users_master WHERE employee_type IS NOT NULL")
+        employee_types = [etype['employee_type'] for etype in cursor.fetchall()]
         
         # Build WHERE conditions based on filters
         where_conditions = []
@@ -74,6 +79,10 @@ def get_hr_analytics_data():
         elif department_filter != 'all':
             where_conditions.append("d.department_name = %s")
             params.append(department_filter)
+        
+        if employee_type_filter != 'all':
+            where_conditions.append("u.employee_type = %s")
+            params.append(employee_type_filter)
         
         # Date range based on period filter
         date_condition = ""
@@ -203,31 +212,59 @@ def get_hr_analytics_data():
         on_leave_result = cursor.fetchone()
         on_leave_now = on_leave_result['on_leave_now'] if on_leave_result else 0
         
-        # 5. Get leave types distribution
+        # 5. Get leave types distribution with paid vs casual information
         leave_types_query = f"""
-            SELECT la.leave_type, COUNT(*) as count
+            SELECT 
+                la.leave_type, 
+                COUNT(*) as count,
+                lt.is_paid
             FROM leave_application la
             LEFT JOIN users_master u ON la.user_id = u.user_id
             LEFT JOIN department d ON u.department_id = d.department_id
+            LEFT JOIN leave_types lt ON la.leave_type = lt.leave_type
             {where_clause} {date_condition}
-            GROUP BY la.leave_type
+            GROUP BY la.leave_type, lt.is_paid
         """
         
         # Fix leave types query parameter issue
         if where_clause == "" and date_condition != "":
             date_condition_types = date_condition.replace(" AND ", "WHERE ", 1)
             leave_types_query = f"""
-                SELECT la.leave_type, COUNT(*) as count
+                SELECT 
+                    la.leave_type, 
+                    COUNT(*) as count,
+                    lt.is_paid
                 FROM leave_application la
                 LEFT JOIN users_master u ON la.user_id = u.user_id
                 LEFT JOIN department d ON u.department_id = d.department_id
+                LEFT JOIN leave_types lt ON la.leave_type = lt.leave_type
                 {date_condition_types}
-                GROUP BY la.leave_type
+                GROUP BY la.leave_type, lt.is_paid
             """
         
         cursor.execute(leave_types_query, all_params)
         leave_types_data = cursor.fetchall()
-        leave_types_distribution = {item['leave_type']: item['count'] for item in leave_types_data}
+        
+        # Separate paid and casual leaves
+        paid_leaves_distribution = {}
+        casual_leaves_distribution = {}
+        total_paid_leaves = 0
+        total_casual_leaves = 0
+        
+        for item in leave_types_data:
+            if item['is_paid']:
+                paid_leaves_distribution[item['leave_type']] = item['count']
+                total_paid_leaves += item['count']
+            else:
+                casual_leaves_distribution[item['leave_type']] = item['count']
+                total_casual_leaves += item['count']
+        
+        leave_types_distribution = {
+            'paid': paid_leaves_distribution,
+            'casual': casual_leaves_distribution,
+            'total_paid': total_paid_leaves,
+            'total_casual': total_casual_leaves
+        }
         
         # 6. Get monthly trends
         monthly_query = f"""
@@ -264,17 +301,29 @@ def get_hr_analytics_data():
         
         # 7. Get department-wise distribution (only when not filtering by employee)
         department_distribution = {}
+        department_paid_casual = {}
         if employee_filter == 'all':
             dept_query = """
-                SELECT d.department_name, COUNT(la.leave_id) as leave_count
+                SELECT 
+                    d.department_name, 
+                    COUNT(la.leave_id) as leave_count,
+                    SUM(CASE WHEN lt.is_paid = 1 THEN 1 ELSE 0 END) as paid_count,
+                    SUM(CASE WHEN lt.is_paid = 0 THEN 1 ELSE 0 END) as casual_count
                 FROM leave_application la
                 JOIN users_master u ON la.user_id = u.user_id
                 JOIN department d ON u.department_id = d.department_id
+                LEFT JOIN leave_types lt ON la.leave_type = lt.leave_type
                 GROUP BY d.department_name
             """
             cursor.execute(dept_query)
             department_data = cursor.fetchall()
             department_distribution = {item['department_name']: item['leave_count'] for item in department_data}
+            department_paid_casual = {
+                item['department_name']: {
+                    'paid': item['paid_count'],
+                    'casual': item['casual_count']
+                } for item in department_data
+            }
         
         # 8. Get approval trends
         approval_trends_query = f"""
@@ -319,7 +368,33 @@ def get_hr_analytics_data():
                 rate = 0
             approval_rates.append(rate)
         
-        # 9. Get employee leave summary with pagination
+        # 9. Get employee type distribution
+        employee_type_query = """
+            SELECT 
+                u.employee_type,
+                COUNT(DISTINCT u.user_id) as employee_count,
+                COUNT(la.leave_id) as leave_count,
+                SUM(CASE WHEN lt.is_paid = 1 THEN 1 ELSE 0 END) as paid_count,
+                SUM(CASE WHEN lt.is_paid = 0 THEN 1 ELSE 0 END) as casual_count
+            FROM users_master u
+            LEFT JOIN leave_application la ON u.user_id = la.user_id
+            LEFT JOIN leave_types lt ON la.leave_type = lt.leave_type
+            WHERE u.is_active = 1
+            GROUP BY u.employee_type
+        """
+        cursor.execute(employee_type_query)
+        employee_type_data = cursor.fetchall()
+        
+        employee_type_distribution = {}
+        for item in employee_type_data:
+            employee_type_distribution[item['employee_type']] = {
+                'employees': item['employee_count'],
+                'leaves': item['leave_count'],
+                'paid_leaves': item['paid_count'],
+                'casual_leaves': item['casual_count']
+            }
+        
+        # 10. Get employee leave summary with pagination
         page = int(request.args.get('page', 1))
         per_page = int(request.args.get('per_page', 10))
         offset = (page - 1) * per_page
@@ -339,10 +414,12 @@ def get_hr_analytics_data():
             SELECT
                 u.user_id,
                 u.user_name,
+                u.employee_type,
                 d.department_name,
                 COALESCE(lb.total_leaves, 20) as total_leaves,
                 COALESCE(lb.used_leaves, 0) as used_leaves,
                 COALESCE(lb.remaining_leaves, 20) as remaining_leaves,
+                COALESCE(lb.is_paid, 0) as is_paid,
                 CASE
                     WHEN COALESCE(lb.total_leaves, 20) > 0 THEN
                         ROUND((COALESCE(lb.used_leaves, 0) / COALESCE(lb.total_leaves, 20)) * 100, 1)
@@ -363,10 +440,12 @@ def get_hr_analytics_data():
         for emp in employee_summary:
             formatted_employees.append({
                 'employee': emp['user_name'],
+                'employeeType': emp['employee_type'],
                 'department': emp['department_name'],
                 'leavesTaken': emp['used_leaves'],
                 'remainingBalance': emp['remaining_leaves'],
-                'utilizationRate': emp['utilization_rate']
+                'utilizationRate': emp['utilization_rate'],
+                'isPaid': bool(emp['is_paid'])
             })
         
         # Get detailed user information using the user.py module
@@ -377,7 +456,9 @@ def get_hr_analytics_data():
                 'totalLeaves': total_leaves,
                 'avgDuration': avg_duration,
                 'approvalRate': approval_rate,
-                'onLeaveNow': on_leave_now
+                'onLeaveNow': on_leave_now,
+                'totalPaidLeaves': total_paid_leaves,
+                'totalCasualLeaves': total_casual_leaves
             },
             'charts': {
                 'leaveTypes': leave_types_distribution,
@@ -386,10 +467,12 @@ def get_hr_analytics_data():
                     'leaves': monthly_leaves
                 },
                 'departmentDistribution': department_distribution,
+                'departmentPaidCasual': department_paid_casual,
                 'approvalTrends': {
                     'months': approval_trends_months,
                     'rates': approval_rates
-                }
+                },
+                'employeeTypeDistribution': employee_type_distribution
             },
             'employees': formatted_employees,
             'pagination': {
@@ -400,7 +483,8 @@ def get_hr_analytics_data():
             },
             'filters': {
                 'departments': departments,
-                'allEmployees': all_employees
+                'allEmployees': all_employees,
+                'employeeTypes': employee_types
             },
             'user_info': user_info or {}
         }

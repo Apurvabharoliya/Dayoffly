@@ -94,17 +94,14 @@ body {
 /* Sidebar Styles updated to match EmployeeDashboard */
 .main-container {
     display: flex;
-    min-height: calc(100vh - 80px);
+    /* min-height: calc(100vh - 80px); */
 }
 
 .sidebar {
     width: 240px;
-    background-color: white;
+    background: white;
     border-right: 1px solid #e5e7eb;
     padding: 16px 0;
-    height: calc(100vh - 80px);
-    position: sticky;
-    top: 55px;
     overflow-y: auto;
     transition: width 0.3s;
 }
@@ -113,20 +110,24 @@ body {
     text-decoration: none;
 }
 
+.sidebar.collapsed {
+    width: 70px;
+}
+
 .nav-item {
     display: flex;
     align-items: center;
-    width: 100%;
+    gap: 12px;
     padding: 12px 20px;
-    border: none;
-    background: none;
-    text-align: left;
     color: #6b7280;
     font-size: 15px;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
     cursor: pointer;
     transition: all 0.25s;
     border-left: 4px solid transparent;
-    gap: 12px;
 }
 
 .nav-item:hover {
@@ -140,11 +141,12 @@ body {
     color: #2563eb;
     font-weight: 600;
     border-left: 4px solid #2563eb;
-    border-right: none;
 }
 
-.nav-item i {
-    width: 20px;
+.content {
+    flex: 1;
+    padding: 28px;
+    overflow-y: auto;
 }
 
 /* Calendar Content Styles */

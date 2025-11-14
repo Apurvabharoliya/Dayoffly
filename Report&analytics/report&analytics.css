@@ -392,7 +392,7 @@ tr:hover {
 }
 
 /* Animations */
-@keyframes fadeIn {
+/* @keyframes fadeIn {
   from {
     opacity: 0;
     transform: translateY(6px);
@@ -402,7 +402,7 @@ tr:hover {
     opacity: 1;
     transform: translateY(0);
   }
-}
+} */
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
@@ -425,7 +425,7 @@ tr:hover {
 }
 
 /* Full Page Loading Overlay */
-.page-loading-overlay {
+/* .page-loading-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -469,7 +469,7 @@ tr:hover {
   to {
     transform: rotate(360deg);
   }
-}
+} */
 
 /* Add to existing CSS */
 .user-welcome {
@@ -495,7 +495,7 @@ tr:hover {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 200px;
+  /* height: 200px; */
   font-size: 1.2rem;
   color: #6b7280;
 }
@@ -567,7 +567,7 @@ tr:hover {
   color: #374151;
 }
 
-@keyframes slideIn {
+/* @keyframes slideIn {
   from {
     transform: translateX(100%);
     opacity: 0;
@@ -589,4 +589,4 @@ tr:hover {
     transform: translateX(100%);
     opacity: 0;
   }
-}
+} */

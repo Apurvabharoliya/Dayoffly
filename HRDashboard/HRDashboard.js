@@ -1,6 +1,9 @@
-// HRDashboard.js - Professional Overview Dashboard (Read-Only)
+// HRDashboard.js - Fixed Version with Proper API Integration
 let requests = [];
 let dashboardStats = {};
+
+// API Base URL
+const API_BASE_URL = 'http://localhost:5000';
 
 // Initialize the dashboard
 document.addEventListener('DOMContentLoaded', () => {
@@ -10,7 +13,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function initializeDashboard() {
     await fetchHRData();
-
     // Refresh data every 30 seconds for live updates
     setInterval(fetchHRData, 30000);
 }
@@ -18,9 +20,10 @@ async function initializeDashboard() {
 // Data fetching functions
 async function fetchHRData() {
     try {
+        console.log('📡 Fetching HR dashboard data...');
         showLoadingState();
 
-        const response = await fetch('http://localhost:5000/hr/dashboard-data', {
+        const response = await fetch(`${API_BASE_URL}/hr/dashboard-data`, {
             method: 'GET',
             credentials: 'include',
             headers: {
@@ -28,11 +31,14 @@ async function fetchHRData() {
             }
         });
 
+        console.log('Response status:', response.status);
+
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
 
         const data = await response.json();
+        console.log('📦 Received data:', data);
 
         if (data.success) {
             console.log('✅ HR data fetched successfully');
@@ -50,6 +56,7 @@ async function fetchHRData() {
 }
 
 function updateDashboard(data) {
+    console.log('🔄 Updating dashboard with data:', data);
     populateRecentRequests();
     updateSummary(data.dashboard_stats?.leave_requests || {});
     updateCharts(data.dashboard_stats || {});
@@ -58,17 +65,20 @@ function updateDashboard(data) {
 
 function showLoadingState() {
     const tbody = document.getElementById('request-table');
+    if (!tbody) return;
+
     tbody.innerHTML = `
         <tr>
             <td colspan="6" style="text-align: center; padding: 40px; color: var(--gray);">
                 <div class="loading-spinner"></div>
-                Loading dashboard data...
+                <p style="margin-top: 10px;">Loading dashboard data...</p>
             </td>
         </tr>
     `;
 }
 
 function handleDataError(error) {
+    console.error('Handling data error:', error);
     requests = [];
     populateRecentRequests();
     updateSummary({ total: 0, pending: 0, approved: 0, rejected: 0 });
@@ -84,6 +94,10 @@ function handleDataError(error) {
 // Request management functions - Read-only overview
 function populateRecentRequests() {
     const tbody = document.getElementById('request-table');
+    if (!tbody) {
+        console.error('Table body element not found');
+        return;
+    }
 
     if (!requests || requests.length === 0) {
         tbody.innerHTML = getEmptyStateHTML();
@@ -94,6 +108,7 @@ function populateRecentRequests() {
 
     // Display recent 5 requests for overview
     const recentRequests = requests.slice(0, 5);
+    console.log(`📊 Displaying ${recentRequests.length} recent requests`);
 
     recentRequests.forEach(req => {
         const row = createRequestRow(req);
@@ -103,26 +118,34 @@ function populateRecentRequests() {
 
 function createRequestRow(req) {
     const row = document.createElement('tr');
+
+    const employeeName = req.employee || req.employee_name || 'Unknown Employee';
+    const department = req.department || 'N/A';
+    const leaveType = req.type || req.leave_type || 'N/A';
+    const dates = req.dates || `${req.start_date || 'N/A'} to ${req.end_date || 'N/A'}`;
+    const duration = req.duration || `${req.total_days || 'N/A'} days`;
+    const status = (req.status || req.hr_approval_status || 'pending').toLowerCase();
+
     row.innerHTML = `
         <td>
             <div class="employee-info">
                 <div class="employee-avatar">
-                    ${req.employee ? req.employee.charAt(0).toUpperCase() : 'U'}
+                    ${employeeName.charAt(0).toUpperCase()}
                 </div>
                 <div class="employee-details">
-                    <div class="employee-name">${req.employee || 'Unknown Employee'}</div>
-                    ${req.department ? `<div class="employee-department">${req.department}</div>` : ''}
+                    <div class="employee-name">${employeeName}</div>
+                    ${department !== 'N/A' ? `<div class="employee-department">${department}</div>` : ''}
                 </div>
             </div>
         </td>
         <td>
-            <span class="leave-type-badge">${req.type || 'N/A'}</span>
+            <span class="leave-type-badge">${leaveType}</span>
         </td>
-        <td>${req.dates || 'N/A'}</td>
-        <td>${req.duration || 'N/A'}</td>
+        <td>${dates}</td>
+        <td>${duration}</td>
         <td>
-            <span class="status status-${req.status ? req.status.toLowerCase() : 'pending'}">
-                ${req.status || 'Pending'}
+            <span class="status status-${status}">
+                ${status.charAt(0).toUpperCase() + status.slice(1)}
             </span>
         </td>
         <td>
@@ -140,7 +163,7 @@ function getEmptyStateHTML() {
         <tr>
             <td colspan="6" class="empty-state">
                 <div class="empty-state-content">
-                    <i class="fas fa-clipboard-check"></i>
+                    <i class="fas fa-clipboard-check" style="font-size: 3em; color: #ccc; margin-bottom: 10px;"></i>
                     <h4>No Active Leave Requests</h4>
                     <p>All requests have been processed or no pending requests available.</p>
                 </div>
@@ -151,27 +174,34 @@ function getEmptyStateHTML() {
 
 // Summary statistics functions
 function updateSummary(stats) {
-    document.getElementById('total-count').textContent = stats.total || 0;
-    document.getElementById('pending-count').textContent = stats.pending || 0;
-    document.getElementById('approved-count').textContent = stats.approved || 0;
-    document.getElementById('rejected-count').textContent = stats.rejected || 0;
+    console.log('📊 Updating summary with stats:', stats);
+
+    const totalCount = document.getElementById('total-count');
+    const pendingCount = document.getElementById('pending-count');
+    const approvedCount = document.getElementById('approved-count');
+    const rejectedCount = document.getElementById('rejected-count');
+
+    if (totalCount) totalCount.textContent = stats.total || 0;
+    if (pendingCount) pendingCount.textContent = stats.pending || 0;
+    if (approvedCount) approvedCount.textContent = stats.approved || 0;
+    if (rejectedCount) rejectedCount.textContent = stats.rejected || 0;
 }
 
 // Chart functions
 function updateCharts(dashboardStats) {
-    // Safely destroy existing charts
+    console.log('📈 Updating charts with data:', dashboardStats);
     destroyCharts();
-
-    // Create charts with actual data
     createCharts(dashboardStats);
 }
 
 function destroyCharts() {
     if (window.leaveTypeChart && typeof window.leaveTypeChart.destroy === 'function') {
         window.leaveTypeChart.destroy();
+        window.leaveTypeChart = null;
     }
     if (window.monthlyTrendChart && typeof window.monthlyTrendChart.destroy === 'function') {
         window.monthlyTrendChart.destroy();
+        window.monthlyTrendChart = null;
     }
 }
 
@@ -181,13 +211,15 @@ function createCharts(dashboardStats) {
 }
 
 function createLeaveTypeChart(dashboardStats) {
-    const leaveTypeLabels = dashboardStats.leave_types ?
-        dashboardStats.leave_types.map(item => item.leave_type) :
-        ['No Data Available'];
+    const leaveTypeLabels = dashboardStats.leave_types && dashboardStats.leave_types.length > 0
+        ? dashboardStats.leave_types.map(item => item.leave_type)
+        : ['No Data Available'];
 
-    const leaveTypeCounts = dashboardStats.leave_types ?
-        dashboardStats.leave_types.map(item => item.count) :
-        [1];
+    const leaveTypeCounts = dashboardStats.leave_types && dashboardStats.leave_types.length > 0
+        ? dashboardStats.leave_types.map(item => item.count)
+        : [1];
+
+    console.log('📊 Creating leave type chart:', { labels: leaveTypeLabels, counts: leaveTypeCounts });
 
     const leaveTypeData = {
         labels: leaveTypeLabels,
@@ -214,8 +246,13 @@ function createLeaveTypeChart(dashboardStats) {
         }]
     };
 
-    const leaveTypeCtx = document.getElementById('leaveTypeChart').getContext('2d');
-    window.leaveTypeChart = new Chart(leaveTypeCtx, {
+    const leaveTypeCtx = document.getElementById('leaveTypeChart');
+    if (!leaveTypeCtx) {
+        console.error('Leave type chart canvas not found');
+        return;
+    }
+
+    window.leaveTypeChart = new Chart(leaveTypeCtx.getContext('2d'), {
         type: 'doughnut',
         data: leaveTypeData,
         options: {
@@ -254,6 +291,8 @@ function createMonthlyTrendChart(dashboardStats) {
         rejected: new Array(12).fill(0)
     };
 
+    console.log('📈 Creating monthly trend chart:', monthlyTrends);
+
     const monthlyTrendData = {
         labels: months,
         datasets: [
@@ -287,8 +326,13 @@ function createMonthlyTrendChart(dashboardStats) {
         ]
     };
 
-    const monthlyTrendCtx = document.getElementById('monthlyTrendChart').getContext('2d');
-    window.monthlyTrendChart = new Chart(monthlyTrendCtx, {
+    const monthlyTrendCtx = document.getElementById('monthlyTrendChart');
+    if (!monthlyTrendCtx) {
+        console.error('Monthly trend chart canvas not found');
+        return;
+    }
+
+    window.monthlyTrendChart = new Chart(monthlyTrendCtx.getContext('2d'), {
         type: 'line',
         data: monthlyTrendData,
         options: {
@@ -337,71 +381,74 @@ function updateEmptyCharts() {
 }
 
 function createEmptyCharts() {
-    const leaveTypeCtx = document.getElementById('leaveTypeChart').getContext('2d');
-    window.leaveTypeChart = new Chart(leaveTypeCtx, {
-        type: 'doughnut',
-        data: {
-            labels: ['No Data Available'],
-            datasets: [{
-                data: [1],
-                backgroundColor: ['rgba(200, 200, 200, 0.7)'],
-                borderColor: ['rgba(150, 150, 150, 1)'],
-                borderWidth: 2
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            cutout: '60%',
-            plugins: {
-                legend: {
-                    position: 'bottom'
-                },
-                tooltip: {
-                    enabled: false
-                }
-            }
-        }
-    });
-
-    const monthlyTrendCtx = document.getElementById('monthlyTrendChart').getContext('2d');
-    window.monthlyTrendChart = new Chart(monthlyTrendCtx, {
-        type: 'line',
-        data: {
-            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-            datasets: [{
-                label: 'No Data Available',
-                data: new Array(12).fill(0),
-                borderColor: 'rgba(200, 200, 200, 1)',
-                backgroundColor: 'rgba(200, 200, 200, 0.1)',
-                tension: 0.4,
-                fill: true,
-                borderWidth: 3
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        precision: 0
+    const leaveTypeCtx = document.getElementById('leaveTypeChart');
+    if (leaveTypeCtx) {
+        window.leaveTypeChart = new Chart(leaveTypeCtx.getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: ['No Data Available'],
+                datasets: [{
+                    data: [1],
+                    backgroundColor: ['rgba(200, 200, 200, 0.7)'],
+                    borderColor: ['rgba(150, 150, 150, 1)'],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '60%',
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    },
+                    tooltip: {
+                        enabled: false
                     }
                 }
+            }
+        });
+    }
+
+    const monthlyTrendCtx = document.getElementById('monthlyTrendChart');
+    if (monthlyTrendCtx) {
+        window.monthlyTrendChart = new Chart(monthlyTrendCtx.getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                datasets: [{
+                    label: 'No Data Available',
+                    data: new Array(12).fill(0),
+                    borderColor: 'rgba(200, 200, 200, 1)',
+                    backgroundColor: 'rgba(200, 200, 200, 0.1)',
+                    tension: 0.4,
+                    fill: true,
+                    borderWidth: 3
+                }]
             },
-            plugins: {
-                legend: {
-                    position: 'bottom'
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
                 }
             }
-        }
-    });
+        });
+    }
 }
 
 // Professional notification system
 function showNotification(message, type) {
-    // Remove existing notifications
     const existingNotifications = document.querySelectorAll('.custom-notification');
     existingNotifications.forEach(notification => {
         if (document.body.contains(notification)) {
@@ -409,7 +456,6 @@ function showNotification(message, type) {
         }
     });
 
-    // Create notification element
     const notification = document.createElement('div');
     notification.className = `custom-notification notification-${type}`;
     notification.innerHTML = `
@@ -429,12 +475,10 @@ function showNotification(message, type) {
 
     document.body.appendChild(notification);
 
-    // Animate in
     setTimeout(() => {
         notification.classList.add('show');
     }, 10);
 
-    // Auto remove after 5 seconds
     setTimeout(() => {
         if (document.body.contains(notification)) {
             notification.classList.remove('show');
@@ -474,20 +518,19 @@ function formatNumber(num) {
 
 // User info update function
 function updateUserInfo(userInfo) {
+    console.log('👤 Updating user info:', userInfo);
+
     if (userInfo && userInfo.user_name) {
-        // Update user name
         const userNameElement = document.getElementById('user-name');
         if (userNameElement) {
             userNameElement.textContent = userInfo.user_name;
         }
 
-        // Update user avatar with first letter of name
         const userAvatarElement = document.getElementById('user-avatar');
         if (userAvatarElement) {
             userAvatarElement.textContent = userInfo.user_name.charAt(0).toUpperCase();
         }
 
-        // Update designation if available
         const designationElement = document.getElementById('user-designation');
         if (designationElement && userInfo.designation) {
             designationElement.textContent = userInfo.designation;
@@ -495,8 +538,10 @@ function updateUserInfo(userInfo) {
     }
 }
 
-// Export functions for global access if needed
+// Export functions for global access
 window.HRDashboard = {
     refreshData: fetchHRData,
     showNotification: showNotification
 };
+
+console.log('✅ HR Dashboard initialized successfully');

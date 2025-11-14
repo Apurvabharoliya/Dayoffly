@@ -65,6 +65,57 @@
         </div>
       </header>
 
+      <!-- Document Reminder Section -->
+      <div class="document-reminder" id="documentReminder">
+        <div class="reminder-header">
+          <h3><i class="fas fa-exclamation-triangle"></i> Pending Documents Required</h3>
+          <button class="btn btn-sm" onclick="hideDocumentReminder()">Dismiss</button>
+        </div>
+        <div id="pendingDocumentsList">
+          <!-- Will be populated by JavaScript -->
+        </div>
+      </div>
+
+      <!-- Paid Leaves Distribution Section -->
+      <section class="paid-leaves-section">
+        <div class="paid-leaves-header">
+          <h2><i class="fas fa-chart-pie"></i> Leave Distribution</h2>
+          <button class="manage-distribution-btn" onclick="showDistributionManagement()">
+            <i class="fas fa-edit"></i> Manage Distribution
+          </button>
+        </div>
+
+        <div class="distribution-cards">
+          <div class="distribution-card intern">
+            <h4>Interns</h4>
+            <div class="leave-breakdown">
+              <div>Paid: <strong>8</strong> days/year</div>
+              <div>Casual: <strong>4</strong> days/year</div>
+              <div style="margin-top: 8px; font-size: 0.9em; color: #666;">
+                🎓 Direct HR Approval
+              </div>
+            </div>
+          </div>
+
+          <div class="distribution-card fulltime">
+            <h4>Full-time</h4>
+            <div class="leave-breakdown">
+              <div>Paid: <strong>18</strong> days/year</div>
+              <div>Casual: <strong>12</strong> days/year</div>
+              <div>Sick: <strong>7</strong> days/year</div>
+            </div>
+          </div>
+
+          <div class="distribution-card contract">
+            <h4>Contract</h4>
+            <div class="leave-breakdown">
+              <div>Paid: <strong>12</strong> days/year</div>
+              <div>Casual: <strong>8</strong> days/year</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section class="summary">
         <div class="card total">
           <div class="card-icon">
@@ -100,6 +151,14 @@
         <div class="section-header">
           <h2>All Leave Requests</h2>
           <div class="filter-section">
+            <!-- Employee Type Filter -->
+            <div class="employee-type-filter">
+              <button class="type-filter-btn active" onclick="filterByEmployeeType('all')">All Employees</button>
+              <button class="type-filter-btn" onclick="filterByEmployeeType('Intern')">🎓 Interns</button>
+              <button class="type-filter-btn" onclick="filterByEmployeeType('Full-time')">💼 Full-time</button>
+              <button class="type-filter-btn" onclick="filterByEmployeeType('Contract')">📝 Contract</button>
+            </div>
+
             <div class="filter-options">
               <button class="filter-btn active" data-filter="all">All</button>
               <button class="filter-btn" data-filter="pending">Pending</button>
@@ -181,6 +240,10 @@
               <span class="detail-label">Email:</span>
               <span class="detail-value" id="modal-email">-</span>
             </div>
+            <div class="detail-item">
+              <span class="detail-label">Employee Type:</span>
+              <span class="detail-value" id="modal-employee-type">-</span>
+            </div>
           </div>
         </div>
 
@@ -223,6 +286,14 @@
           <div class="detail-item">
             <span class="detail-label">Approver:</span>
             <span class="detail-value" id="modal-approver">-</span>
+          </div>
+          <div class="detail-item" id="document-info" style="display: none;">
+            <span class="detail-label">Document:</span>
+            <span class="detail-value">
+              <button class="btn btn-sm" onclick="viewDocument()">
+                <i class="fas fa-file"></i> View Document
+              </button>
+            </span>
           </div>
         </div>
 
@@ -273,6 +344,25 @@
       <div class="modal-footer">
         <button class="btn btn-secondary" id="modalCancelBtn">Cancel</button>
         <button class="btn" id="modalConfirmBtn">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Distribution Management Modal -->
+  <div class="modal" id="distributionModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title">Manage Leave Distribution</h2>
+        <button class="close-modal" onclick="closeDistributionModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div id="distributionManagementContent">
+          <!-- Will be populated by JavaScript -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeDistributionModal()">Close</button>
+        <button class="btn btn-primary" onclick="saveDistributionChanges()">Save Changes</button>
       </div>
     </div>
   </div>

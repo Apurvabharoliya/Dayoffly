@@ -385,9 +385,13 @@ async function loadLeaveTypes() {
             // Add options from database
             leaveTypes.forEach(leaveType => {
                 const option = document.createElement('option');
-                option.value = leaveType.name;
-                option.textContent = leaveType.name;
+                option.value = leaveType.leave_name || leaveType.leave_type;
+                option.textContent = leaveType.leave_name || leaveType.leave_type;
                 option.title = leaveType.rules || 'Standard leave rules apply';
+                // Store additional data for validation
+                option.setAttribute('data-requires-document', leaveType.requires_document);
+                option.setAttribute('data-max-days', leaveType.max_days);
+                option.setAttribute('data-is-paid', leaveType.is_paid);
                 leaveTypeSelect.appendChild(option);
             });
         }
@@ -431,7 +435,10 @@ async function submitLeaveApplication(formData) {
             reason: formData.reason,
             halfDay: formData.halfDay,
             halfDayOption: formData.halfDayOption,
-            handover: formData.handover
+            handover: formData.handover,
+            employeeType: document.getElementById('employeeType').value,
+            leaveCategory: document.getElementById('leaveCategory').value,
+            contactInfo: document.getElementById('contactInfo').value
         };
 
         // Handle file attachment if present

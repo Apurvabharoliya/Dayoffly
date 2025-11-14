@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -30,7 +31,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.15);
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.15);
         }
 
         .logo {
@@ -57,7 +58,7 @@
             border: none;
             outline: none;
             font-size: 14px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
             transition: box-shadow 0.2s;
         }
 
@@ -69,7 +70,7 @@
             width: 36px;
             height: 36px;
             border-radius: 50%;
-            background: rgba(255,255,255,0.15);
+            background: rgba(255, 255, 255, 0.15);
             border: none;
             color: white;
             cursor: pointer;
@@ -81,7 +82,7 @@
         }
 
         .icon-btn:hover {
-            background: rgba(255,255,255,0.25);
+            background: rgba(255, 255, 255, 0.25);
             transform: scale(1.1);
         }
 
@@ -110,7 +111,7 @@
             transition: width 0.3s;
         }
 
-        .sidebar a{
+        .sidebar a {
             text-decoration: none;
         }
 
@@ -681,8 +682,15 @@
 
         /* Animations */
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(6px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(6px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         /* Responsive adjustments */
@@ -690,11 +698,11 @@
             .date-inputs {
                 flex-direction: column;
             }
-            
+
             .cards-container {
                 flex-direction: column;
             }
-            
+
             .toast {
                 min-width: auto;
                 width: calc(100vw - 40px);
@@ -702,6 +710,7 @@
         }
     </style>
 </head>
+
 <body>
     <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>
@@ -725,7 +734,8 @@
                 <button class="nav-item"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></button>
             </a>
             <a href="/HTML/leaveapplication.html">
-                <button class="nav-item active"><i class="fas fa-folder-open"></i> <span>Leave Applications</span></button>
+                <button class="nav-item active"><i class="fas fa-folder-open"></i> <span>Leave
+                        Applications</span></button>
             </a>
             <button class="nav-item"><i class="fas fa-chart-line"></i> <span>Reports & Analytics</span></button>
             <button class="nav-item"><i class="fas fa-list-check"></i> <span>Leave Status</span></button>
@@ -815,7 +825,8 @@
                     <!-- Step 2: Reason and Attachments -->
                     <div class="form-group">
                         <label class="form-label">Reason for Leave</label>
-                        <textarea class="form-control" id="reason" placeholder="Please provide a reason for your leave"></textarea>
+                        <textarea class="form-control" id="reason"
+                            placeholder="Please provide a reason for your leave"></textarea>
                     </div>
 
                     <div class="form-group" id="attachmentSection" style="display: none;">
@@ -831,7 +842,8 @@
                     <!-- Step 3: Handover -->
                     <div class="form-group">
                         <label class="form-label">Handover to Colleague</label>
-                        <input type="text" class="form-control" id="handover" placeholder="Start typing colleague's name">
+                        <input type="text" class="form-control" id="handover"
+                            placeholder="Start typing colleague's name">
                         <div id="suggestions" style="display: none;"></div>
                     </div>
 
@@ -891,33 +903,33 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // Toggle form visibility
             const applyButton = document.getElementById('applyButton');
             const applicationForm = document.getElementById('applicationForm');
             const cancelButton = document.getElementById('cancelButton');
-            
-            applyButton.addEventListener('click', function() {
+
+            applyButton.addEventListener('click', function () {
                 applicationForm.style.display = 'block';
                 applyButton.style.display = 'none';
                 // Scroll to form
                 applicationForm.scrollIntoView({ behavior: 'smooth' });
             });
-            
-            cancelButton.addEventListener('click', function() {
+
+            cancelButton.addEventListener('click', function () {
                 applicationForm.style.display = 'none';
                 applyButton.style.display = 'block';
             });
-            
+
             // Date calculation and calendar display
             const startDateInput = document.getElementById('startDate');
             const endDateInput = document.getElementById('endDate');
-            
+
             // Set default dates (today and tomorrow)
             const today = new Date();
             const tomorrow = new Date(today);
             tomorrow.setDate(tomorrow.getDate() + 1);
-            
+
             // Format dates for input fields (YYYY-MM-DD)
             function formatDate(date) {
                 const year = date.getFullYear();
@@ -925,24 +937,24 @@
                 const day = String(date.getDate()).padStart(2, '0');
                 return `${year}-${month}-${day}`;
             }
-            
+
             startDateInput.value = formatDate(today);
             endDateInput.value = formatDate(tomorrow);
-            
+
             // Half day option toggle
             const halfDayCheckbox = document.getElementById('halfDay');
             const halfDaySelect = document.getElementById('halfDayOption');
-            
-            halfDayCheckbox.addEventListener('change', function() {
+
+            halfDayCheckbox.addEventListener('change', function () {
                 halfDaySelect.disabled = !this.checked;
             });
-            
+
             // Toast notification function
             function showToast(title, message, type = 'success') {
                 const toastContainer = document.getElementById('toastContainer');
                 const toast = document.createElement('div');
                 toast.className = `toast ${type}`;
-                
+
                 toast.innerHTML = `
                     <div class="toast-icon">
                         <i class="fas fa-check"></i>
@@ -953,37 +965,37 @@
                     </div>
                     <button class="toast-close">&times;</button>
                 `;
-                
+
                 toastContainer.appendChild(toast);
-                
+
                 // Show toast with animation
                 setTimeout(() => {
                     toast.classList.add('show');
                 }, 10);
-                
+
                 // Close button event
                 const closeButton = toast.querySelector('.toast-close');
                 closeButton.addEventListener('click', () => {
                     hideToast(toast);
                 });
-                
+
                 // Auto hide after 5 seconds
                 setTimeout(() => {
                     hideToast(toast);
                 }, 5000);
             }
-            
+
             function hideToast(toast) {
                 toast.classList.remove('show');
                 setTimeout(() => {
                     toast.remove();
                 }, 300);
             }
-            
+
             // Form submission
-            document.getElementById('leaveForm').addEventListener('submit', function(e) {
+            document.getElementById('leaveForm').addEventListener('submit', function (e) {
                 e.preventDefault();
-                
+
                 // Create and show custom popup
                 const popup = document.createElement('div');
                 popup.className = 'custom-popup';
@@ -997,14 +1009,14 @@
                         <button class="popup-close-btn">OK</button>
                     </div>
                 `;
-                
+
                 document.body.appendChild(popup);
-                
+
                 // Add show class after a small delay for animation
                 setTimeout(() => {
                     popup.classList.add('show');
                 }, 10);
-                
+
                 // Close button event
                 const closeButton = popup.querySelector('.popup-close-btn');
                 closeButton.addEventListener('click', () => {
@@ -1012,12 +1024,12 @@
                     setTimeout(() => {
                         popup.remove();
                     }, 300);
-                    
+
                     // Hide form and show apply button
                     applicationForm.style.display = 'none';
                     applyButton.style.display = 'block';
                 });
-                
+
                 // Also close when clicking outside the popup content
                 popup.addEventListener('click', (e) => {
                     if (e.target === popup) {
@@ -1028,4 +1040,5 @@
         });
     </script>
 </body>
+
 </html>

@@ -24,7 +24,7 @@ def get_db_connection():
     
 @settingsHR_bp.route('/api/users')
 def get_all_users():
-    """Get all users with their details"""
+    """Get all users with their details including employee type"""
     conn = get_db_connection()
     if not conn:
         return jsonify({'error': 'Database connection failed'}), 500
@@ -51,6 +51,8 @@ def get_all_users():
                 u.gender,
                 u.nationality,
                 u.pronouns,
+                u.employee_type,
+                u.date_of_joining,
                 d.department_name,
                 r.role_name,
                 ua.user_name as approver_name
@@ -92,7 +94,9 @@ def get_all_users():
                 'gender': user['gender'],
                 'nationality': user['nationality'],
                 'pronouns': user['pronouns'],
-                'approver_name': user['approver_name']
+                'approver_name': user['approver_name'],
+                'employee_type': user['employee_type'] or 'Full-time',
+                'date_of_joining': user['date_of_joining'] or datetime.now().strftime('%Y-%m-%d')
             }
             formatted_users.append(formatted_user)
         
@@ -108,7 +112,7 @@ def get_all_users():
 
 @settingsHR_bp.route('/api/users', methods=['POST'])
 def add_user():
-    """Add a new user"""
+    """Add a new user with employee type"""
     conn = get_db_connection()
     if not conn:
         return jsonify({'error': 'Database connection failed'}), 500
@@ -123,8 +127,10 @@ def add_user():
         role = data.get('role')
         department = data.get('department')
         designation = data.get('designation', 'Employee')
+        employee_type = data.get('employee_type', 'Full-time')
+        date_of_joining = data.get('date_of_joining', datetime.now().strftime('%Y-%m-%d'))
         
-        if not all([username, email, password, role, department]):
+        if not all([username, email, password, role, department, employee_type]):
             return jsonify({'error': 'Missing required fields'}), 400
         
         cursor = conn.cursor(dictionary=True)
@@ -159,32 +165,32 @@ def add_user():
         # Default approver (HR manager)
         approver_id = 2  # HR Manager user_id
         
-        # Insert new user
+        # Insert new user with date_of_joining
         cursor.execute("""
             INSERT INTO users_master 
-            (user_id, user_name, email, password, department_id, role_id, designation, contact_number, is_active, approver_id)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-        """, (new_user_id, username, email, password, department_id, role_id, designation, '', 1, approver_id))
+            (user_id, user_name, email, password, department_id, role_id, designation, 
+             contact_number, is_active, approver_id, user_role, employee_type, date_of_joining)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """, (new_user_id, username, email, password, department_id, role_id, designation, 
+              '', 1, approver_id, role, employee_type, date_of_joining))
         
         conn.commit()
         
-        # Create leave balance records
-        leave_types = ['Sick Leave', 'Vacation', 'Casual Leave']
-        for leave_type in leave_types:
-            total_leaves = 10 if leave_type == 'Sick Leave' else (15 if leave_type == 'Vacation' else 12)
-            cursor.execute("""
-                INSERT INTO leave_balance (user_id, leave_type, total_leaves, used_leaves, remaining_leaves)
-                VALUES (%s, %s, %s, %s, %s)
-            """, (new_user_id, leave_type, total_leaves, 0, total_leaves))
+        # ⚠️ REMOVED: Manual leave balance creation - database trigger handles this
+        # create_employee_leave_balance(cursor, new_user_id, employee_type, date_of_joining)
         
-        conn.commit()
+        # ⚠️ REMOVED: Second commit - not needed
+        # conn.commit()
         
         return jsonify({
             'message': 'User added successfully',
             'user_id': new_user_id,
             'username': username,
             'email': email,
-            'password': password  # Return password for HR to share
+            'password': password,  # Return password for HR to share
+            'employee_type': employee_type,
+            'date_of_joining': date_of_joining,
+            'leave_policy': get_leave_policy_description(employee_type)
         })
         
     except Exception as e:
@@ -196,9 +202,77 @@ def add_user():
             cursor.close()
         conn.close()
 
+# ⚠️ KEEP this function but don't call it - or remove it entirely
+def create_employee_leave_balance(cursor, user_id, employee_type, date_of_joining):
+    """Create leave balance records based on employee type with prorated calculations"""
+    
+    # Calculate months worked for prorated accruals
+    if date_of_joining:
+        join_date = datetime.strptime(str(date_of_joining), '%Y-%m-%d')
+        current_date = datetime.now()
+        months_worked = (current_date.year - join_date.year) * 12 + (current_date.month - join_date.month)
+        months_worked = max(months_worked, 1)
+    else:
+        months_worked = 1
+    
+    if employee_type == 'Intern':
+        # Interns get 8 paid leaves only (prorated)
+        accrued_paid = min(8, round(0.67 * months_worked, 1))  # 8 annually = 0.67 monthly
+        cursor.execute("""
+            INSERT INTO leave_balance (user_id, leave_type, total_leaves, used_leaves, remaining_leaves, is_paid)
+            VALUES (%s, %s, %s, %s, %s, %s)
+        """, (user_id, 'Paid Leave', 8, 0, accrued_paid, 1))
+    else:
+        # Define leave types based on employee type
+        if employee_type == 'Full-time':
+            leave_types = [
+                ('Sick Leave', 10, 1),    # 10 paid sick leaves
+                ('Vacation', 15, 1),      # 15 paid vacation leaves  
+                ('Casual Leave', 12, 0)   # 12 casual leaves (unpaid)
+            ]
+        elif employee_type == 'Contract':
+            leave_types = [
+                ('Sick Leave', 6, 1),     # 6 paid sick leaves
+                ('Vacation', 9, 1),       # 9 paid vacation leaves
+                ('Casual Leave', 8, 0)    # 8 casual leaves
+            ]
+        elif employee_type == 'Part-time':
+            leave_types = [
+                ('Sick Leave', 4, 1),     # 4 paid sick leaves
+                ('Vacation', 8, 1),       # 8 paid vacation leaves
+                ('Casual Leave', 6, 0)    # 6 casual leaves
+            ]
+        else:  # Trainee and others
+            leave_types = [
+                ('Sick Leave', 5, 1),     # 5 paid sick leaves
+                ('Vacation', 5, 1),       # 5 paid vacation leaves
+                ('Casual Leave', 5, 0)    # 5 casual leaves
+            ]
+        
+        for leave_type, total, is_paid in leave_types:
+            # Calculate prorated leaves based on months worked
+            monthly_accrual = total / 12.0
+            accrued_leaves = min(total, round(monthly_accrual * months_worked, 1))
+            
+            cursor.execute("""
+                INSERT INTO leave_balance (user_id, leave_type, total_leaves, used_leaves, remaining_leaves, is_paid)
+                VALUES (%s, %s, %s, %s, %s, %s)
+            """, (user_id, leave_type, total, 0, accrued_leaves, is_paid))
+
+def get_leave_policy_description(employee_type):
+    """Get description of leave policy for employee type"""
+    policies = {
+        'Intern': 'Intern: 8 Paid Leaves (prorated based on joining date)',
+        'Full-time': 'Full-time: 10 Sick + 15 Vacation + 12 Casual Leaves (prorated)',
+        'Contract': 'Contract: 6 Sick + 9 Vacation + 8 Casual Leaves (prorated)',
+        'Part-time': 'Part-time: 4 Sick + 8 Vacation + 6 Casual Leaves (prorated)',
+        'Trainee': 'Trainee: 5 Sick + 5 Vacation + 5 Casual Leaves (prorated)'
+    }
+    return policies.get(employee_type, 'Standard Leave Package')
+
 @settingsHR_bp.route('/api/users/<int:user_id>', methods=['PUT'])
 def update_user(user_id):
-    """Update user details"""
+    """Update user details including employee type"""
     conn = get_db_connection()
     if not conn:
         return jsonify({'error': 'Database connection failed'}), 500
@@ -255,6 +329,14 @@ def update_user(user_id):
             update_fields.append("designation = %s")
             update_values.append(data['designation'])
         
+        if 'employee_type' in data:
+            update_fields.append("employee_type = %s")
+            update_values.append(data['employee_type'])
+        
+        if 'date_of_joining' in data:
+            update_fields.append("date_of_joining = %s")
+            update_values.append(data['date_of_joining'])
+        
         if 'is_active' in data:
             update_fields.append("is_active = %s")
             update_values.append(1 if data['is_active'] else 0)
@@ -310,3 +392,119 @@ def delete_user(user_id):
 def get_roles():
     """Get all roles"""
     return jsonify(['employee', 'manager', 'hr', 'admin'])
+
+@settingsHR_bp.route('/api/employee-types')
+def get_employee_types():
+    """Get all employee types"""
+    return jsonify(['Intern', 'Full-time', 'Contract', 'Part-time', 'Trainee'])
+
+@settingsHR_bp.route('/api/leave-policies')
+def get_leave_policies():
+    """Get leave policies for different employee types with time-period details"""
+    policies = [
+        {
+            'employee_type': 'Intern',
+            'paid_leaves': 8,
+            'casual_leaves': 0,
+            'sick_leaves': 0,
+            'monthly_accrual_paid': 0.67,
+            'monthly_accrual_casual': 0,
+            'description': 'Interns get 8 paid leaves per year (prorated). Direct HR approval required. No casual leaves.',
+            'time_period': 'Annual (prorated monthly)',
+            'direct_hr_approval': True
+        },
+        {
+            'employee_type': 'Full-time',
+            'paid_leaves': 25,
+            'casual_leaves': 12,
+            'sick_leaves': 10,
+            'monthly_accrual_paid': 2.08,
+            'monthly_accrual_casual': 1.0,
+            'description': 'Full-time employees get 25 paid leaves, 12 casual leaves, and 10 sick leaves per year (prorated monthly).',
+            'time_period': 'Annual (prorated monthly)',
+            'direct_hr_approval': False
+        },
+        {
+            'employee_type': 'Contract',
+            'paid_leaves': 15,
+            'casual_leaves': 8,
+            'sick_leaves': 6,
+            'monthly_accrual_paid': 1.25,
+            'monthly_accrual_casual': 0.67,
+            'description': 'Contract employees get 15 paid leaves, 8 casual leaves, and 6 sick leaves per year (prorated monthly).',
+            'time_period': 'Annual (prorated monthly)',
+            'direct_hr_approval': False
+        },
+        {
+            'employee_type': 'Part-time',
+            'paid_leaves': 12,
+            'casual_leaves': 6,
+            'sick_leaves': 4,
+            'monthly_accrual_paid': 1.0,
+            'monthly_accrual_casual': 0.5,
+            'description': 'Part-time employees get 12 paid leaves, 6 casual leaves, and 4 sick leaves per year (prorated monthly).',
+            'time_period': 'Annual (prorated monthly)',
+            'direct_hr_approval': False
+        },
+        {
+            'employee_type': 'Trainee',
+            'paid_leaves': 10,
+            'casual_leaves': 5,
+            'sick_leaves': 5,
+            'monthly_accrual_paid': 0.83,
+            'monthly_accrual_casual': 0.42,
+            'description': 'Trainees get 10 paid leaves, 5 casual leaves, and 5 sick leaves per year (prorated monthly).',
+            'time_period': 'Annual (prorated monthly)',
+            'direct_hr_approval': False
+        }
+    ]
+    return jsonify(policies)
+
+@settingsHR_bp.route('/api/document-requirements')
+def get_document_requirements():
+    """Get document requirements for different leave types"""
+    requirements = [
+        {
+            'leave_type': 'Sick Leave',
+            'requires_document': True,
+            'document_type': 'Medical Certificate',
+            'description': 'Medical certificate from registered practitioner required for sick leaves exceeding 2 days.'
+        },
+        {
+            'leave_type': 'Medical Leave',
+            'requires_document': True,
+            'document_type': 'Medical Certificate/Hospital Documents',
+            'description': 'Medical documents required for all medical leaves.'
+        },
+        {
+            'leave_type': 'Injury Leave',
+            'requires_document': True,
+            'document_type': 'Medical Report/Accident Report',
+            'description': 'Medical report and accident documentation required for injury leaves.'
+        },
+        {
+            'leave_type': 'Maternity Leave',
+            'requires_document': True,
+            'document_type': 'Medical Certificate',
+            'description': 'Medical certificate confirming pregnancy required for maternity leave.'
+        },
+        {
+            'leave_type': 'Paternity Leave',
+            'requires_document': True,
+            'document_type': 'Birth Certificate',
+            'description': 'Birth certificate of child required for paternity leave.'
+        },
+        {
+            'leave_type': 'Casual Leave',
+            'requires_document': False,
+            'document_type': 'None',
+            'description': 'No documents required for casual leaves.'
+        },
+        {
+            'leave_type': 'Vacation',
+            'requires_document': False,
+            'document_type': 'None',
+            'description': 'No documents required for vacation leaves.'
+        }
+    ]
+    return jsonify(requirements)

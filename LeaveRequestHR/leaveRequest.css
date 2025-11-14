@@ -25,6 +25,215 @@ body {
   line-height: 1.6;
 }
 
+.paid-leaves-section {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+.paid-leaves-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.distribution-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.distribution-card {
+  padding: 15px;
+  border-radius: 8px;
+  text-align: center;
+  border-left: 4px solid #007bff;
+  background: #f8f9fa;
+}
+
+.distribution-card.intern {
+  border-left-color: #28a745;
+}
+
+.distribution-card.fulltime {
+  border-left-color: #007bff;
+}
+
+.distribution-card.contract {
+  border-left-color: #ffc107;
+}
+
+.employee-type-filter {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+}
+
+.type-filter-btn {
+  padding: 8px 16px;
+  border: 1px solid #ddd;
+  background: white;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 14px;
+}
+
+.type-filter-btn:hover {
+  background: #f8f9fa;
+}
+
+.type-filter-btn.active {
+  background: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+.intern-badge {
+  background: #e8f5e8;
+  color: #28a745;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.7em;
+  font-weight: bold;
+  margin-top: 4px;
+  display: inline-block;
+}
+
+.document-reminder {
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 20px;
+  display: none;
+}
+
+.document-reminder.show {
+  display: block;
+}
+
+.reminder-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.pending-doc-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid #f8f9fa;
+}
+
+.pending-doc-item:last-child {
+  border-bottom: none;
+}
+
+.manage-distribution-btn {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.3s;
+}
+
+.manage-distribution-btn:hover {
+  background: #218838;
+}
+
+.leave-breakdown {
+  text-align: left;
+  margin-top: 10px;
+}
+
+.leave-breakdown div {
+  margin-bottom: 5px;
+}
+
+/* Distribution Management Styles */
+.distribution-management {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.employee-type-section {
+  margin-bottom: 20px;
+  padding: 15px;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+}
+
+.employee-type-section h4 {
+  margin-bottom: 15px;
+  color: #495057;
+}
+
+.policy-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 15px;
+}
+
+.policy-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  background: #f8f9fa;
+  border-radius: 5px;
+}
+
+.policy-item label {
+  font-weight: bold;
+  min-width: 100px;
+}
+
+.policy-input {
+  width: 80px;
+  padding: 5px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.doc-required {
+  background: #fff3cd;
+  color: #856404;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.8em;
+}
+
+/* Button enhancements */
+.btn-sm {
+  padding: 5px 10px;
+  font-size: 12px;
+}
+
+.btn-warning {
+  background: #ffc107;
+  color: #212529;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn-warning:hover {
+  background: #e0a800;
+}
+
 .container {
   display: grid;
   grid-template-columns: 250px 1fr;

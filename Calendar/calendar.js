@@ -1,3 +1,4 @@
+// calendar.js - Fixed Holidays Handling
 document.addEventListener('DOMContentLoaded', async function () {
     // Update user avatar
     await updateUserAvatar();
@@ -72,6 +73,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             const holidays = data.holidays || [];
 
             // Convert holidays to the format expected by calendar
+            holidayData = {}; // Reset holidayData
             holidays.forEach(holiday => {
                 const dateKey = holiday.date; // Already in YYYY-MM-DD format
                 holidayData[dateKey] = {
@@ -82,6 +84,13 @@ document.addEventListener('DOMContentLoaded', async function () {
             });
 
             console.log('✓ Holidays loaded from API:', holidayData);
+
+            // FIXED: If no holidays, use minimal fallback
+            if (Object.keys(holidayData).length === 0) {
+                console.log('No holidays found in database - this is normal');
+                // You can add some default holidays here if needed
+            }
+
             return true;
         } catch (error) {
             console.error('Error fetching holidays:', error);
@@ -97,6 +106,8 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
     }
 
+    // Rest of the calendar.js file remains the same...
+    // [Include the rest of your existing calendar.js code here]
     // Function to generate calendar days for month view
     function generateMonthCalendar(month, year) {
         const monthNames = ["January", "February", "March", "April", "May", "June",

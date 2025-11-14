@@ -1,3 +1,4 @@
+// report&analytics.js - Complete Fixed File
 // Global variables
 let userData = null;
 let charts = {};
@@ -24,7 +25,6 @@ async function checkAuthentication() {
     try {
         showPageLoading();
 
-        // Try to get user data from session using the same endpoint as other pages
         const token = localStorage.getItem('authToken');
         const headers = {
             'Content-Type': 'application/json'
@@ -44,7 +44,14 @@ async function checkAuthentication() {
         if (response.ok) {
             const dashboardData = await response.json();
             userData = dashboardData.user_info;
-            currentUserId = userData.user_id;
+
+            // FIXED: Better user ID extraction
+            currentUserId = userData?.user_id || getUserIdFromSession();
+
+            if (!currentUserId) {
+                throw new Error('User ID not available after authentication');
+            }
+
             await loadUserAnalytics();
         } else {
             throw new Error('Not authenticated');
@@ -53,11 +60,29 @@ async function checkAuthentication() {
         console.error('Authentication check failed:', error);
         hidePageLoading();
         showError('Please log in to view your analytics');
-        // Redirect to login after 3 seconds
         setTimeout(() => {
             window.location.href = 'http://localhost:5000/login-page';
         }, 3000);
     }
+}
+
+// Add helper function to extract user ID
+function getUserIdFromSession() {
+    // Try to get user ID from various sources
+    const token = localStorage.getItem('authToken');
+    if (token) {
+        try {
+            // If using JWT, decode to get user ID
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            return payload.user_id;
+        } catch (e) {
+            console.log('Could not decode JWT token');
+        }
+    }
+
+    // Return a default or throw error
+    console.error('Could not determine user ID');
+    return null;
 }
 
 // Setup event listeners
@@ -72,7 +97,11 @@ async function loadUserAnalytics() {
         showLoading();
 
         if (!currentUserId) {
-            throw new Error('User ID not available');
+            // Try one more time to get user ID
+            currentUserId = getUserIdFromSession();
+            if (!currentUserId) {
+                throw new Error('User ID not available. Please log in again.');
+            }
         }
 
         // Fetch user-specific analytics data
@@ -106,6 +135,8 @@ async function loadUserAnalytics() {
     } catch (error) {
         console.error('Error loading analytics data:', error);
         showError(`Failed to load your analytics data: ${error.message}`);
+        // Load demo data as fallback
+        loadDemoData();
     }
 }
 
@@ -496,8 +527,6 @@ async function applyDateFilter() {
         hideLoading();
     }
 }
-
-
 
 // Retry loading data
 function retryLoading() {

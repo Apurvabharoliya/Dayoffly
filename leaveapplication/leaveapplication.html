@@ -156,6 +156,32 @@
                         <div id="suggestions" style="display: none;"></div>
                     </div>
 
+                    <!-- Additional Fields -->
+                    <div class="form-group">
+                        <label class="form-label">Employee Type</label>
+                        <select class="form-control" id="employeeType" name="employeeType">
+                            <option value="Full-time">Full-time</option>
+                            <option value="Part-time">Part-time</option>
+                            <option value="Contract">Contract</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Leave Category</label>
+                        <select class="form-control" id="leaveCategory" name="leaveCategory">
+                            <option value="paid">Paid Leave</option>
+                            <option value="casual">Casual Leave</option>
+                            <option value="sick">Sick Leave</option>
+                            <option value="unpaid">Unpaid Leave</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Contact Information</label>
+                        <input type="text" class="form-control" id="contactInfo" name="contactInfo"
+                            placeholder="Phone number or email for contact during leave">
+                    </div>
+
                     <div class="form-buttons">
                         <button type="button" class="cancel-btn" id="cancelButton">Cancel</button>
                         <button type="submit" class="submit-btn">Submit Request</button>

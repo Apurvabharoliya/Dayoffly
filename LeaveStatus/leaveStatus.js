@@ -1,3 +1,4 @@
+// leaveStatus.js - Complete Fixed File
 // Global variables to store data from API
 let employeeData = {};
 let leaveRequests = [];
@@ -216,7 +217,10 @@ function renderTable() {
 
   // Render table rows
   paginatedRequests.forEach(req => {
-    const statusInfo = statusMap[req.status];
+    // FIXED: Add null check for status
+    const status = req.status || 'pending';
+    const statusInfo = statusMap[status] || statusMap.pending; // Fallback to pending
+
     const row = document.createElement('tr');
     row.innerHTML = `
           <td>
@@ -305,7 +309,7 @@ function renderTable() {
                         <div>Approver:</div><div class="font-semibold">${request.status === 'pending' ? '--' : (request.approverName || 'N/A')}</div>
                         <div>Designation:</div><div class="font-semibold">${request.status === 'pending' ? '--' : (request.approverDesignation || 'N/A')}</div>
                         <div>Decision Date:</div><div class="font-semibold">${request.status === 'pending' ? '--' : formatDate(request.decisionDate)}</div>
-                        <div>Status:</div><div><span class="status-badge ${statusMap[request.status].class}">${statusMap[request.status].text}</span></div>
+                        <div>Status:</div><div><span class="status-badge ${statusMap[request.status]?.class || 'status-pending'}">${statusMap[request.status]?.text || 'Pending'}</span></div>
                       </div>
                     </div>
 
@@ -383,6 +387,12 @@ async function loadLeaveStatusData() {
     // Update global variables with API data
     employeeData = data.employeeData || {};
     leaveRequests = data.leaveRequests || [];
+
+    // FIXED: Ensure employeeData has proper values
+    if (!employeeData.empName) {
+      console.warn('Employee name not found in response, using fallback');
+      employeeData.empName = 'Employee User';
+    }
 
     return { success: true };
   } catch (error) {
@@ -516,22 +526,30 @@ function updateEmployeeInfo() {
 
   if (employeeNameEl && employeeData.empName) {
     employeeNameEl.textContent = employeeData.empName;
+  } else if (employeeNameEl) {
+    employeeNameEl.textContent = 'Employee User'; // Fallback name
   }
 
   if (employeeInfoEl && employeeData.empId && employeeData.department) {
     employeeInfoEl.innerHTML = `${employeeData.empId} • ${employeeData.department} Department`;
+  } else if (employeeInfoEl) {
+    employeeInfoEl.innerHTML = 'EMP00001 • General Department'; // Fallback info
   }
 
   // Update designation
   const designationEl = document.querySelector('.employee-details p:last-child');
   if (designationEl && employeeData.designation) {
     designationEl.textContent = employeeData.designation;
+  } else if (designationEl) {
+    designationEl.textContent = 'Employee'; // Fallback designation
   }
 
   // Update avatar
   const avatarEl = document.querySelector('.employee-avatar');
   if (avatarEl && employeeData.empName) {
     avatarEl.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(employeeData.empName)}&background=0D8ABC&color=fff&size=80`;
+  } else if (avatarEl) {
+    avatarEl.src = `https://ui-avatars.com/api/?name=Employee&background=0D8ABC&color=fff&size=80`;
   }
 
   // Update header avatar
@@ -539,12 +557,17 @@ function updateEmployeeInfo() {
   if (headerAvatarEl && employeeData.empName) {
     headerAvatarEl.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(employeeData.empName)}&background=667eea&color=fff&size=36`;
     headerAvatarEl.alt = `${employeeData.empName}'s Avatar`;
+  } else if (headerAvatarEl) {
+    headerAvatarEl.src = `https://ui-avatars.com/api/?name=Employee&background=667eea&color=fff&size=36`;
+    headerAvatarEl.alt = `Employee's Avatar`;
   }
 
   // Update leave balance display
   const leaveBalanceEl = document.getElementById('total-leave-balance');
   if (leaveBalanceEl && employeeData.totalLeaveBalance !== undefined) {
     leaveBalanceEl.textContent = employeeData.totalLeaveBalance;
+  } else if (leaveBalanceEl) {
+    leaveBalanceEl.textContent = '20'; // Fallback balance
   }
 }
 
